@@ -17,7 +17,7 @@ async function main() {
 
   // Vault
 
-  const WETH = ""; // WBNB
+  const WETH = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"; // WBNB
   const pauseWindowDuration = 0;
   const bufferPeriodDuration = 0;
 
