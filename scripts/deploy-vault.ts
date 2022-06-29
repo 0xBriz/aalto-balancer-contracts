@@ -1,4 +1,5 @@
 import { ethers } from "hardhat";
+import { deployWeightedFactory } from "./utils/factories/weighted-factory";
 import { predictAddresses } from "./utils/predictAddresses";
 import { MONTH } from "./utils/time";
 
@@ -45,6 +46,10 @@ async function main() {
   );
   await authorizer.deployed();
   console.log("TimelockAuthorizer deployed to: ", authorizer.address);
+
+  // ======================= FACTORIES ========================//
+
+  await deployWeightedFactory(vault.address);
 }
 
 main().catch((error) => {
