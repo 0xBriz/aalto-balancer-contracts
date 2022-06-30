@@ -3,7 +3,7 @@
   "license": "MIT",
   "author": "0xBriz",
   "scripts": {
-    "start": "npx hardhat node",
+    "start": "npx hardhat node --hostname 0.0.0.0",
     "build": "npx hardhat compile",
     "test": "npx hardhat test --network localhost",
     "clean": "npx hardhat clean",
