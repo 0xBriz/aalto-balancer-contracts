@@ -10,9 +10,7 @@ async function main() {
 
   const admin = (await ethers.getSigners())[0];
 
-  const { vaultAddress, authorizerAddress } = await predictAddresses(
-    admin.address
-  );
+  const { vaultAddress, authorizerAddress } = await predictAddresses(admin.address);
   console.log("Predicted Vault address: " + vaultAddress);
   console.log("Predicted TimelockAuthorizer address: " + authorizerAddress);
 
@@ -36,9 +34,7 @@ async function main() {
 
   const rootTransferDelay = MONTH;
 
-  const TimelockAuthorizer = await ethers.getContractFactory(
-    "TimelockAuthorizer"
-  );
+  const TimelockAuthorizer = await ethers.getContractFactory("TimelockAuthorizer");
   const authorizer = await TimelockAuthorizer.deploy(
     admin.address,
     vault.address,
