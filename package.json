@@ -10,7 +10,9 @@
     "lint:sol": "solhint -f table contracts/**/*.sol",
     "format": "npx prettier --write 'contracts/**/*.sol'",
     "deploy:bsc": "npx hardhat run --network bsc_mainnet ./scripts/deploy-vault.ts",
-    "deploy:local": "npx hardhat run --network localhost ./scripts/deploy-vault.ts"
+    "deploy:local": "npx hardhat run --network localhost ./scripts/deploy-vault.ts",
+    "deploy:multicall": "npx hardhat run ./scripts/deploy-multicall.ts",
+    "deploy:relayer": "npx hardhat run ./scripts/deploy-relayer.ts"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.0",
