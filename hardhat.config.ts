@@ -7,6 +7,7 @@ import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
 import "@nomiclabs/hardhat-web3";
+import "@nomiclabs/hardhat-vyper";
 
 dotenv.config();
 
@@ -19,6 +20,9 @@ const config: HardhatUserConfig = {
         runs: 200,
       },
     },
+  },
+  vyper: {
+    version: "0.3.1",
   },
   networks: {
     hardhat: {
