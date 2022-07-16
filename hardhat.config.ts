@@ -25,12 +25,16 @@ const config: HardhatUserConfig = {
       allowUnlimitedContractSize: true,
       forking: {
         url: process.env.BSC_ARCHIVE_NODE || "",
-        blockNumber: 18743922,
+        blockNumber: 19602096,
       },
-      mining: {
-        auto: false,
-        interval: 2000,
-      },
+      // mining: {
+      //   auto: false,
+      //   interval: 2000,
+      // },
+    },
+    server: {
+      url: process.env.SERVER_NODE_RPC,
+      accounts: "remote",
     },
     bsc_mainnet: {
       url: process.env.BSC_MAINNET_URL || "",
