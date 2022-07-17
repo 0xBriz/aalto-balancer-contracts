@@ -7,7 +7,6 @@ export async function deployGaugeController(votingEscrow: string, authAdapter: s
     const gc = await GaugeController.deploy(votingEscrow, authAdapter);
     await gc.deployed();
     console.log("GaugeController deployed to: ", gc.address);
-
     return gc.address;
   } catch (error) {
     console.error(error);

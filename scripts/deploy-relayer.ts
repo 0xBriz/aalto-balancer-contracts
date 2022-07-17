@@ -1,10 +1,9 @@
 import { ethers } from "hardhat";
-import { MAINNET_VAULT } from "./addresses";
 
 async function main() {
   // Will deploy a BalancerRelayer for itself during construction
   const BaseRelayerLibrary = await ethers.getContractFactory("BaseRelayerLibrary");
-  const lib = await BaseRelayerLibrary.deploy(MAINNET_VAULT);
+  const lib = await BaseRelayerLibrary.deploy("0x26683651C18018b3d6e0754366D145a5CE1b36bc");
   await lib.deployed();
   console.log("BaseRelayerLibrary: ", lib.address);
 
