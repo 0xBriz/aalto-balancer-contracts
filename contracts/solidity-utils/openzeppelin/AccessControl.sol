@@ -1,16 +1,47 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.7.0;
-pragma experimental ABIEncoderV2;
 
-import "../interfaces/liquidity-mining/IBalancerToken.sol";
-import "../solidity-utils/openzeppelin/ERC20.sol";
+import "./EnumerableSet.sol";
+import "./Address.sol";
+import "./Context.sol";
 
-import "../solidity-utils/openzeppelin/EnumerableSet.sol";
-import "../solidity-utils/openzeppelin/Address.sol";
-import "../solidity-utils/openzeppelin/Context.sol";
-
-contract AQX is ERC20, IBalancerToken, Context {
+/**
+ * @dev Contract module that allows children to implement role-based access
+ * control mechanisms.
+ *
+ * Roles are referred to by their `bytes32` identifier. These should be exposed
+ * in the external API and be unique. The best way to achieve this is by
+ * using `public constant` hash digests:
+ *
+ * ```
+ * bytes32 public constant MY_ROLE = keccak256("MY_ROLE");
+ * ```
+ *
+ * Roles can be used to represent a set of permissions. To restrict access to a
+ * function call, use {hasRole}:
+ *
+ * ```
+ * function foo() public {
+ *     require(hasRole(MY_ROLE, msg.sender));
+ *     ...
+ * }
+ * ```
+ *
+ * Roles can be granted and revoked dynamically via the {grantRole} and
+ * {revokeRole} functions. Each role has an associated admin role, and only
+ * accounts that have a role's admin role can call {grantRole} and {revokeRole}.
+ *
+ * By default, the admin role for all roles is `DEFAULT_ADMIN_ROLE`, which means
+ * that only accounts with this role will be able to grant or revoke other
+ * roles. More complex role relationships can be created by using
+ * {_setRoleAdmin}.
+ *
+ * WARNING: The `DEFAULT_ADMIN_ROLE` is also its own admin: it has permission to
+ * grant and revoke this role. Extra precautions should be taken to secure
+ * accounts that have been granted it.
+ */
+abstract contract AccessControl is Context {
     using EnumerableSet for EnumerableSet.AddressSet;
     using Address for address;
 
@@ -21,11 +52,7 @@ contract AQX is ERC20, IBalancerToken, Context {
 
     mapping(bytes32 => RoleData) private _roles;
 
-    bytes32 public constant override DEFAULT_ADMIN_ROLE = 0x00;
-
-    bytes32 public constant override SNAPSHOT_ROLE = keccak256("SNAPSHOT_ROLE");
-
-    bytes32 public constant override MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
 
     /**
      * @dev Emitted when `newAdminRole` is set as ``role``'s admin role, replacing `previousAdminRole`
@@ -58,24 +85,10 @@ contract AQX is ERC20, IBalancerToken, Context {
      */
     event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender);
 
-    constructor() ERC20("AQX (TEST)", "AQX (TEST)") {
-        // _mint(msg.sender, 1000);
-    }
-
-    function mint(address to, uint256 amount) external override {
-        require(hasRole(MINTER_ROLE, msg.sender), "Can not snapshot");
-        _mint(to, amount);
-    }
-
-    function snapshot() external override {
-        require(hasRole(SNAPSHOT_ROLE, msg.sender), "Can not snapshot");
-        // TODO: How is this to be used?
-    }
-
     /**
      * @dev Returns `true` if `account` has been granted `role`.
      */
-    function hasRole(bytes32 role, address account) public view override returns (bool) {
+    function hasRole(bytes32 role, address account) public view returns (bool) {
         return _roles[role].members.contains(account);
     }
 
@@ -83,7 +96,7 @@ contract AQX is ERC20, IBalancerToken, Context {
      * @dev Returns the number of accounts that have `role`. Can be used
      * together with {getRoleMember} to enumerate all bearers of a role.
      */
-    function getRoleMemberCount(bytes32 role) public view override returns (uint256) {
+    function getRoleMemberCount(bytes32 role) public view returns (uint256) {
         return _roles[role].members.length();
     }
 
@@ -99,7 +112,7 @@ contract AQX is ERC20, IBalancerToken, Context {
      * https://forum.openzeppelin.com/t/iterating-over-elements-on-enumerableset-in-openzeppelin-contracts/2296[forum post]
      * for more information.
      */
-    function getRoleMember(bytes32 role, uint256 index) public view override returns (address) {
+    function getRoleMember(bytes32 role, uint256 index) public view returns (address) {
         return _roles[role].members.at(index);
     }
 
@@ -109,7 +122,7 @@ contract AQX is ERC20, IBalancerToken, Context {
      *
      * To change a role's admin, use {_setRoleAdmin}.
      */
-    function getRoleAdmin(bytes32 role) public view override returns (bytes32) {
+    function getRoleAdmin(bytes32 role) public view returns (bytes32) {
         return _roles[role].adminRole;
     }
 
@@ -123,7 +136,7 @@ contract AQX is ERC20, IBalancerToken, Context {
      *
      * - the caller must have ``role``'s admin role.
      */
-    function grantRole(bytes32 role, address account) public override {
+    function grantRole(bytes32 role, address account) public virtual {
         require(
             hasRole(_roles[role].adminRole, _msgSender()),
             "AccessControl: sender must be an admin to grant"
@@ -141,7 +154,7 @@ contract AQX is ERC20, IBalancerToken, Context {
      *
      * - the caller must have ``role``'s admin role.
      */
-    function revokeRole(bytes32 role, address account) public override {
+    function revokeRole(bytes32 role, address account) public virtual {
         require(
             hasRole(_roles[role].adminRole, _msgSender()),
             "AccessControl: sender must be an admin to revoke"
@@ -164,7 +177,7 @@ contract AQX is ERC20, IBalancerToken, Context {
      *
      * - the caller must be `account`.
      */
-    function renounceRole(bytes32 role, address account) public {
+    function renounceRole(bytes32 role, address account) public virtual {
         require(account == _msgSender(), "AccessControl: can only renounce roles for self");
 
         _revokeRole(role, account);
