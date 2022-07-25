@@ -146,7 +146,7 @@ abstract contract LegacyBasePool is
      * @notice Return the current value of the swap fee percentage.
      * @dev This is stored in the MSB 64 bits of the `_miscData`.
      */
-    function getSwapFeePercentage() public view returns (uint256) {
+    function getSwapFeePercentage() public view override returns (uint256) {
         return _miscData.decodeUint(_SWAP_FEE_PERCENTAGE_OFFSET, 64);
     }
 
@@ -608,7 +608,7 @@ abstract contract LegacyBasePool is
      * For instance, an 18-decimal token has a scaling factor of 1, while a 6-decimal token has a scaling factor of
      * 10^12.
      */
-    function getScalingFactors() external view returns (uint256[] memory) {
+    function getScalingFactors() external view override returns (uint256[] memory) {
         return _scalingFactors();
     }
 
