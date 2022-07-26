@@ -58,8 +58,12 @@ contract AQX is ERC20, IBalancerToken, Context {
      */
     event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender);
 
-    constructor() ERC20("AQX (TEST)", "AQX (TEST)") {
-        // _mint(msg.sender, 1000);
+    constructor(
+        string memory _name,
+        string memory _symbol,
+        uint256 _initialMint
+    ) ERC20(_name, _symbol) {
+        _mint(msg.sender, _initialMint);
     }
 
     function mint(address to, uint256 amount) external override {

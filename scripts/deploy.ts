@@ -1,15 +1,28 @@
 import { ethers } from "hardhat";
 import { MAINNET_VAULT } from "./addresses";
-import { deployToken } from "./deploy-token";
+import { deployMulticall } from "./deploy-multicall";
+import { deployVault } from "./deploy-vault";
 import { deployBootstrapPoolFactory } from "./utils/factories/lbp-factory";
 import { deployStablePoolFactory } from "./utils/factories/stable-factory";
 import { deployWeightedFactory } from "./utils/factories/weighted-factory";
+import { deployWeightedNoAssetManagersFactory } from "./utils/factories/weighted-nomanagers";
+
+//const VAULT = '0xc37c34eA9CA579aDF279A16C547e801ed722F3b5'
+const VAULT_GOERLI = "0x0Cc23b51B3A89728c85a63c819E8283e353FC86c";
 
 async function main() {
-  await deployStablePoolFactory("0x26683651C18018b3d6e0754366D145a5CE1b36bc");
-  await deployBootstrapPoolFactory("0x26683651C18018b3d6e0754366D145a5CE1b36bc");
+  // const vaultAddress = await deployVault();
 
-  // await deployToken();
+  // ======================= FACTORIES ========================//
+
+  await deployWeightedFactory(VAULT_GOERLI);
+  await deployWeightedNoAssetManagersFactory(VAULT_GOERLI);
+  await deployStablePoolFactory(VAULT_GOERLI);
+  await deployBootstrapPoolFactory(VAULT_GOERLI);
+
+  // ======================= STAND ALONES ========================//
+
+  // await deployMulticall();
 }
 
 main().catch((error) => {
