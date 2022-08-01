@@ -28,6 +28,8 @@ contract LiquidityGaugeFactory is ILiquidityGaugeFactory {
 
     event GaugeCreated(address indexed gauge, address indexed pool);
 
+    // Pools share the same gauge implementation contract
+    // LiquidityGaugeV5.vy, RewardsOnlyGauge.vy(rewards non protocol tokens), SingleRecipientGauge
     constructor(ILiquidityGauge gauge) {
         _gaugeImplementation = gauge;
     }

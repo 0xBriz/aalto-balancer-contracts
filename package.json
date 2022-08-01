@@ -16,7 +16,8 @@
     "deploy:multicall": "npx hardhat run ./scripts/deploy-multicall.ts",
     "deploy:relayer": "npx hardhat run ./scripts/deploy-relayer.ts",
     "deploy:helper": "npx hardhat run ./scripts/deploy-helper.ts",
-    "deploy:lpmining": "npx hardhat run ./scripts/lp-mining/deploy.ts"
+    "deploy:lpmining": "npx hardhat run ./scripts/lp-mining/deploy.ts",
+    "deploy:lpmining:goerli": "npx hardhat --network goerli run ./scripts/lp-mining/deploy-goerli.ts"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.0",
