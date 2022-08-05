@@ -13,13 +13,26 @@ dotenv.config();
 
 const config: HardhatUserConfig = {
   solidity: {
-    version: "0.7.1",
-    settings: {
-      optimizer: {
-        enabled: true,
-        runs: 200,
+    compilers: [
+      {
+        version: "0.7.1",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200, // Need to crank this up to 9999 for production
+          },
+        },
       },
-    },
+      {
+        version: "0.6.8",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200, // Need to crank this up to 9999 for production
+          },
+        },
+      },
+    ],
   },
   vyper: {
     version: "0.3.1",
@@ -28,8 +41,8 @@ const config: HardhatUserConfig = {
     hardhat: {
       allowUnlimitedContractSize: true,
       forking: {
-        url: process.env.BSC_ARCHIVE_NODE || "",
-        blockNumber: 19602096,
+        url: process.env.ETH_ARCHIVE_RPC || "",
+        blockNumber: 15282844, // 8/5 ~10:25AM
       },
       // mining: {
       //   auto: false,

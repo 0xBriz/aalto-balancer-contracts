@@ -32,6 +32,7 @@ contract BalancerMinter is IBalancerMinter, ReentrancyGuard, EIP712 {
 
     // user -> gauge -> value
     mapping(address => mapping(address => uint256)) private _minted;
+
     // minter -> user -> can mint?
     mapping(address => mapping(address => bool)) private _allowedMinter;
 

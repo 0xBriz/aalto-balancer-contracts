@@ -10,7 +10,9 @@ import "../solidity-utils/openzeppelin/EnumerableSet.sol";
 import "../solidity-utils/openzeppelin/Address.sol";
 import "../solidity-utils/openzeppelin/Context.sol";
 
-contract AQX is ERC20, IBalancerToken, Context {
+/// @dev Token needs to implement the specified interface needed to pass ownership to BalTokenAdmin.
+/// @dev Inflation schedule is set, and enforced, in the admin contract.
+contract AEQToken is ERC20, IBalancerToken, Context {
     using EnumerableSet for EnumerableSet.AddressSet;
     using Address for address;
 
@@ -58,12 +60,8 @@ contract AQX is ERC20, IBalancerToken, Context {
      */
     event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender);
 
-    constructor(
-        string memory _name,
-        string memory _symbol,
-        uint256 _initialMint
-    ) ERC20(_name, _symbol) {
-        _mint(msg.sender, _initialMint);
+    constructor(string memory _name, string memory _symbol) ERC20(_name, _symbol) {
+        _grantRole(MINTER_ROLE, msg.sender);
     }
 
     function mint(address to, uint256 amount) external override {
@@ -73,7 +71,19 @@ contract AQX is ERC20, IBalancerToken, Context {
 
     function snapshot() external override {
         require(hasRole(SNAPSHOT_ROLE, msg.sender), "Can not snapshot");
-        // TODO: How is this to be used?
+        // This is used for voting snapshots.
+        // The BalTokenAdmin takes over this and all roles
+        // Implementation of anything needed here?
+
+        // TODO: How is this used?
+
+        //   /**
+        //     * @notice Perform a snapshot of BAL token balances
+        //     * @dev Callable only by addresses defined in the Balancer Authorizer contract
+        //     */
+        //     function snapshot() external authenticate {
+        //         _balancerToken.snapshot();
+        //     }
     }
 
     /**

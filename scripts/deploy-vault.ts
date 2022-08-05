@@ -39,7 +39,7 @@ export async function deployVault() {
     await authorizer.deployed();
     console.log("TimelockAuthorizer deployed to: ", authorizer.address);
 
-    return vault.address;
+    return vault;
   } catch (error) {
     console.error(error);
     process.exitCode = 1;
