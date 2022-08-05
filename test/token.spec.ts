@@ -2,7 +2,7 @@ import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { Contract } from "ethers";
 import { deployVault } from "../scripts/deploy-vault";
-import { deployAdminToken } from "../scripts/deploy-admin-token";
+import { deployAdminToken } from "../scripts/deploy-governance-token";
 import { expect } from "chai";
 import { deployBalTokenAdmin } from "../scripts/lp-mining/deploy-token-admin";
 
