@@ -1,9 +1,9 @@
 import { ethers } from "hardhat";
 import { deployWeightedFactory } from "./utils/factories/weighted-factory";
 import { predictAddresses } from "./utils/predictAddresses";
-import { MONTH } from "./utils/time";
+import { DAY, MONTH } from "./utils/time";
 
-export async function deployVault() {
+export async function deployVault(WETH: string) {
   try {
     // - ProtocolFeesCollector
     // - BalancerHelpers
@@ -14,9 +14,10 @@ export async function deployVault() {
     console.log("Predicted TimelockAuthorizer address: " + authorizerAddress);
 
     // Vault
-    const WETH = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"; // WBNB
-    const pauseWindowDuration = 0;
-    const bufferPeriodDuration = 0;
+    // const WETH = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"; // WBNB
+
+    const pauseWindowDuration = MONTH;
+    const bufferPeriodDuration = DAY;
 
     const Vault = await ethers.getContractFactory("Vault");
     const vault = await Vault.deploy(
@@ -29,7 +30,7 @@ export async function deployVault() {
     console.log("Vault deployed to: ", vault.address);
 
     // AUTH
-    const rootTransferDelay = MONTH;
+    const rootTransferDelay = 0; // Timelock until root(admin/boss) status can he transferred
     const TimelockAuthorizer = await ethers.getContractFactory("TimelockAuthorizer");
     const authorizer = await TimelockAuthorizer.deploy(
       admin.address,
