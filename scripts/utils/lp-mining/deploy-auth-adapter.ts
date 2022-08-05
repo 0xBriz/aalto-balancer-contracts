@@ -6,7 +6,7 @@ export async function deployAuthAdapter(vault: string) {
     const auth = await AuthorizerAdaptor.deploy(vault);
     await auth.deployed();
     console.log("AuthorizerAdaptor deployed to: ", auth.address);
-    return auth.address;
+    return auth;
   } catch (error) {
     console.error(error);
     process.exitCode = 1;

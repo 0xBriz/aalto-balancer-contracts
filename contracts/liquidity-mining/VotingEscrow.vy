@@ -99,9 +99,11 @@ slope_changes: public(HashMap[uint256, int128])  # time -> signed slope change
 future_smart_wallet_checker: public(address)
 smart_wallet_checker: public(address)
 
+stakingAdmin: address
+
 
 @external
-def __init__(token_addr: address, _name: String[64], _symbol: String[32], _authorizer_adaptor: address):
+def __init__(token_addr: address, _name: String[64], _symbol: String[32], _authorizer_adaptor: address, _stakingAdmin: address):
     """
     @notice Contract constructor
     @param token_addr 80/20 BAL-WETH BPT token address
@@ -122,6 +124,8 @@ def __init__(token_addr: address, _name: String[64], _symbol: String[32], _autho
     NAME = _name
     SYMBOL = _symbol
     DECIMALS = _decimals
+
+    self.stakingAdmin = _stakingAdmin
 
 @external
 @view
@@ -365,6 +369,46 @@ def _deposit_for(_addr: address, _value: uint256, unlock_time: uint256, locked_b
     log Deposit(_addr, _value, _locked.end, type, block.timestamp)
     log Supply(supply_before, supply_before + _value)
 
+@internal
+def _admin_deposit_for(
+        _approvedCaller: address,
+        _lockingFor: address, 
+        _value: uint256, 
+        unlock_time: uint256, 
+        locked_balance: LockedBalance, 
+        type: int128):
+    """
+    @notice Admin deposit and lock tokens for a user
+    @notice Tokens are pulled from approved caller(checks in calling function)
+    @param _lockingFor User's wallet address
+    @param _lockingFor User's wallet address
+    @param _value Amount to deposit
+    @param unlock_time New time when to unlock the tokens, or 0 if unchanged
+    @param locked_balance Previous locked amount / timestamp
+    """
+    _locked: LockedBalance = locked_balance
+    supply_before: uint256 = self.supply
+
+    self.supply = supply_before + _value
+    old_locked: LockedBalance = _locked
+    # Adding to existing lock, or if a lock is expired - creating a new one
+    _locked.amount += convert(_value, int128)
+    if unlock_time != 0:
+        _locked.end = unlock_time
+    self.locked[_lockingFor] = _locked
+
+    # Possibilities:
+    # Both old_locked.end could be current or expired (>/< block.timestamp)
+    # value == 0 (extend lock) or value > 0 (add to lock or extend lock)
+    # _locked.end > block.timestamp (always)
+    self._checkpoint(_lockingFor, old_locked, _locked)
+
+    if _value != 0:
+        assert ERC20(TOKEN).transferFrom(_approvedCaller, self, _value)
+
+    log Deposit(_lockingFor, _value, _locked.end, type, block.timestamp)
+    log Supply(supply_before, supply_before + _value)
+
 
 @external
 def checkpoint():
@@ -411,6 +455,34 @@ def create_lock(_value: uint256, _unlock_time: uint256):
     assert unlock_time <= block.timestamp + MAXTIME, "Voting lock can be 1 year max"
 
     self._deposit_for(msg.sender, _value, unlock_time, _locked, CREATE_LOCK_TYPE)
+
+@external
+@nonreentrant('lock')
+def create_lock_for(_addr: address, _value: uint256, _unlock_time: uint256):
+    """
+    @notice Deposit `_value` tokens for `_addr` and lock until `_unlock_time`
+    @param _value Amount to deposit
+    @param _unlock_time Epoch time when tokens unlock, rounded down to whole weeks
+    """
+    assert msg.sender == self.stakingAdmin, "Only admin can stake for"
+
+    #self.assert_not_contract(_addr)
+    unlock_time: uint256 = (_unlock_time / WEEK) * WEEK  # Locktime is rounded down to weeks
+    _locked: LockedBalance = self.locked[_addr]
+
+    #  Staking for a user should not interfere with a current lock
+    assert _value > 0  # dev: need non-zero value
+    assert _locked.amount == 0, "Withdraw old tokens first"
+    assert unlock_time > block.timestamp, "Can only lock until time in the future"
+    assert unlock_time <= block.timestamp + MAXTIME, "Voting lock can be 1 year max"
+
+    self._admin_deposit_for(msg.sender, _addr, _value, unlock_time, _locked, CREATE_LOCK_TYPE)
+
+@external
+@nonreentrant('lock')
+def update_staking_admin(_addr: address):
+   assert msg.sender == self.stakingAdmin or msg.sender == AUTHORIZER_ADAPTOR
+   self.stakingAdmin = _addr
 
 
 @external

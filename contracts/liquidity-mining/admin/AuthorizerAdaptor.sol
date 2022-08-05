@@ -21,6 +21,8 @@ import "../../interfaces/vault/IVault.sol";
 import "../../solidity-utils/openzeppelin/ReentrancyGuard.sol";
 import "../../solidity-utils/openzeppelin/Address.sol";
 
+import "hardhat/console.sol";
+
 /**
  * @title Authorizer Adaptor
  * @notice This contract is intended to act as an adaptor between systems which expect a single admin address
@@ -106,6 +108,9 @@ contract AuthorizerAdaptor is IAuthorizerAdaptor, ReentrancyGuard {
             // 96 + 4 = 100 bytes
             selector := calldataload(100)
         }
+
+        console.logBytes4(selector);
+        console.logBytes(data);
 
         _require(_canPerform(getActionId(selector), msg.sender, target), Errors.SENDER_NOT_ALLOWED);
 
