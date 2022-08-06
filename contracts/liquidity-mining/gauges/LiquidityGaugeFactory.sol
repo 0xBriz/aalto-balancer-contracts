@@ -30,6 +30,7 @@ contract LiquidityGaugeFactory is ILiquidityGaugeFactory {
 
     // Pools share the same gauge implementation contract
     // LiquidityGaugeV5.vy, RewardsOnlyGauge.vy(rewards non protocol tokens), SingleRecipientGauge
+    // Factory for each type
     constructor(ILiquidityGauge gauge) {
         _gaugeImplementation = gauge;
     }

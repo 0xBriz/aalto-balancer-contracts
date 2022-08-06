@@ -11,6 +11,7 @@ import { formatEther, Interface, parseEther } from "ethers/lib/utils";
 import { deployAuthAdapter } from "../scripts/utils/lp-mining/deploy-auth-adapter";
 import { deployTestERC20 } from "../scripts/utils/deploy-test-erc20";
 import { deployVotingEscrow } from "../scripts/utils/lp-mining/deploy-voting-escrow";
+import { deployGaugeController } from "../scripts/utils/lp-mining/deploy-gauge-controller";
 
 const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"; // ETH mainnet
 
@@ -27,6 +28,7 @@ describe("Token Admin", () => {
   let BalTokenAdmin: Contract;
   let mockVeDepositToken: Contract;
   let votingEscrow: Contract;
+  let gaugeController: Contract;
 
   beforeEach(async () => {
     const accounts = await ethers.getSigners();
@@ -46,6 +48,7 @@ describe("Token Admin", () => {
       authAdapter.address,
       owner.address
     );
+    gaugeController = await deployGaugeController(votingEscrow.address, authAdapter.address);
   });
 
   // it("should activate token admin ownership", async () => {
@@ -87,32 +90,45 @@ describe("Token Admin", () => {
   // });
 
   it("should creating locks for users", async () => {
-    // const veAuthAdapter = new Contract(await votingEscrow.admin(), AuthAdapter.abi, owner);
-    // const iface = new Interface(["function create_lock_for(address, uint256, uint256) external"]);
-    // const selector = iface.getSighash("create_lock_for(address, uint256, uint256)");
-    // console.log(selector);
-    // const actionId = await veAuthAdapter.getActionId(selector);
-    // await authorizer.grantPermissions([actionId], owner.address, [votingEscrow.address]);
-    // const args = ethers.utils.defaultAbiCoder.encode(
-    //   ["address", "uint256", "uint256"],
-    //   [stakeForUser.address, lockAmount, unlockTime]
-    // );
-    // const adapterInterface = authAdapter.interface
-    // adapterInterface.encodeFunctionData('perform')
-    // console.log(args);
-    // await authAdapter.performAction(votingEscrow.address, args);
-
-    await mockVeDepositToken.approve(votingEscrow.address, ethers.constants.MaxUint256);
-
     const lockAmount = parseEther("100");
     let currentBlock = await ethers.provider.getBlock(await ethers.provider.getBlockNumber());
-    const unlockTime = currentBlock.timestamp + 60 * SECONDS_IN_DAY;
-    await votingEscrow.create_lock_for(stakeForUser.address, lockAmount, unlockTime);
-    currentBlock = await ethers.provider.getBlock(await ethers.provider.getBlockNumber());
-    const balance = await votingEscrow.balanceOfAt(stakeForUser.address, currentBlock.number);
-    console.log(`
-    60 day staked for: ${stakeForUser.address}
-    Staked for user veAEQ balance: ${formatEther(balance)}`);
+    const unlockTime = currentBlock.timestamp + 365 * SECONDS_IN_DAY;
+    await mockVeDepositToken.approve(votingEscrow.address, ethers.constants.MaxUint256);
+
+    const veAuthAdapter = new Contract(await votingEscrow.admin(), AuthAdapter.abi, owner);
+    const iface = new Interface(["function create_lock_for(address, uint256, uint256) external"]);
+    const selector = iface.getSighash("create_lock_for(address, uint256, uint256)");
+    console.log(selector);
+
+    // This wont work without transferring the funds to the auth adapter contract itself first
+    // So sticking with the "staking admin" thing
+    // Need function selector encode in initial bytes
+    // const argsWithSelector = iface.encodeFunctionData("create_lock_for", [
+    //   stakeForUser.address,
+    //   lockAmount,
+    //   unlockTime,
+    // ]);
+    // console.log(argsWithSelector);
+
+    const actionId = await veAuthAdapter.getActionId(selector);
+    await authorizer.grantPermissions([actionId], owner.address, [votingEscrow.address]);
+
+    const args = ethers.utils.defaultAbiCoder.encode(
+      ["address", "uint256", "uint256"],
+      [stakeForUser.address, lockAmount, unlockTime]
+    );
+
+    console.log(args);
+
+    await authAdapter.performAction(votingEscrow.address, args);
+
+    // // await votingEscrow.create_lock_for(stakeForUser.address, lockAmount, unlockTime);
+    // currentBlock = await ethers.provider.getBlock(await ethers.provider.getBlockNumber());
+    // const balance = await votingEscrow.balanceOfAt(stakeForUser.address, currentBlock.number);
+    // console.log(`
+    // 60 day staked for: ${stakeForUser.address}
+    // Staked for user veAEQ balance: ${formatEther(balance)}`);
+    expect(true).to.be.true;
   });
 
   // it("should do supply curve shit", async () => {

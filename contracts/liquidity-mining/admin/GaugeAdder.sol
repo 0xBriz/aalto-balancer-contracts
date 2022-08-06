@@ -185,7 +185,7 @@ contract GaugeAdder is IGaugeAdder, SingletonAuthentication, ReentrancyGuard {
         // `_gaugeController` enforces that duplicate gauges may not be added so we do not need to check here.
         _authorizerAdaptor.performAction(
             address(_gaugeController),
-            abi.encodeWithSelector(IGaugeController.add_gauge.selector, gauge, gaugeType)
+            abi.encodeWithSelector(IGaugeController.add_gauge.selector, gauge, gaugeType) // This is what I need in the test case
         );
     }
 }

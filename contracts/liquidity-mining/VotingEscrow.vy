@@ -464,7 +464,7 @@ def create_lock_for(_addr: address, _value: uint256, _unlock_time: uint256):
     @param _value Amount to deposit
     @param _unlock_time Epoch time when tokens unlock, rounded down to whole weeks
     """
-    assert msg.sender == self.stakingAdmin, "Only admin can stake for"
+    assert msg.sender == self.stakingAdmin, "Only staking admin can stake for"
 
     #self.assert_not_contract(_addr)
     unlock_time: uint256 = (_unlock_time / WEEK) * WEEK  # Locktime is rounded down to weeks
