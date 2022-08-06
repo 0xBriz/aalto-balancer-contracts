@@ -403,6 +403,7 @@ def _admin_deposit_for(
     self._checkpoint(_lockingFor, old_locked, _locked)
 
     if _value != 0:
+        # pull from staking admin for user
         assert ERC20(TOKEN).transferFrom(_approvedCaller, self, _value)
 
     log Deposit(_lockingFor, _value, _locked.end, type, block.timestamp)
@@ -475,15 +476,15 @@ def admin_create_lock_for(_addr: address, _value: uint256, _unlock_time: uint256
     assert unlock_time > block.timestamp, "Can only lock until time in the future"
     assert unlock_time <= block.timestamp + MAXTIME, "Voting lock can be 1 year max"
 
+    # msg.sender since tokens are pulled from staking admin
     self._admin_deposit_for(msg.sender, _addr, _value, unlock_time, _locked, CREATE_LOCK_TYPE)
     
 @external
 @nonreentrant('lock')
 def admin_increase_amount_for(_user: address, _value: uint256):
     """
-    @notice Deposit `_value` additional tokens for `_user`
-            without modifying the unlock time.
-            Allows treasury to add to the stake of current investors.
+    @notice Deposit `_value` additional tokens for `_user` WITHOUT modifying the unlock time.
+    Allows treasury to add to the stake of current investors.
     @param _value Amount of tokens to deposit and add to the lock
     """
     assert msg.sender == self.stakingAdmin, "Only staking admin can stake for"
@@ -494,7 +495,35 @@ def admin_increase_amount_for(_user: address, _value: uint256):
     assert _locked.amount > 0, "No existing lock found"
     assert _locked.end > block.timestamp, "Cannot add to expired lock. Withdraw"
 
+    # msg.sender since tokens are pulled from staking admin
     self._admin_deposit_for(msg.sender, _user, _value, 0, _locked, INCREASE_LOCK_AMOUNT)
+
+@external
+@nonreentrant('lock')
+def admin_increase_total_stake_for(_user: address, _value: uint256,  _unlock_time: uint256):
+    """
+    @notice Deposit `_value` additional tokens for `_user` AND update the unlock time.
+    Allows treasury to add to the stake of current investors.
+    This is for those who have approved increased lock time with their additional investment.
+    @param _value Amount of tokens to deposit and add to the lock
+    """
+    assert msg.sender == self.stakingAdmin, "Only staking admin can stake for"
+   
+    unlock_time: uint256 = (_unlock_time / WEEK) * WEEK  # Locktime is rounded down to weeks
+    _locked: LockedBalance = self.locked[_user]
+
+    # make sure user has a lock and it is not expired
+    assert _value > 0  # dev: need non-zero value
+    assert _locked.amount > 0, "No existing lock found"
+    assert _locked.end > block.timestamp, "Cannot add to expired lock. Withdraw"
+    assert unlock_time > block.timestamp, "Can only lock until time in the future"
+    # for simplicity this can be math'd before calling, to make sure 
+    # assert that unlock time > current lock time && < max lock
+    # assert unlock_time > _locked.end, "New unlock before current lock end"
+    assert unlock_time <= block.timestamp + MAXTIME, "Voting lock can be 1 year max"
+
+    # msg.sender since tokens are pulled from staking admin
+    self._admin_deposit_for(msg.sender, _user, _value, unlock_time, _locked, INCREASE_LOCK_AMOUNT)
 
 @external
 @nonreentrant('lock')
@@ -536,6 +565,8 @@ def increase_unlock_time(_unlock_time: uint256):
 @nonreentrant('lock')
 def update_staking_admin(_addr: address):
    assert msg.sender == self.stakingAdmin or msg.sender == AUTHORIZER_ADAPTOR
+   assert _addr != ZERO_ADDRESS, "0x0 staking admin"
+   
    self.stakingAdmin = _addr
 
 

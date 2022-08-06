@@ -1,4 +1,5 @@
 import { ethers } from "hardhat";
+import * as helpers from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { BigNumber, Contract } from "ethers";
 import { deployVault } from "../scripts/deploy-vault";
@@ -17,6 +18,11 @@ const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"; // ETH mainnet
 
 const ONE_DAY = (60 * 1000 * 60 * 24) / 1000;
 const SECONDS_IN_DAY = 86400;
+const ONE_WEEK = SECONDS_IN_DAY * 7;
+const ONE_MONTH = SECONDS_IN_DAY * 30;
+const THREE_MONTHS = SECONDS_IN_DAY * 90;
+const SIX_MONTHS = SECONDS_IN_DAY * 180;
+const ONE_YEAR = SECONDS_IN_DAY * 365;
 
 describe("Token Admin", () => {
   let owner: SignerWithAddress;
@@ -160,6 +166,82 @@ describe("Token Admin", () => {
   //   New staked for user veAEQ balance: ${formatEther(userBalance)}
   //   lockEnd: ${new Date(lockEnd.toNumber() * 1000)}`);
   // });
+
+  it("should admin increase amounts AND time for a user", async () => {
+    const lockAmount = parseEther("100");
+
+    console.log(`
+    Starting initial user stake for THREE_MONTHS`);
+
+    console.log(`
+    Amount in: ${formatEther(lockAmount)}`);
+
+    console.log(`
+    current date/time: ${new Date((await helpers.time.latest()) * 1000).toLocaleString()}`);
+
+    // Make the time shorter to stay under max for additional stake
+    const unlockTime = (await helpers.time.latest()) + THREE_MONTHS;
+    await mockVeDepositToken.approve(votingEscrow.address, ethers.constants.MaxUint256);
+
+    await votingEscrow.admin_create_lock_for(stakeForUser.address, lockAmount, unlockTime);
+
+    let currentBlock = await ethers.provider.getBlock(await ethers.provider.getBlockNumber());
+    let userBalance = await votingEscrow.balanceOfAt(stakeForUser.address, currentBlock.number);
+    let lockEnd: BigNumber = await votingEscrow.locked__end(stakeForUser.address);
+    console.log(`
+    THREE_MONTHS staked for user: ${stakeForUser.address}
+    User veAEQ amount balance: ${formatEther(userBalance)}
+    lockEnd: ${new Date(lockEnd.toNumber() * 1000).toLocaleString()}`);
+
+    console.log(`
+    Increasing user lock AND end time..`);
+    console.log(`
+    current date/time: ${new Date((await helpers.time.latest()) * 1000).toLocaleString()}`);
+
+    // currentBlock = await ethers.provider.getBlock(await ethers.provider.getBlockNumber());
+    // userBalance = await votingEscrow.balanceOfAt(stakeForUser.address, currentBlock.number);
+    // lockEnd = await votingEscrow.locked__end(stakeForUser.address);
+    // console.log(`
+    // User: ${stakeForUser.address}
+    // Current user veAEQ balance: ${formatEther(userBalance)}
+    // lockEnd: ${new Date(lockEnd.toNumber() * 1000).toLocaleString()}`);
+
+    console.log(`
+    Fast forwarding world time one month..`);
+
+    console.log(`
+    current date/time: ${new Date(
+      (await helpers.time.increase(ONE_MONTH)) * 1000
+    ).toLocaleString()}`);
+
+    currentBlock = await ethers.provider.getBlock(await ethers.provider.getBlockNumber());
+    const additionalLockAmount = parseEther("150");
+
+    console.log(`
+    Additional amount in: ${formatEther(additionalLockAmount)}`);
+
+    // console.log(`
+    // current date/time: ${new Date((await helpers.time.latest()) * 1000).toLocaleString()}`);
+
+    const newUnlockTime = currentBlock.timestamp + THREE_MONTHS;
+
+    console.log(`
+    Setting user unlock time to ~: ${new Date(newUnlockTime * 1000).toLocaleString()}`);
+
+    await votingEscrow.admin_increase_total_stake_for(
+      stakeForUser.address,
+      additionalLockAmount,
+      newUnlockTime
+    );
+
+    currentBlock = await ethers.provider.getBlock(await ethers.provider.getBlockNumber());
+    userBalance = await votingEscrow.balanceOfAt(stakeForUser.address, currentBlock.number);
+    lockEnd = await votingEscrow.locked__end(stakeForUser.address);
+    console.log(`
+    New stake for: ${stakeForUser.address}
+    New user veAEQ balance: ${formatEther(userBalance)}
+    New lockEnd: ${new Date(lockEnd.toNumber() * 1000)}`);
+  });
 
   // it("should do supply curve shit", async () => {
   //   // If going this route we need to be able to update the emissions according to our schedule

@@ -20,6 +20,7 @@
     "deploy:lpmining:goerli": "npx hardhat --network goerli run ./scripts/lp-mining/deploy-goerli.ts"
   },
   "devDependencies": {
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.3",
     "@nomiclabs/hardhat-ethers": "^2.0.0",
     "@nomiclabs/hardhat-etherscan": "^3.0.0",
     "@nomiclabs/hardhat-vyper": "^3.0.0",
