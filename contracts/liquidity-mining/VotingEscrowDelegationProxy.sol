@@ -19,10 +19,7 @@ import "../interfaces/vault/IVault.sol";
 
 import "../solidity-utils/helpers/SingletonAuthentication.sol";
 
-// Believe this is what is being referred to by "boost"
-// Would make sense to delegate your vote to, boost, the weight of some overall vote
-// IVeDelegation is a reference to whatever contract...
-
+// This is a proxy to allow updating the boost contract
 contract VotingEscrowDelegationProxy is SingletonAuthentication {
     IERC20 private immutable _votingEscrow;
     IVeDelegation private _delegation;
@@ -32,7 +29,7 @@ contract VotingEscrowDelegationProxy is SingletonAuthentication {
     constructor(
         IVault vault,
         IERC20 votingEscrow,
-        IVeDelegation delegation
+        IVeDelegation delegation // Initial VoteEscrowDelegation(VE Boost) implementation
     ) SingletonAuthentication(vault) {
         _votingEscrow = votingEscrow;
         _delegation = delegation;

@@ -6,7 +6,7 @@ export async function deployBalancerMinter(tokenAdmin: string, gaugeController: 
     const minter = await BalancerMinter.deploy(tokenAdmin, gaugeController);
     await minter.deployed();
     console.log("BalancerMinter deployed to: ", minter.address);
-    return minter.address;
+    return minter;
   } catch (error) {
     console.error(error);
     process.exitCode = 1;

@@ -6,7 +6,7 @@ import { deployGaugeController } from "../utils/lp-mining/deploy-gauge-controlle
 import { deployGaugeFactory } from "../utils/lp-mining/deploy-gauge-factory";
 import { deployTokenAdmin } from "../utils/lp-mining/deploy-token-admin";
 import { deployVeBalHelper } from "../utils/lp-mining/deploy-ve-bal-helper";
-import { deployVeDelegationProxy } from "../utils/lp-mining/deploy-ve-delegation-proxy";
+import { deployVeBoost } from "../utils/lp-mining/deploy-ve-boost";
 import { deployVotingEscrow } from "../utils/lp-mining/deploy-voting-escrow";
 
 const VAULT_ADDY = "0x26683651C18018b3d6e0754366D145a5CE1b36bc";

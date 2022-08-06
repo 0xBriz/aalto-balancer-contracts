@@ -1,32 +1,40 @@
+import { parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { deployAdminToken } from "../deploy-governance-token";
+import { setupGovernance } from "../setup-governance";
 import { deployAuthAdapter } from "../utils/lp-mining/deploy-auth-adapter";
 import { deployBalancerMinter } from "../utils/lp-mining/deploy-bal-minter";
 import { deployFeeDistributor } from "../utils/lp-mining/deploy-fee-distributor";
 import { deployGaugeController } from "../utils/lp-mining/deploy-gauge-controller";
 import { deployGaugeFactory } from "../utils/lp-mining/deploy-gauge-factory";
+import { deployLiquidityGaugeFactory } from "../utils/lp-mining/deploy-liq-gauge-factory";
+import { deployRewardOnlyGaugeFactory } from "../utils/lp-mining/deploy-reward-gauge-factory";
 import { deployTokenAdmin } from "../utils/lp-mining/deploy-token-admin";
 import { deployVeBalHelper } from "../utils/lp-mining/deploy-ve-bal-helper";
-import { deployVeDelegationProxy } from "../utils/lp-mining/deploy-ve-delegation-proxy";
+import { deployVeBoost } from "../utils/lp-mining/deploy-ve-boost";
 import { deployVotingEscrow } from "../utils/lp-mining/deploy-voting-escrow";
 
 const VAULT_ADDY = "0x0Cc23b51B3A89728c85a63c819E8283e353FC86c";
 
 // VE
-const AUTH_ADAPTER = "0x8Db257791920C4eD64a1f0139A067b42BDAa781A";
-const VOTING_ESCROW = "";
-const AQX_TOKEN = "";
-const GAUGE_CONTROLLER = "";
-const BAL_TOKEN_ADMIN = "";
-const BAL_MINTER = "";
+const AEQ_TOKEN_V2 = "0x226E1F30b19D61EFeb1B211a7fB32d41683B0734";
+const AUTH_ADAPTER = "0xD765D64aee0B44131B226edeB4f21f4B5CbD7011";
+const VOTING_ESCROW = "0xE40c9DbBCC6ab95C3f1664d72C428dace3F9D731";
+const VE_BOOST_PROXY = "0x2350dE713E00979e2A724eb2bDFdef6a6494e963";
+const GAUGE_CONTROLLER = "0xE79b03446cb0dc2273e170B197E141687296182b";
+const BAL_TOKEN_ADMIN = "0x038A87512a7B96C2b310E81093a4e22CE008d960";
+const BAL_MINTER = "0x5338F11255505677b2108D7ccD12c9ce692B0eec";
 const VE_BAL_HELPER = "";
 
+const AEQ_BNB_BPT = "0xb9cc1bd3ad16f02ced308bd1a73ed23cefd7e074";
+const STAKING_ADMIN = "0x570108E54d11348BD3734FF73dc55eC52c28d3EF";
+
 async function main() {
-  // const AQX = await ethers.getContractFactory("AQX");
-  // const token = await AQX.deploy();
-  // await token.deployed();
-  // console.log("AQX address: ", token.address);
+  // const AEQ = await deployAdminToken();
+  // await AEQ.mint(STAKING_ADMIN, parseEther("1000000"));
   //
-  const auth = await deployAuthAdapter(VAULT_ADDY);
+  // await deployVotingEscrow(AEQ_BNB_BPT, "veAEQ", "veAEQ", AUTH_ADAPTER, STAKING_ADMIN);
+  //
   // const veAddress = await deployVotingEscrow(token.address, "AQX (TEST)", "AQX (TEST)", auth);
   // const gaugeController = await deployGaugeController(veAddress, auth);
   //
@@ -38,11 +46,21 @@ async function main() {
   //   block.timestamp
   // );
   //
-  // await deployTokenAdmin(VAULT_ADDY, AQX_TOKEN);
+  // await deployTokenAdmin(VAULT_ADDY, AEQ_TOKEN_V2);
   // await deployBalancerMinter(BAL_TOKEN_ADMIN, GAUGE_CONTROLLER);
-  //await deployVeBalHelper(GAUGE_CONTROLLER);
-  //  await deployVeDelegationProxy(VAULT_ADDY, VOTING_ESCROW, AUTH_ADAPTER);
-  //await deployGaugeFactory(BAL_MINTER, "", AUTH_ADAPTER);
+  // await deployVeBalHelper(GAUGE_CONTROLLER);
+  // await deployGaugeFactory(BAL_MINTER, "", AUTH_ADAPTER);
+  // await deployVeBoost(VAULT_ADDY, VOTING_ESCROW);
+  // await deployGaugeController(VOTING_ESCROW, AUTH_ADAPTER);
+  //
+  // await deployTokenAdmin(VAULT_ADDY, AEQ_TOKEN_V2);
+  // await deployBalancerMinter(BAL_TOKEN_ADMIN, GAUGE_CONTROLLER);
+  //
+  await deployLiquidityGaugeFactory(BAL_MINTER, VE_BOOST_PROXY, AUTH_ADAPTER);
+  // await deployRewardOnlyGaugeFactory()
+  //
+  // TODO: Need to then run auth process and active the token admin (once initial mints are complete)
+  //await setupGovernance(BAL_TOKEN_ADMIN, AUTH_ADAPTER, AEQ_TOKEN_V2);
 }
 
 main().catch((error) => {

@@ -8,7 +8,6 @@ export async function deployVotingEscrow(
   stakingAdmin: string
 ) {
   try {
-    //  __init__(token_addr: address, _name: String[64], _symbol: String[32], _authorizer_adaptor: address):
     const VotingEscrow = await ethers.getContractFactory("VotingEscrow");
     const ve = await VotingEscrow.deploy(
       tokenAddress,
