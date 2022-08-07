@@ -608,3 +608,10 @@ def set_staking_admin(_addr: address):
    assert _addr != ZERO_ADDRESS, "0x0 staking admin"
    
    self.stakingAdmin = _addr
+
+@external
+@nonreentrant('lock')
+def kill_staking_admin(_addr: address):
+   assert  msg.sender == AUTHORIZER_ADAPTOR
+   
+   self.stakingAdmin = ZERO_ADDRESS

@@ -14,17 +14,18 @@ import { deployTestERC20 } from "../scripts/utils/deploy-test-erc20";
 import { deployVotingEscrow } from "../scripts/utils/lp-mining/deploy-voting-escrow";
 import { deployGaugeController } from "../scripts/utils/lp-mining/deploy-gauge-controller";
 import { deployVeBoost } from "../scripts/utils/lp-mining/deploy-ve-boost";
-import { deployGaugeFactory } from "../scripts/utils/lp-mining/deploy-gauge-factory";
 import { deployBalancerMinter } from "../scripts/utils/lp-mining/deploy-bal-minter";
 import { deployWeightedNoAssetManagersFactory } from "../scripts/utils/factories/weighted-nomanagers";
 import {
   awaitTransactionComplete,
   getFunctionSigHash,
+  getLiquidityGauge,
   getWeightedPoolInstance,
   initWeightedJoin,
   sortTokens,
 } from "./utils";
 import GC from "../artifacts/contracts/liquidity-mining/GaugeController.vy/GaugeController.json";
+import { deployLiquidityGaugeFactory } from "../scripts/utils/lp-mining/deploy-liquidity-gauge-factory";
 
 const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"; // ETH mainnet
 
@@ -65,6 +66,8 @@ describe("Gauges", () => {
   let liquidityGaugeFactory: Contract;
   let balMinter: Contract;
   let weightedFactory: Contract;
+  let testRewardToken: Contract;
+
   const pools: PoolInfo[] = [];
 
   beforeEach(async () => {
@@ -108,12 +111,15 @@ describe("Gauges", () => {
     );
     balMinter = await deployBalancerMinter(balTokenAdmin.address, gaugeController.address);
 
-    const { factory } = await deployGaugeFactory(
+    const { factory } = await deployLiquidityGaugeFactory(
       balMinter.address,
       veBoost.address,
-      vaultAuthorizer.address
+      vaultAuthorizer.address,
+      owner.address
     );
     liquidityGaugeFactory = factory;
+
+    testRewardToken = await deployTestERC20(parseEther("1000000"));
   });
 
   async function createPool() {
@@ -199,32 +205,21 @@ describe("Gauges", () => {
     return gaugeAddress;
   }
 
+  async function initGaugeTypes() {
+    // Need to add the type first to pass checks
+    // Have to add the total number needed here
+    // to be able to able any of the type later
+    await gaugeController["add_type(string)"](GaugeType.LiquidityMiningCommittee);
+    await gaugeController["add_type(string)"](GaugeType.veBAL);
+    await gaugeController["add_type(string)"](GaugeType.Ethereum);
+  }
+
   async function addGauge(gaugeAddress: string, type: GaugeType, weight = 0) {
-    // const iface = new Interface(["function add_gauge(address, int128, uint256) external"]);
-    // const selector = iface.getSighash("add_gauge(address, int128, uint256)");
-
-    // const actionId = await authAdapter.getActionId(selector);
-    // await vaultAuthorizer.grantPermissions([actionId], owner.address, [gaugeController.address]);
-
-    // // Need function selector encode in initial bytes
-    // const argsWithSelector = iface.encodeFunctionData("add_gauge", [gaugeAddress, type, weight]);
-
-    // const args = defaultAbiCoder.encode(
-    //   ["address", "int256", "uint256"],
-    //   [gaugeAddress, type, weight]
-    // );
-
-    // const fml = await authAdapter.callStatic.performAction(
-    //   gaugeController.address,
-    //   argsWithSelector
-    // );
-
-    // Need to add the type first to pass checks?
-    await gaugeController["add_type(string)"](type);
+    await initGaugeTypes();
     await gaugeController["add_gauge(address,int128,uint256)"](gaugeAddress, type, weight);
   }
 
-  it("should add a gauge to the controller", async () => {
+  async function setupGaugeForPool(type: GaugeType) {
     const { poolAddress } = await createPool();
     // bal-weth id: 0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014
     // bal-weth address:
@@ -235,6 +230,25 @@ describe("Gauges", () => {
     await giveTokenAdminOwnership();
     const gaugeAddress = await createLiquidityGauge(poolAddress);
     // Add to controller
-    await addGauge(gaugeAddress, GaugeType.LiquidityMiningCommittee);
+    await addGauge(gaugeAddress, type);
+
+    return gaugeAddress;
+  }
+
+  // it("should add a gauge to the controller", async () => {
+  //   await setupGaugeForPool(GaugeType.LiquidityMiningCommittee);
+  // });
+
+  it("should add rewards to a gauge", async () => {
+    const gaugeAddress = await setupGaugeForPool(GaugeType.veBAL);
+    const gauge = getLiquidityGauge(gaugeAddress, owner);
+
+    const token = testRewardToken.address;
+    const distributor = owner.address;
+    await gauge.add_reward(token, distributor);
   });
+
+  // it("should deposit to a gauge", async () => {
+  //   const gaugeAddress = await setupGaugeForPool(GaugeType.veBAL);
+  // });
 });

@@ -5,6 +5,7 @@ import { MAX_UINT256 } from "../scripts/utils/constants";
 import { ERC20_ABI } from "./abis/ERC20ABI";
 import { WEIGHTED_POOL_ABI } from "./abis/WeightPool";
 import { IERC20, JoinPoolRequest } from "./types";
+import liqV5 from "../artifacts/contracts/liquidity-mining/gauges/LiquidityGaugeV5.vy/LiquidityGaugeV5.json";
 
 // Contract storage slots for user balances
 // Use to overwrite a users balance to any value for testing
@@ -128,6 +129,10 @@ export async function awaitTransactionComplete(txResponse: ContractTransaction, 
   } catch (error) {
     throw error; // Throw and try to let this be handled back in the call stack as needed
   }
+}
+
+export function getLiquidityGauge(address: string, signer) {
+  return new Contract(address, liqV5.abi, signer);
 }
 
 export function getFunctionSigHash(functionPrototype: string) {

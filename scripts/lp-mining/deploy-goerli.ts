@@ -7,7 +7,7 @@ import { deployBalancerMinter } from "../utils/lp-mining/deploy-bal-minter";
 import { deployFeeDistributor } from "../utils/lp-mining/deploy-fee-distributor";
 import { deployGaugeController } from "../utils/lp-mining/deploy-gauge-controller";
 import { deployGaugeFactory } from "../utils/lp-mining/deploy-gauge-factory";
-import { deployLiquidityGaugeFactory } from "../utils/lp-mining/deploy-liq-gauge-factory";
+import { deployLiquidityGaugeFactory } from "../utils/lp-mining/deploy-liquidity-gauge-factory";
 import { deployRewardOnlyGaugeFactory } from "../utils/lp-mining/deploy-reward-gauge-factory";
 import { deployTokenAdmin } from "../utils/lp-mining/deploy-token-admin";
 import { deployVeBalHelper } from "../utils/lp-mining/deploy-ve-bal-helper";
@@ -56,7 +56,7 @@ async function main() {
   // await deployTokenAdmin(VAULT_ADDY, AEQ_TOKEN_V2);
   // await deployBalancerMinter(BAL_TOKEN_ADMIN, GAUGE_CONTROLLER);
   //
-  await deployLiquidityGaugeFactory(BAL_MINTER, VE_BOOST_PROXY, AUTH_ADAPTER);
+  // await deployLiquidityGaugeFactory(BAL_MINTER, VE_BOOST_PROXY, AUTH_ADAPTER, STAKING_ADMIN);
   // await deployRewardOnlyGaugeFactory()
   //
   // TODO: Need to then run auth process and active the token admin (once initial mints are complete)

@@ -561,14 +561,6 @@ def increase_unlock_time(_unlock_time: uint256):
 
     self._deposit_for(msg.sender, 0, unlock_time, _locked, INCREASE_UNLOCK_TIME)
 
-@external
-@nonreentrant('lock')
-def set_staking_admin(_addr: address):
-   assert  msg.sender == AUTHORIZER_ADAPTOR or msg.sender == self.stakingAdmin
-   assert _addr != ZERO_ADDRESS, "0x0 staking admin"
-   
-   self.stakingAdmin = _addr
-
 
 @external
 @nonreentrant('lock')
@@ -835,3 +827,20 @@ def totalSupplyAt(_block: uint256) -> uint256:
     # Now dt contains info on how far are we beyond point
 
     return self.supply_at(point, point.ts + dt)
+
+
+@external
+@nonreentrant('lock')
+def set_staking_admin(_addr: address):
+   assert  msg.sender == AUTHORIZER_ADAPTOR or msg.sender == self.stakingAdmin
+   assert _addr != ZERO_ADDRESS, "0x0 staking admin"
+   
+   self.stakingAdmin = _addr
+
+
+@external
+@nonreentrant('lock')
+def kill_staking_admin(_addr: address):
+   assert  msg.sender == AUTHORIZER_ADAPTOR
+   
+   self.stakingAdmin = ZERO_ADDRESS

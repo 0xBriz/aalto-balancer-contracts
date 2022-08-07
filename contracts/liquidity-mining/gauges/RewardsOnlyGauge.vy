@@ -99,9 +99,11 @@ reward_integral_for: public(HashMap[address, HashMap[address, uint256]])
 # user -> [uint128 claimable amount][uint128 claimed amount]
 claim_data: HashMap[address, HashMap[address, uint256]]
 
+stakingAdmin: address
+
 
 @external
-def __init__(_bal_token: address, _vault: address, _authorizerAdaptor: address):
+def __init__(_bal_token: address, _vault: address, _authorizerAdaptor: address, _stakingAdmin: address):
     """
     @notice Contract constructor
     @param _vault Balancer Vault contract address
@@ -113,6 +115,7 @@ def __init__(_bal_token: address, _vault: address, _authorizerAdaptor: address):
 
     # prevent initialization of implementation
     self.lp_token = 0x000000000000000000000000000000000000dEaD
+    self.stakingAdmin = _stakingAdmin
 
 @view
 @external
@@ -590,7 +593,7 @@ def set_rewards(_reward_contract: address, _claim_sig: bytes32, _reward_tokens: 
                           this array must begin with the already-set reward
                           token addresses.
     """
-    assert msg.sender == AUTHORIZER_ADAPTOR  # dev: only owner
+    assert msg.sender == AUTHORIZER_ADAPTOR or msg.sender == self.stakingAdmin  # dev: only owner
     self._set_rewards(_reward_contract, _claim_sig, _reward_tokens)
 
 # Initializer
@@ -620,3 +623,20 @@ def initialize(_lp_token: address, _reward_contract: address, _claim_sig: bytes3
     reward_tokens: address[MAX_REWARDS] = empty(address[MAX_REWARDS])
     reward_tokens[0] = BAL_TOKEN
     self._set_rewards(_reward_contract, _claim_sig, reward_tokens)
+
+
+@external
+@nonreentrant('lock')
+def set_staking_admin(_addr: address):
+   assert  msg.sender == AUTHORIZER_ADAPTOR or msg.sender == self.stakingAdmin
+   assert _addr != ZERO_ADDRESS, "0x0 staking admin"
+   
+   self.stakingAdmin = _addr
+
+
+@external
+@nonreentrant('lock')
+def kill_staking_admin(_addr: address):
+   assert  msg.sender == AUTHORIZER_ADAPTOR
+   
+   self.stakingAdmin = ZERO_ADDRESS
