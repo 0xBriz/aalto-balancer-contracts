@@ -38,18 +38,18 @@ const config: HardhatUserConfig = {
     compilers: [{ version: "0.3.1" }, { version: "0.3.3" }],
   },
   networks: {
-    hardhat: {
-      allowUnlimitedContractSize: true,
-      forking: {
-        url: process.env.ETH_ARCHIVE_RPC || "",
-        blockNumber: 15282844, // 8/5 ~10:25AM
-      },
-      //loggingEnabled: true,
-      // mining: {
-      //   auto: false,
-      //   interval: 2000,
-      // },
-    },
+    // hardhat: {
+    //   allowUnlimitedContractSize: true,
+    //   forking: {
+    //     url: process.env.ETH_ARCHIVE_RPC || "",
+    //     blockNumber: 15282844, // 8/5 ~10:25AM
+    //   },
+    //   //loggingEnabled: true,
+    //   // mining: {
+    //   //   auto: false,
+    //   //   interval: 2000,
+    //   // },
+    // },
     server: {
       url: process.env.SERVER_NODE_RPC,
       accounts: "remote",
