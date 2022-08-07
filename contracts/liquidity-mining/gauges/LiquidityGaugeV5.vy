@@ -153,7 +153,7 @@ period_timestamp: public(uint256[100000000000000000000000000000])
 # 1e18 * ∫(rate(t) / totalSupply(t) dt) from 0 till checkpoint
 integrate_inv_supply: public(uint256[100000000000000000000000000000])  # bump epoch when rate() changes
 
-stakingAdmin: immutable(address)
+stakingAdmin: immutable(address
 
 
 @external
