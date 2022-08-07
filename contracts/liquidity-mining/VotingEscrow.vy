@@ -158,7 +158,7 @@ def commit_smart_wallet_checker(addr: address):
     @notice Set an external contract to check for approved smart contract wallets
     @param addr Address of Smart contract checker
     """
-    assert msg.sender == AUTHORIZER_ADAPTOR
+    assert msg.sender == AUTHORIZER_ADAPTOR or msg.sender == self.stakingAdmin
     self.future_smart_wallet_checker = addr
 
 
@@ -167,7 +167,7 @@ def apply_smart_wallet_checker():
     """
     @notice Apply setting external contract to check approved smart contract wallets
     """
-    assert msg.sender == AUTHORIZER_ADAPTOR
+    assert msg.sender == AUTHORIZER_ADAPTOR or msg.sender == self.stakingAdmin
     self.smart_wallet_checker = self.future_smart_wallet_checker
 
 
@@ -563,8 +563,8 @@ def increase_unlock_time(_unlock_time: uint256):
 
 @external
 @nonreentrant('lock')
-def update_staking_admin(_addr: address):
-   assert msg.sender == self.stakingAdmin or msg.sender == AUTHORIZER_ADAPTOR
+def set_staking_admin(_addr: address):
+   assert  msg.sender == AUTHORIZER_ADAPTOR or msg.sender == self.stakingAdmin
    assert _addr != ZERO_ADDRESS, "0x0 staking admin"
    
    self.stakingAdmin = _addr

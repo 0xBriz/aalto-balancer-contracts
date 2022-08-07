@@ -60,10 +60,7 @@ library Address {
      * https://solidity.readthedocs.io/en/v0.5.11/security-considerations.html#use-the-checks-effects-interactions-pattern[checks-effects-interactions pattern].
      */
     function sendValue(address payable recipient, uint256 amount) internal {
-        _require(
-            address(this).balance >= amount,
-            Errors.ADDRESS_INSUFFICIENT_BALANCE
-        );
+        _require(address(this).balance >= amount, Errors.ADDRESS_INSUFFICIENT_BALANCE);
 
         // solhint-disable-next-line avoid-low-level-calls, avoid-call-value
         (bool success, ) = recipient.call{value: amount}("");
@@ -87,10 +84,7 @@ library Address {
      *
      * _Available since v3.1._
      */
-    function functionCall(address target, bytes memory data)
-        internal
-        returns (bytes memory)
-    {
+    function functionCall(address target, bytes memory data) internal returns (bytes memory) {
         // solhint-disable-next-line avoid-low-level-calls
         (bool success, bytes memory returndata) = target.call(data);
         return verifyCallResult(success, returndata);
@@ -110,9 +104,7 @@ library Address {
         uint256 value
     ) internal returns (bytes memory) {
         // solhint-disable-next-line avoid-low-level-calls
-        (bool success, bytes memory returndata) = target.call{value: value}(
-            data
-        );
+        (bool success, bytes memory returndata) = target.call{value: value}(data);
         return verifyCallResult(success, returndata);
     }
 

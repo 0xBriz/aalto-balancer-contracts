@@ -8,7 +8,7 @@ import { expect } from "chai";
 import { deployTokenAdmin } from "../scripts/utils/lp-mining/deploy-token-admin";
 import TimeAuth from "../artifacts/contracts/authorizer/TimelockAuthorizer.sol/TimelockAuthorizer.json";
 import AuthAdapter from "../artifacts/contracts/liquidity-mining/admin/AuthorizerAdaptor.sol/AuthorizerAdaptor.json";
-import { formatEther, Interface, parseEther, parseUnits } from "ethers/lib/utils";
+import { defaultAbiCoder, formatEther, Interface, parseEther, parseUnits } from "ethers/lib/utils";
 import { deployAuthAdapter } from "../scripts/utils/lp-mining/deploy-auth-adapter";
 import { deployTestERC20 } from "../scripts/utils/deploy-test-erc20";
 import { deployVotingEscrow } from "../scripts/utils/lp-mining/deploy-voting-escrow";
@@ -24,6 +24,7 @@ import {
   initWeightedJoin,
   sortTokens,
 } from "./utils";
+import GC from "../artifacts/contracts/liquidity-mining/GaugeController.vy/GaugeController.json";
 
 const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"; // ETH mainnet
 
@@ -34,6 +35,12 @@ const ONE_MONTH = SECONDS_IN_DAY * 30;
 const THREE_MONTHS = SECONDS_IN_DAY * 90;
 const SIX_MONTHS = SECONDS_IN_DAY * 180;
 const ONE_YEAR = SECONDS_IN_DAY * 365;
+
+enum GaugeType {
+  LiquidityMiningCommittee,
+  veBAL,
+  Ethereum,
+}
 
 interface PoolInfo {
   name: string;
@@ -67,10 +74,11 @@ describe("Gauges", () => {
 
     Vault = await deployVault(WETH);
     authAdapter = await deployAuthAdapter(Vault.address);
-    vaultAuthorizer = await ethers.getContractAt(TimeAuth.abi, await Vault.getAuthorizer());
+    vaultAuthorizer = await ethers.getContractAt(TimeAuth.abi, await Vault.getAuthorizer(), owner);
     weightedFactory = await deployWeightedNoAssetManagersFactory(Vault.address);
 
     AEQ = await deployAdminToken();
+    // Mint before handing ownership to token admin
     await AEQ.mint(owner.address, parseEther("1000000"));
     testPairToken = await deployTestERC20(parseEther("1000000"));
     balTokenAdmin = await deployTokenAdmin(Vault.address, AEQ.address);
@@ -93,7 +101,11 @@ describe("Gauges", () => {
     const { veBoostContract } = await deployVeBoost(Vault.address, votingEscrow.address);
     veBoost = veBoostContract;
 
-    gaugeController = await deployGaugeController(votingEscrow.address, authAdapter.address);
+    gaugeController = await deployGaugeController(
+      votingEscrow.address,
+      authAdapter.address,
+      owner.address
+    );
     balMinter = await deployBalancerMinter(balTokenAdmin.address, gaugeController.address);
 
     const { factory } = await deployGaugeFactory(
@@ -107,8 +119,6 @@ describe("Gauges", () => {
   async function createPool() {
     const tokens = [AEQ.address, testPairToken.address];
     sortTokens(tokens);
-
-    console.log(tokens);
 
     const args = {
       name: "Big Booty Hoes",
@@ -165,38 +175,6 @@ describe("Gauges", () => {
     };
   }
 
-  async function grantFunctionPermision(
-    functionSignatureAbi: string,
-    accountToGrant: string,
-    contractToAccess: string
-  ) {
-    try {
-      // const iface = new Interface(["function activate() external"]);
-      // const selector = iface.getSighash("activate()");
-      // console.log(selector);
-
-      const iface = new Interface([functionSignatureAbi]);
-      // "function fn() external".split(' ')[1] = portion needed for getSighash
-      const selector = iface.getSighash(functionSignatureAbi.split(" ")[1]);
-      console.log(selector);
-
-      // Gets the abi.encodePacked action identifier for the function
-      // we want to set permissions for.
-      const actionId = await authAdapter.getActionId(selector);
-      console.log(actionId);
-
-      let canDo = await vaultAuthorizer.hasPermission(actionId, accountToGrant, contractToAccess);
-      console.log(canDo);
-
-      await vaultAuthorizer.grantPermissions([actionId], accountToGrant, [contractToAccess]);
-
-      await vaultAuthorizer.hasPermission(actionId, accountToGrant, contractToAccess);
-      console.log(canDo);
-    } catch (error) {
-      throw error;
-    }
-  }
-
   async function giveTokenAdminOwnership() {
     // Give vault authorization to account to call `activate`
     const selector = getFunctionSigHash("function activate() external");
@@ -212,7 +190,7 @@ describe("Gauges", () => {
   }
 
   // Create gauge, then add to controller
-  async function createGauge(poolAddress: string) {
+  async function createLiquidityGauge(poolAddress: string) {
     const tx = await liquidityGaugeFactory.create(poolAddress);
     const receipt = await tx.wait();
     const events = receipt.events.filter((e) => e.event === "GaugeCreated");
@@ -221,17 +199,42 @@ describe("Gauges", () => {
     return gaugeAddress;
   }
 
+  async function addGauge(gaugeAddress: string, type: GaugeType, weight = 0) {
+    // const iface = new Interface(["function add_gauge(address, int128, uint256) external"]);
+    // const selector = iface.getSighash("add_gauge(address, int128, uint256)");
+
+    // const actionId = await authAdapter.getActionId(selector);
+    // await vaultAuthorizer.grantPermissions([actionId], owner.address, [gaugeController.address]);
+
+    // // Need function selector encode in initial bytes
+    // const argsWithSelector = iface.encodeFunctionData("add_gauge", [gaugeAddress, type, weight]);
+
+    // const args = defaultAbiCoder.encode(
+    //   ["address", "int256", "uint256"],
+    //   [gaugeAddress, type, weight]
+    // );
+
+    // const fml = await authAdapter.callStatic.performAction(
+    //   gaugeController.address,
+    //   argsWithSelector
+    // );
+
+    // Need to add the type first to pass checks?
+    await gaugeController["add_type(string)"](type);
+    await gaugeController["add_gauge(address,int128,uint256)"](gaugeAddress, type, weight);
+  }
+
   it("should add a gauge to the controller", async () => {
     const { poolAddress } = await createPool();
     // bal-weth id: 0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014
     // bal-weth address:
 
     // BalTokenAdmin has to be activated before creating gauges
-    // Since their initialize function will call for data
-    // Which will trigger an max256 overflow `activate` has not been triggered yet
+    // Since their initialize function will call for epoch data from it
+    // Which will trigger a max256 overflow if `activate` has not been triggered yet
     await giveTokenAdminOwnership();
-
-    await createGauge(poolAddress);
-    expect(true).to.be.true;
+    const gaugeAddress = await createLiquidityGauge(poolAddress);
+    // Add to controller
+    await addGauge(gaugeAddress, GaugeType.LiquidityMiningCommittee);
   });
 });
