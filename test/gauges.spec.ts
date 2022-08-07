@@ -17,7 +17,13 @@ import { deployVeBoost } from "../scripts/utils/lp-mining/deploy-ve-boost";
 import { deployGaugeFactory } from "../scripts/utils/lp-mining/deploy-gauge-factory";
 import { deployBalancerMinter } from "../scripts/utils/lp-mining/deploy-bal-minter";
 import { deployWeightedNoAssetManagersFactory } from "../scripts/utils/factories/weighted-nomanagers";
-import { getWeightedPoolInstance, initWeightedJoin, sortTokens } from "./utils";
+import {
+  awaitTransactionComplete,
+  getFunctionSigHash,
+  getWeightedPoolInstance,
+  initWeightedJoin,
+  sortTokens,
+} from "./utils";
 
 const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"; // ETH mainnet
 
@@ -29,23 +35,30 @@ const THREE_MONTHS = SECONDS_IN_DAY * 90;
 const SIX_MONTHS = SECONDS_IN_DAY * 180;
 const ONE_YEAR = SECONDS_IN_DAY * 365;
 
+interface PoolInfo {
+  name: string;
+  contract: Contract;
+  poolId: string;
+  poolAddress: string;
+}
+
 describe("Gauges", () => {
   let owner: SignerWithAddress;
   let stakeForUser: SignerWithAddress;
   let AEQ: Contract;
   let testPairToken: Contract;
   let Vault: Contract;
-  let authorizer: Contract;
+  let vaultAuthorizer: Contract;
   let authAdapter: Contract;
   let balTokenAdmin: Contract;
-  let mockVeDepositToken: Contract;
+  let tokenAdminAuthAdapter: Contract;
   let votingEscrow: Contract;
   let veBoost: Contract;
   let gaugeController: Contract;
   let liquidityGaugeFactory: Contract;
   let balMinter: Contract;
   let weightedFactory: Contract;
-  const pools: { name: string; contract: Contract; poolId: string; poolAddress: string }[] = [];
+  const pools: PoolInfo[] = [];
 
   beforeEach(async () => {
     const accounts = await ethers.getSigners();
@@ -54,21 +67,29 @@ describe("Gauges", () => {
 
     Vault = await deployVault(WETH);
     authAdapter = await deployAuthAdapter(Vault.address);
-    authorizer = await ethers.getContractAt(TimeAuth.abi, await Vault.getAuthorizer());
+    vaultAuthorizer = await ethers.getContractAt(TimeAuth.abi, await Vault.getAuthorizer());
+    weightedFactory = await deployWeightedNoAssetManagersFactory(Vault.address);
 
     AEQ = await deployAdminToken();
     await AEQ.mint(owner.address, parseEther("1000000"));
     testPairToken = await deployTestERC20(parseEther("1000000"));
     balTokenAdmin = await deployTokenAdmin(Vault.address, AEQ.address);
+    tokenAdminAuthAdapter = new Contract(
+      await balTokenAdmin.getAuthorizer(),
+      AuthAdapter.abi,
+      owner
+    );
 
-    mockVeDepositToken = await deployTestERC20(parseEther("1000000"));
+    const { poolAddress } = await createPool();
+
     votingEscrow = await deployVotingEscrow(
-      mockVeDepositToken.address,
+      poolAddress,
       "veToken",
       "veToken",
       authAdapter.address,
       owner.address
     );
+
     const { veBoostContract } = await deployVeBoost(Vault.address, votingEscrow.address);
     veBoost = veBoostContract;
 
@@ -78,11 +99,9 @@ describe("Gauges", () => {
     const { factory } = await deployGaugeFactory(
       balMinter.address,
       veBoost.address,
-      authorizer.address
+      vaultAuthorizer.address
     );
     liquidityGaugeFactory = factory;
-
-    weightedFactory = await deployWeightedNoAssetManagersFactory(Vault.address);
   });
 
   async function createPool() {
@@ -129,8 +148,6 @@ describe("Gauges", () => {
       poolId,
     };
 
-    console.log(poolInfo);
-
     pools.push(poolInfo);
 
     await initWeightedJoin(
@@ -148,8 +165,73 @@ describe("Gauges", () => {
     };
   }
 
+  async function grantFunctionPermision(
+    functionSignatureAbi: string,
+    accountToGrant: string,
+    contractToAccess: string
+  ) {
+    try {
+      // const iface = new Interface(["function activate() external"]);
+      // const selector = iface.getSighash("activate()");
+      // console.log(selector);
+
+      const iface = new Interface([functionSignatureAbi]);
+      // "function fn() external".split(' ')[1] = portion needed for getSighash
+      const selector = iface.getSighash(functionSignatureAbi.split(" ")[1]);
+      console.log(selector);
+
+      // Gets the abi.encodePacked action identifier for the function
+      // we want to set permissions for.
+      const actionId = await authAdapter.getActionId(selector);
+      console.log(actionId);
+
+      let canDo = await vaultAuthorizer.hasPermission(actionId, accountToGrant, contractToAccess);
+      console.log(canDo);
+
+      await vaultAuthorizer.grantPermissions([actionId], accountToGrant, [contractToAccess]);
+
+      await vaultAuthorizer.hasPermission(actionId, accountToGrant, contractToAccess);
+      console.log(canDo);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async function giveTokenAdminOwnership() {
+    // Give vault authorization to account to call `activate`
+    const selector = getFunctionSigHash("function activate() external");
+    // Need the action id from the token admin auth itself so the correct disambiguator is used
+    const actionId = await balTokenAdmin.getActionId(selector);
+    await vaultAuthorizer.grantPermissions([actionId], owner.address, [balTokenAdmin.address]);
+
+    // Give token admin boss role
+    await AEQ.grantRole(await AEQ.DEFAULT_ADMIN_ROLE(), balTokenAdmin.address);
+
+    // Trigger admin activation
+    await balTokenAdmin.activate();
+  }
+
+  // Create gauge, then add to controller
+  async function createGauge(poolAddress: string) {
+    const tx = await liquidityGaugeFactory.create(poolAddress);
+    const receipt = await tx.wait();
+    const events = receipt.events.filter((e) => e.event === "GaugeCreated");
+    const gaugeAddress = events[0].args.gauge;
+    console.log("gaugeAddress: " + gaugeAddress);
+    return gaugeAddress;
+  }
+
   it("should add a gauge to the controller", async () => {
-    await createPool();
+    const { poolAddress } = await createPool();
+    // bal-weth id: 0x5c6ee304399dbdb9c8ef030ab642b10820db8f56000200000000000000000014
+    // bal-weth address:
+
+    // BalTokenAdmin has to be activated before creating gauges
+    // Since their initialize function will call for data
+    // Which will trigger an max256 overflow `activate` has not been triggered yet
+    await giveTokenAdminOwnership();
+
+    await createGauge(poolAddress);
     expect(true).to.be.true;
   });
 });

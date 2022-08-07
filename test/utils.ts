@@ -1,5 +1,5 @@
-import { BigNumber, Contract, ethers } from "ethers";
-import { defaultAbiCoder } from "ethers/lib/utils";
+import { BigNumber, Contract, ContractTransaction, ethers } from "ethers";
+import { defaultAbiCoder, Interface } from "ethers/lib/utils";
 import { string } from "hardhat/internal/core/params/argumentTypes";
 import { MAX_UINT256 } from "../scripts/utils/constants";
 import { ERC20_ABI } from "./abis/ERC20ABI";
@@ -112,4 +112,27 @@ export async function approveTokensIfNeeded(
   } catch (error) {
     throw error;
   }
+}
+
+export async function awaitTransactionComplete(txResponse: ContractTransaction, confirmations = 1) {
+  try {
+    console.log(`- Starting transaction: ${txResponse.hash}`);
+    console.log(`- Awaiting transaction receipt... - ` + new Date().toLocaleString());
+    const txReceipt = await txResponse.wait(confirmations);
+    console.log("- TransactionReceipt received - " + new Date().toLocaleString());
+    if (txReceipt.status === 1) {
+      // success
+      console.log(`Transaction successful`);
+    }
+    return txReceipt;
+  } catch (error) {
+    throw error; // Throw and try to let this be handled back in the call stack as needed
+  }
+}
+
+export function getFunctionSigHash(functionPrototype: string) {
+  const iface = new Interface([functionPrototype]);
+  // "function fn() external".split(' ')[1] = portion needed for getSighash
+  const selector = iface.getSighash(functionPrototype.split(" ")[1]);
+  return selector;
 }

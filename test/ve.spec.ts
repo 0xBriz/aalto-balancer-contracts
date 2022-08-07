@@ -66,8 +66,7 @@ describe("Voting Escrow", () => {
   //   console.log(actionId);
   //   let canDo = await authorizer.canPerform(actionId, owner.address, BalTokenAdmin.address);
   //   console.log(canDo);
-  //   const canGrant = await authorizer.canGrant(actionId, owner.address, BalTokenAdmin.address);
-  //   console.log(canGrant);
+
   //   await authorizer.grantPermissions([actionId], owner.address, [BalTokenAdmin.address]);
   //   canDo = await authorizer.canPerform(actionId, owner.address, BalTokenAdmin.address);
   //   console.log(canDo);
