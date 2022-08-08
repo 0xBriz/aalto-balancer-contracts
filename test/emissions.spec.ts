@@ -8,14 +8,14 @@ import { expect } from "chai";
 import { deployTokenAdmin } from "../scripts/utils/lp-mining/deploy-token-admin";
 import TimeAuth from "../artifacts/contracts/authorizer/TimelockAuthorizer.sol/TimelockAuthorizer.json";
 import AuthAdapter from "../artifacts/contracts/liquidity-mining/admin/AuthorizerAdaptor.sol/AuthorizerAdaptor.json";
-import { defaultAbiCoder, formatEther, Interface, parseEther, parseUnits } from "ethers/lib/utils";
-import { deployAuthAdapter } from "../scripts/utils/lp-mining/deploy-auth-adapter";
-import { deployTestERC20 } from "../scripts/utils/deploy-test-erc20";
-import { deployVotingEscrow } from "../scripts/utils/lp-mining/deploy-voting-escrow";
-import { deployGaugeController } from "../scripts/utils/lp-mining/deploy-gauge-controller";
-import { deployVeBoost } from "../scripts/utils/lp-mining/deploy-ve-boost";
-import { deployBalancerMinter } from "../scripts/utils/lp-mining/deploy-bal-minter";
-import { deployWeightedNoAssetManagersFactory } from "../scripts/utils/factories/weighted-nomanagers";
+import {
+  commify,
+  defaultAbiCoder,
+  formatEther,
+  Interface,
+  parseEther,
+  parseUnits,
+} from "ethers/lib/utils";
 import {
   awaitTransactionComplete,
   getFunctionSigHash,
@@ -24,18 +24,16 @@ import {
   initWeightedJoin,
   sortTokens,
 } from "./utils";
-import GC from "../artifacts/contracts/liquidity-mining/GaugeController.vy/GaugeController.json";
-import { deployLiquidityGaugeFactory } from "../scripts/utils/lp-mining/deploy-liquidity-gauge-factory";
 
 const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"; // ETH mainnet
 
-const ONE_DAY = (60 * 1000 * 60 * 24) / 1000;
 const SECONDS_IN_DAY = 86400;
-const ONE_WEEK = SECONDS_IN_DAY * 7;
-const ONE_MONTH = SECONDS_IN_DAY * 30;
-const THREE_MONTHS = SECONDS_IN_DAY * 90;
-const SIX_MONTHS = SECONDS_IN_DAY * 180;
-const ONE_YEAR = SECONDS_IN_DAY * 365;
+const ONE_DAY_SECONDS = SECONDS_IN_DAY;
+const ONE_WEEK_SECONDS = SECONDS_IN_DAY * 7;
+const ONE_MONTH_SECONDS = SECONDS_IN_DAY * 30;
+const THREE_MONTHS_SECONDS = SECONDS_IN_DAY * 90;
+const SIX_MONTHS_SECONDS = SECONDS_IN_DAY * 180;
+const ONE_YEAR_SECONDS = SECONDS_IN_DAY * 365;
 
 enum GaugeType {
   LiquidityMiningCommittee,
@@ -50,75 +48,23 @@ interface PoolInfo {
   poolAddress: string;
 }
 
-describe("Gauges", () => {
+describe("Token Emissions", () => {
   let owner: SignerWithAddress;
-  let stakeForUser: SignerWithAddress;
   let AEQ: Contract;
-  let testPairToken: Contract;
   let Vault: Contract;
   let vaultAuthorizer: Contract;
-  let authAdapter: Contract;
   let balTokenAdmin: Contract;
-  let tokenAdminAuthAdapter: Contract;
-  let votingEscrow: Contract;
-  let veBoost: Contract;
-  let gaugeController: Contract;
-  let liquidityGaugeFactory: Contract;
   let balMinter: Contract;
-  let weightedFactory: Contract;
-  let testRewardToken: Contract;
-
-  const pools: PoolInfo[] = [];
 
   beforeEach(async () => {
     const accounts = await ethers.getSigners();
     owner = accounts[0];
-    stakeForUser = accounts[1];
-
     Vault = await deployVault(WETH);
-    authAdapter = await deployAuthAdapter(Vault.address);
     vaultAuthorizer = await ethers.getContractAt(TimeAuth.abi, await Vault.getAuthorizer(), owner);
-    // weightedFactory = await deployWeightedNoAssetManagersFactory(Vault.address);
-
     AEQ = await deployAdminToken();
-    // Mint before handing ownership to token admin
-    await AEQ.mint(owner.address, parseEther("1000000"));
+    // await AEQ.mint(owner.address, parseEther("100000"));
     balTokenAdmin = await deployTokenAdmin(Vault.address, AEQ.address);
-
-    // testPairToken = await deployTestERC20(parseEther("1000000"));
-    // tokenAdminAuthAdapter = new Contract(
-    //   await balTokenAdmin.getAuthorizer(),
-    //   AuthAdapter.abi,
-    //   owner
-    // );
-
-    // const { poolAddress } = await createPool();
-
-    // votingEscrow = await deployVotingEscrow(
-    //   poolAddress,
-    //   "veToken",
-    //   "veToken",
-    //   authAdapter.address,
-    //   owner.address
-    // );
-
-    // const { veBoostContract } = await deployVeBoost(Vault.address, votingEscrow.address);
-    // veBoost = veBoostContract;
-
-    // gaugeController = await deployGaugeController(
-    //   votingEscrow.address,
-    //   authAdapter.address,
-    //   owner.address
-    // );
-    // balMinter = await deployBalancerMinter(balTokenAdmin.address, gaugeController.address);
-
-    // const { factory } = await deployLiquidityGaugeFactory(
-    //   balMinter.address,
-    //   veBoost.address,
-    //   vaultAuthorizer.address,
-    //   owner.address
-    // );
-    // liquidityGaugeFactory = factory;
+    await giveTokenAdminOwnership();
   });
 
   async function giveTokenAdminOwnership() {
@@ -134,4 +80,113 @@ describe("Gauges", () => {
     // Trigger admin activation
     await balTokenAdmin.activate();
   }
+
+  function convertDate(seconds: number) {
+    return new Date(seconds * 1000).toLocaleString();
+  }
+
+  async function getMintableAmount(startSeconds: number, endSeconds: number) {
+    const amount: BigNumber = await balTokenAdmin.mintableInTimeframe(startSeconds, endSeconds);
+    return commify(formatEther(amount));
+  }
+
+  async function takeSnapshot() {
+    const [
+      rateReductionTime,
+      startEpochTime,
+      nextEpochStart,
+      rate,
+      availableSupply,
+      epochStartingSupply,
+      miningEpoch,
+    ] = await Promise.all([
+      balTokenAdmin.RATE_REDUCTION_TIME(),
+      balTokenAdmin.getStartEpochTime(),
+      balTokenAdmin.getFutureEpochTime(), // Start of next epoch
+      balTokenAdmin.rate(),
+      balTokenAdmin.getAvailableSupply(), // Maximum allowable number of tokens in existence (claimed or unclaimed)
+      balTokenAdmin.getStartEpochSupply(),
+      balTokenAdmin.getMiningEpoch(),
+    ]);
+
+    const mintable = await getMintableAmount(startEpochTime, nextEpochStart);
+
+    const data = {
+      epochStart: convertDate(startEpochTime),
+      startOfNextEpoch: convertDate(nextEpochStart),
+      epochStartingSupply: commify(formatEther(epochStartingSupply)),
+      currentRate: formatEther(rate),
+      miningEpoch: miningEpoch.toNumber(),
+      mintableInEpoch: mintable,
+      totalAvailableSupply: commify(formatEther(availableSupply)),
+    };
+
+    return data;
+  }
+
+  async function runTimeLoop() {
+    // Try to snapshot every month until end of mining epochs
+    // 1189207115002721024
+
+    console.log(formatEther(BigNumber.from("97325973987698445")));
+    console.log(formatEther(BigNumber.from("40920531318665947")));
+    console.log(formatEther(BigNumber.from("17204964048071776")));
+    console.log(formatEther(BigNumber.from("7233796296296297")));
+    console.log(formatEther(BigNumber.from("3041436687115576")));
+
+    // const epochs = new Array(5);
+    // for (const epoch of epochs) {
+    //   await logEmissionsInfo();
+    //   await helpers.time.increase(ONE_YEAR_SECONDS);
+    //   await balTokenAdmin.updateMiningParameters();
+    // }
+  }
+
+  async function logEmissionsInfo() {
+    let [
+      rateReductionTime,
+      startEpochTime,
+      nextEpochStart,
+      rate,
+      availableSupply,
+      epochStartingSupply,
+      miningEpoch,
+    ] = await Promise.all([
+      balTokenAdmin.RATE_REDUCTION_TIME(),
+      balTokenAdmin.getStartEpochTime(),
+      balTokenAdmin.getFutureEpochTime(), // Start of next epoch
+      balTokenAdmin.rate(),
+      balTokenAdmin.getAvailableSupply(), // Maximum allowable number of tokens in existence (claimed or unclaimed)
+      balTokenAdmin.getStartEpochSupply(),
+      balTokenAdmin.getMiningEpoch(),
+    ]);
+
+    // const rateReductionSeconds = rateReductionTime.toNumber();
+    // const rateReductionDays = rateReductionSeconds / SECONDS_IN_DAY;
+    const mintable = await getMintableAmount(startEpochTime, nextEpochStart);
+
+    // console.log(`
+    // Rate reduction time(seconds):   ${rateReductionTime.toNumber()}
+    // In days:                        ${rateReductionDays}
+    // `);
+
+    console.log(`
+    Epoch start time:                   ${convertDate(startEpochTime)}
+    Start of next epoch:                ${convertDate(nextEpochStart)}
+    Epoch starting supply:              ${commify(formatEther(epochStartingSupply))}
+    Current rate:                       ${formatEther(rate)}
+    Minig epoch:                        ${miningEpoch.toNumber()}
+    Mintable amount this epoch:         ${mintable}
+    Total available supply:             ${commify(formatEther(availableSupply))}
+    `);
+
+    return {
+      startEpochTime,
+      nextEpochStart,
+    };
+  }
+
+  it("should follow the correct emissions curve", async () => {
+    await runTimeLoop();
+  });
 });

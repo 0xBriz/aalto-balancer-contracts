@@ -153,7 +153,7 @@ period_timestamp: public(uint256[100000000000000000000000000000])
 # 1e18 * ∫(rate(t) / totalSupply(t) dt) from 0 till checkpoint
 integrate_inv_supply: public(uint256[100000000000000000000000000000])  # bump epoch when rate() changes
 
-stakingAdmin: immutable(address
+stakingAdmin: immutable(address)
 
 
 @external
@@ -691,7 +691,7 @@ def add_reward(_reward_token: address, _distributor: address):
     @param _distributor Address permitted to fund this contract with the reward token
     """
     assert _distributor != ZERO_ADDRESS
-    assert msg.sender == AUTHORIZER_ADAPTOR or msg.sender == stakingAdmin, "404" # dev: only owner
+    assert msg.sender == AUTHORIZER_ADAPTOR or msg.sender == stakingAdmin # dev: only owner
 
     reward_count: uint256 = self.reward_count
     assert reward_count < MAX_REWARDS, "Exceeds max rewwards"
