@@ -2,6 +2,7 @@ import { ethers } from "hardhat";
 
 export async function deployVeBalHelper(gaugeController: string) {
   try {
+    // "veBALHelpers" ref on BAL's front end
     const GaugeControllerQuerier = await ethers.getContractFactory("GaugeControllerQuerier");
     const helper = await GaugeControllerQuerier.deploy(gaugeController);
     await helper.deployed();

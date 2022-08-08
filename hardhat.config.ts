@@ -50,10 +50,6 @@ const config: HardhatUserConfig = {
     //   //   interval: 2000,
     //   // },
     // },
-    server: {
-      url: process.env.SERVER_NODE_RPC,
-      accounts: "remote",
-    },
     bsc_mainnet: {
       url: process.env.BSC_MAINNET_URL || "",
       accounts: process.env.DEV_KEY !== undefined ? [process.env.DEV_KEY] : [],

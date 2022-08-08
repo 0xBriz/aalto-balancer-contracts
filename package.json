@@ -16,8 +16,7 @@
     "deploy:multicall": "npx hardhat run ./scripts/deploy-multicall.ts",
     "deploy:relayer": "npx hardhat run ./scripts/deploy-relayer.ts",
     "deploy:helper": "npx hardhat run ./scripts/deploy-helper.ts",
-    "deploy:lpmining": "npx hardhat run ./scripts/lp-mining/deploy.ts",
-    "deploy:lpmining:goerli": "npx hardhat --network goerli run ./scripts/lp-mining/deploy-goerli.ts"
+    "deploy:goerli": "npx hardhat --network goerli run ./scripts/deploy-goerli.ts"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-network-helpers": "^1.0.3",

@@ -21,6 +21,7 @@ import "../solidity-utils/openzeppelin/IERC20.sol";
 // naming convention.
 // solhint-disable func-name-mixedcase, var-name-mixedcase
 
+// Solidity wrapper around vyper shit. This is a gauge
 interface IRewardTokenDistributor {
     struct Reward {
         IERC20 token;
