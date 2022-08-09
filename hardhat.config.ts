@@ -50,7 +50,7 @@ const config: HardhatUserConfig = {
     //   //   interval: 2000,
     //   // },
     // },
-    bsc_mainnet: {
+    bsc: {
       url: process.env.BSC_MAINNET_URL || "",
       accounts: process.env.DEV_KEY !== undefined ? [process.env.DEV_KEY] : [],
     },

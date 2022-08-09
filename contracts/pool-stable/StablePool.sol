@@ -15,7 +15,6 @@
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "../interfaces/pool-stable/StablePoolUserData.sol";
 import "../interfaces/pool-utils/IRateProvider.sol";
 
 import "../solidity-utils/math/FixedPoint.sol";
@@ -26,6 +25,7 @@ import "../pool-utils/BaseGeneralPool.sol";
 import "../pool-utils/LegacyBaseMinimalSwapInfoPool.sol";
 
 import "./StableMath.sol";
+import "./StablePoolUserData.sol";
 
 /**
  * @notice Pool designed to hold tokens of similar value.

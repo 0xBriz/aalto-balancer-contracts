@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 import { deployWeightedFactory } from "./utils/factories/weighted-factory";
 import { predictAddresses } from "./utils/predictAddresses";
-import { DAY, MONTH } from "./utils/time";
+import { DAY, MONTH, ONE_MONTH_SECONDS } from "./utils/time";
 
 export async function deployVault(WETH: string) {
   try {
@@ -13,7 +13,7 @@ export async function deployVault(WETH: string) {
     console.log("Predicted Vault address: " + vaultAddress);
     console.log("Predicted TimelockAuthorizer address: " + authorizerAddress);
 
-    const pauseWindowDuration = MONTH;
+    const pauseWindowDuration = ONE_MONTH_SECONDS * 3;
     const bufferPeriodDuration = DAY;
 
     const Vault = await ethers.getContractFactory("Vault");

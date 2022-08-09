@@ -30,11 +30,7 @@ import "./solidity-utils/openzeppelin/SafeERC20.sol";
  * sent to this contract, where they may be withdrawn by authorized entities. All authorization tasks are delegated
  * to the Vault's own authorizer.
  */
-contract ProtocolFeesCollector is
-    IProtocolFeesCollector,
-    Authentication,
-    ReentrancyGuard
-{
+contract ProtocolFeesCollector is IProtocolFeesCollector, Authentication, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     // Absolute maximum fee percentages (1e18 = 100%, 1e16 = 1%).
@@ -59,6 +55,8 @@ contract ProtocolFeesCollector is
         Authentication(bytes32(uint256(address(this))))
     {
         vault = _vault;
+        _swapFeePercentage = _MAX_PROTOCOL_SWAP_FEE_PERCENTAGE;
+        _flashLoanFeePercentage = _MAX_PROTOCOL_FLASH_LOAN_FEE_PERCENTAGE;
     }
 
     function withdrawCollectedFees(
@@ -75,11 +73,7 @@ contract ProtocolFeesCollector is
         }
     }
 
-    function setSwapFeePercentage(uint256 newSwapFeePercentage)
-        external
-        override
-        authenticate
-    {
+    function setSwapFeePercentage(uint256 newSwapFeePercentage) external override authenticate {
         _require(
             newSwapFeePercentage <= _MAX_PROTOCOL_SWAP_FEE_PERCENTAGE,
             Errors.SWAP_FEE_PERCENTAGE_TOO_HIGH
@@ -94,8 +88,7 @@ contract ProtocolFeesCollector is
         authenticate
     {
         _require(
-            newFlashLoanFeePercentage <=
-                _MAX_PROTOCOL_FLASH_LOAN_FEE_PERCENTAGE,
+            newFlashLoanFeePercentage <= _MAX_PROTOCOL_FLASH_LOAN_FEE_PERCENTAGE,
             Errors.FLASH_LOAN_FEE_PERCENTAGE_TOO_HIGH
         );
         _flashLoanFeePercentage = newFlashLoanFeePercentage;
@@ -106,12 +99,7 @@ contract ProtocolFeesCollector is
         return _swapFeePercentage;
     }
 
-    function getFlashLoanFeePercentage()
-        external
-        view
-        override
-        returns (uint256)
-    {
+    function getFlashLoanFeePercentage() external view override returns (uint256) {
         return _flashLoanFeePercentage;
     }
 
@@ -131,12 +119,7 @@ contract ProtocolFeesCollector is
         return _getAuthorizer();
     }
 
-    function _canPerform(bytes32 actionId, address account)
-        internal
-        view
-        override
-        returns (bool)
-    {
+    function _canPerform(bytes32 actionId, address account) internal view override returns (bool) {
         return _getAuthorizer().canPerform(actionId, account, address(this));
     }
 
