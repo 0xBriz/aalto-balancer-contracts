@@ -1,6 +1,6 @@
 import { parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import { deployAdminToken } from "./deploy-governance-token";
+import { deployGovernanceToken } from "./deploy-governance-token";
 import { deployVault } from "./deploy-vault";
 import { setupGovernance } from "./setup-governance";
 import { deployBootstrapPoolFactory } from "./utils/factories/lbp-factory";

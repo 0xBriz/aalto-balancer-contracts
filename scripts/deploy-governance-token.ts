@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 
-export async function deployAdminToken() {
+export async function deployGovernanceToken() {
   try {
     const AequinoxToken = await ethers.getContractFactory("AequinoxToken");
     const token = await AequinoxToken.deploy("Aequinox", "AEQ");

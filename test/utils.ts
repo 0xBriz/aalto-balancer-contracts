@@ -6,6 +6,7 @@ import { ERC20_ABI } from "./abis/ERC20ABI";
 import { WEIGHTED_POOL_ABI } from "./abis/WeightPool";
 import { IERC20, JoinPoolRequest } from "./types";
 import liqV5 from "../artifacts/contracts/liquidity-mining/gauges/LiquidityGaugeV5.vy/LiquidityGaugeV5.json";
+import BPT from "../artifacts/contracts/pool-utils/BalancerPoolToken.sol/BalancerPoolToken.json";
 
 // Contract storage slots for user balances
 // Use to overwrite a users balance to any value for testing
@@ -49,6 +50,10 @@ export function sortTokens(tokens: string[]) {
   tokens.sort((t1, t2) => (t1 > t2 ? 1 : -1));
 }
 
+export function getBalancerPoolToken(address: string, signer) {
+  return new Contract(address, BPT.abi, signer);
+}
+
 export function getWeightedPoolInstance(address: string, signer) {
   return new Contract(address, WEIGHTED_POOL_ABI, signer);
 }
@@ -62,7 +67,6 @@ export async function initWeightedJoin(
   signer
 ) {
   try {
-    console.log("initWeightedJoin");
     const JOIN_KIND_INIT = 0; // Can only be called once for most pools
     // Must be encoded
     const initUserData = defaultAbiCoder.encode(
@@ -100,12 +104,12 @@ export async function approveTokensIfNeeded(
   signer
 ) {
   try {
-    console.log(`Checking allowances..`);
+    //  console.log(`Checking allowances..`);
     for (const address of tokens) {
       const token = getERC20(address, signer);
       const allowance: BigNumber = await token.allowance(owner, spender);
       if (allowance.isZero()) {
-        console.log(`Approving token: ${address} - for spender ${spender}`);
+        //  console.log(`Approving token: ${address} - for spender ${spender}`);
         const tx = await token.approve(spender, MAX_UINT256);
         await tx.wait();
       }

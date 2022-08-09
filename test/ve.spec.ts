@@ -3,7 +3,7 @@ import * as helpers from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { BigNumber, Contract } from "ethers";
 import { deployVault } from "../scripts/deploy-vault";
-import { deployAdminToken } from "../scripts/deploy-governance-token";
+import { deployGovernanceToken } from "../scripts/deploy-governance-token";
 import { expect } from "chai";
 import { deployTokenAdmin } from "../scripts/utils/lp-mining/deploy-token-admin";
 import TimeAuth from "../artifacts/contracts/authorizer/TimelockAuthorizer.sol/TimelockAuthorizer.json";
