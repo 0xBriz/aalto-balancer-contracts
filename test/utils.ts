@@ -6,6 +6,7 @@ import { ERC20_ABI } from "./abis/ERC20ABI";
 import { WEIGHTED_POOL_ABI } from "./abis/WeightPool";
 import { IERC20, JoinPoolRequest } from "./types";
 import liqV5 from "../artifacts/contracts/liquidity-mining/gauges/LiquidityGaugeV5.vy/LiquidityGaugeV5.json";
+import AuthAdapter from "../artifacts/contracts/liquidity-mining/admin/AuthorizerAdaptor.sol/AuthorizerAdaptor.json";
 import BPT from "../artifacts/contracts/pool-utils/BalancerPoolToken.sol/BalancerPoolToken.json";
 
 // Contract storage slots for user balances
@@ -137,6 +138,10 @@ export async function awaitTransactionComplete(txResponse: ContractTransaction, 
 
 export function getLiquidityGauge(address: string, signer) {
   return new Contract(address, liqV5.abi, signer);
+}
+
+export function getAuthAdapter(address: string, signer) {
+  return new Contract(address, AuthAdapter.abi, signer);
 }
 
 export function getFunctionSigHash(functionPrototype: string) {

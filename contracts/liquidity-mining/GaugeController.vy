@@ -290,7 +290,7 @@ def add_gauge(addr: address, gauge_type: int128, weight: uint256 = 0):
     @param gauge_type Gauge type
     @param weight Gauge weight
     """
-    assert msg.sender == AUTHORIZER_ADAPTOR or msg.sender == self.stakingAdmin, "Not authorized"
+    assert msg.sender == AUTHORIZER_ADAPTOR or msg.sender == self.stakingAdmin
     assert (gauge_type >= 0) and (gauge_type < self.n_gauge_types)
     assert self.gauge_types_[addr] == 0  # dev: cannot add the same gauge twice
 

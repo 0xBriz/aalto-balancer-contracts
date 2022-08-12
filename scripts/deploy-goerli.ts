@@ -32,11 +32,12 @@ const WEIGHT_TWO_TOKEN_FACTORY = "0x37137Df03c5b9D05665Bfdf45c23d961ee70706C"; /
 // VE
 const AEQ_TOKEN = "0x875cf904E113470F039c5C5f1B85DD17837AD254";
 const AUTH_ADAPTER = "0xb18ADcf27927F61C612A3A13e6BacAAdE4E18491";
-const VOTING_ESCROW = "0xC6b5055c6C46D202d186aCcb2C08AAfD08Cf2C99";
-const VE_BOOST_PROXY = "";
-const GAUGE_CONTROLLER = "";
-const BAL_TOKEN_ADMIN = "";
-const BAL_MINTER = "";
+const VOTING_ESCROW = "0x050128022c139Dce6b6efb9AF01F0696e52ff7C1";
+const VE_BOOST_PROXY = "0x54B1C66aeDb3064fe0139f74D8B73CED566654db";
+const CURRENT_BOOST_CONTRACT = "0x90537c7B1FD5B48A74a16e0BC2D3574c292d13BA";
+const GAUGE_CONTROLLER = "0xA1e5ac38463274C4B444C55D017c2649E11703F2";
+const BAL_TOKEN_ADMIN = "0x1435000056a6Af075a3144965fB875B80Dd58F78";
+const BAL_MINTER = "0x252A6B2958715B3Cc461Ce508ee9C7E55166C9c8";
 const VE_BAL_HELPER = "";
 
 const AEQ_BNB_BPT = "0x3a103f8614a9616af0706a729949fec8a81df05b";
@@ -49,8 +50,7 @@ async function main() {
   //
   await deployVE();
   //
-  // await deployTokenAdmin(VAULT, AEQ_TOKEN);
-  // await deployBalancerMinter(BAL_TOKEN_ADMIN, GAUGE_CONTROLLER);
+
   // await deployRewardOnlyGaugeFactory()
   // TODO: Need to then run auth process and active the token admin (once initial mints are complete)
   // await setupGovernance(BAL_TOKEN_ADMIN, AUTH_ADAPTER, AEQ_TOKEN);
@@ -81,12 +81,16 @@ async function deployVE() {
   try {
     // Need the main pair pool already created
     // const auth = await deployAuthAdapter(VAULT);
-    // await deployVotingEscrow(AEQ_BNB_BPT, "veAEQ", "veAEQ", auth.address, STAKING_ADMIN);
+    // await deployVotingEscrow(AEQ_BNB_BPT, "veAEQ", "veAEQ", AUTH_ADAPTER, STAKING_ADMIN);
+    await deployGaugeController(VOTING_ESCROW, AUTH_ADAPTER, STAKING_ADMIN);
     // await deployVeBalHelper(GAUGE_CONTROLLER); // TODO: Will probably need this for front end
-    // await deployGaugeFactory(BAL_MINTER, "", AUTH_ADAPTER);
-    // await deployVeBoost(VAULT_ADDY, VOTING_ESCROW);
+    // await deployVeBoost(VAULT, VOTING_ESCROW);
+    // await deployTokenAdmin(VAULT, AEQ_TOKEN);
+    // await deployBalancerMinter(BAL_TOKEN_ADMIN, GAUGE_CONTROLLER);
+    //  await deployLiquidityGaugeFactory(BAL_MINTER, VE_BOOST_PROXY, AUTH_ADAPTER, STAKING_ADMIN);
+    //
     // await deployLiquidityGaugeFactory(BAL_MINTER, VE_BOOST_PROXY, AUTH_ADAPTER, STAKING_ADMIN);
-    // await deployGaugeController(VOTING_ESCROW, AUTH_ADAPTER);
+
     //
     // BAL: "We assume that `votingEscrow` has been deployed in a week previous to this one."
     // So we need ve setup and running for some time yet to have a supply (or create it manually for testing purposes)

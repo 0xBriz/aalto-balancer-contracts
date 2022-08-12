@@ -43,13 +43,11 @@ contract BalancerTokenAdmin is IBalancerTokenAdmin, SingletonAuthentication, Ree
     // uint256 public constant override RATE_REDUCTION_COEFFICIENT = 1189207115002721024; // 2 ** (1/4) * 1e18
     // uint256 public constant override RATE_DENOMINATOR = 1e18;
 
-    uint256 public constant override INITIAL_RATE = (145000 * 1e18) / uint256(1 weeks); // BAL has 18 decimals
-    uint256 public constant override RATE_REDUCTION_TIME = 365 days;
-    uint256 public constant override RATE_REDUCTION_COEFFICIENT = 1189207115002721024; // 2 ** (1/4) * 1e18
+    uint256 public constant override INITIAL_RATE = (210000 * 1e18) / uint256(1 weeks); // BAL has 18 decimals
+    uint256 public constant override RATE_REDUCTION_TIME = 90 days;
+    uint256 public constant override RATE_REDUCTION_COEFFICIENT = 1139207115002721024; // 2 ** (1/4) * 1e18
     // uint256 public constant override RATE_REDUCTION_COEFFICIENT = 2378414230005442048;  // 2 ** (1/2) * 1e18
     uint256 public constant override RATE_DENOMINATOR = 1e18;
-
-    uint256 public constant GHETTO_REDUCTION_RATE = 20;
 
     IBalancerToken private immutable _balancerToken;
 
