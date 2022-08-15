@@ -14,6 +14,7 @@ const WETH = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"; // WBNB
 const AEQ = "";
 
 async function main() {
+  await deployMulticall();
   //  await deployVault(WETH);
   // ======================= FACTORIES ========================//
   // await deployWeightedFactory(VAULT);

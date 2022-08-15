@@ -866,19 +866,3 @@ def initialize(_lp_token: address):
 
     self.period_timestamp[0] = block.timestamp
     self.inflation_params = shift(TokenAdmin(BAL_TOKEN_ADMIN).future_epoch_time_write(), 216) + TokenAdmin(BAL_TOKEN_ADMIN).rate()
-
-
-# @external
-# @nonreentrant('lock')
-# def set_staking_admin(_addr: address):
-#    assert  msg.sender == AUTHORIZER_ADAPTOR or msg.sender == stakingAdmin
-#    assert _addr != ZERO_ADDRESS, "0x0 staking admin"
-   
-#    self.stakingAdmin = _addr
-
-# @external
-# @nonreentrant('lock')
-# def kill_staking_admin(_addr: address):
-#    assert  msg.sender == AUTHORIZER_ADAPTOR
-   
-#    self.stakingAdmin = ZERO_ADDRESS

@@ -42,6 +42,8 @@ export const receiptTimestamp = async (
   return block.timestamp;
 };
 
+export const ONE_DAY_SECONDS = 86400;
+
 export const SECOND = 1;
 export const MINUTE = SECOND * 60;
 export const HOUR = MINUTE * 60;
@@ -49,4 +51,5 @@ export const DAY = HOUR * 24;
 export const WEEK = DAY * 7;
 export const MONTH = DAY * 30;
 
-export const ONE_MONTH_SECONDS = MONTH / 1000;
+export const ONE_WEEK_SECONDS = ONE_DAY_SECONDS * 7;
+export const ONE_MONTH_SECONDS = ONE_DAY_SECONDS * 30;
