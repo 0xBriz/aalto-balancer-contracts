@@ -52,7 +52,8 @@ const config: HardhatUserConfig = {
     // },
     bsc: {
       url: process.env.BSC_MAINNET_URL || "",
-      accounts: process.env.DEV_KEY !== undefined ? [process.env.DEV_KEY] : [],
+      accounts:
+        process.env.LOTTERY_OPERATOR_KEY !== undefined ? [process.env.LOTTERY_OPERATOR_KEY] : [],
     },
     goerli: {
       url: process.env.GOERLI_RPC || "",

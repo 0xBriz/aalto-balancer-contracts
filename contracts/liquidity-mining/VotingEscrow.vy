@@ -465,7 +465,7 @@ def admin_create_lock_for(_addr: address, _value: uint256, _unlock_time: uint256
     @param _value Amount to deposit
     @param _unlock_time Epoch time when tokens unlock, rounded down to whole weeks
     """
-    assert msg.sender == self.stakingAdmin, "Only staking admin can stake for"
+    assert msg.sender == AUTHORIZER_ADAPTOR or msg.sender == self.stakingAdmin
 
     unlock_time: uint256 = (_unlock_time / WEEK) * WEEK  # Locktime is rounded down to weeks
     _locked: LockedBalance = self.locked[_addr]
@@ -487,7 +487,7 @@ def admin_increase_amount_for(_user: address, _value: uint256):
     Allows treasury to add to the stake of current investors.
     @param _value Amount of tokens to deposit and add to the lock
     """
-    assert msg.sender == self.stakingAdmin, "Only staking admin can stake for"
+    assert msg.sender == AUTHORIZER_ADAPTOR or msg.sender == self.stakingAdmin
 
     _locked: LockedBalance = self.locked[_user]
 
@@ -507,7 +507,7 @@ def admin_increase_total_stake_for(_user: address, _value: uint256,  _unlock_tim
     This is for those who have approved increased lock time with their additional investment.
     @param _value Amount of tokens to deposit and add to the lock
     """
-    assert msg.sender == self.stakingAdmin, "Only staking admin can stake for"
+    assert msg.sender == AUTHORIZER_ADAPTOR or msg.sender == self.stakingAdmin
    
     unlock_time: uint256 = (_unlock_time / WEEK) * WEEK  # Locktime is rounded down to weeks
     _locked: LockedBalance = self.locked[_user]

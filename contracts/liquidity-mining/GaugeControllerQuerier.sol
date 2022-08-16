@@ -13,6 +13,7 @@ interface IGaugeController {
     function gauge_relative_weight(address gauge) external view returns (uint256);
 }
 
+// "veBalHelpers"
 contract GaugeControllerQuerier {
     IGaugeController public immutable GAUGE_CONTROLLER;
 

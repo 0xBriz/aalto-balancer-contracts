@@ -11,7 +11,7 @@ export async function setupGovernance(balAdminAddress: string, auth: string, aeq
   try {
     /**
      * Need to grant the deployer dev account permissions on the vault authorizer in order
-     * to call the activate function on the BalTokenAdmin contract.
+     * to call the activate function on the BalTokenAdmin contract.(After initial mints)
      */
     const signer = (await ethers.getSigners())[0];
 
