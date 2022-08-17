@@ -85,14 +85,17 @@ last_user_vote: public(HashMap[address, HashMap[address, uint256]])  # Last user
 # time_* are for the last change timestamp
 # timestamps are rounded to whole weeks
 
+# gauges weight at some, point, in time
 points_weight: public(HashMap[address, HashMap[uint256, Point]])  # gauge_addr -> time -> Point
 changes_weight: HashMap[address, HashMap[uint256, uint256]]  # gauge_addr -> time -> slope
 time_weight: public(HashMap[address, uint256])  # gauge_addr -> last scheduled time (next week)
 
+# History a gauge types points
 points_sum: public(HashMap[int128, HashMap[uint256, Point]])  # type_id -> time -> Point
 changes_sum: HashMap[int128, HashMap[uint256, uint256]]  # type_id -> time -> slope
 time_sum: public(uint256[1000000000])  # type_id -> last scheduled time (next week)
 
+# total weight for a certain week in time
 points_total: public(HashMap[uint256, uint256])  # time -> total weight
 time_total: public(uint256)  # last scheduled time
 

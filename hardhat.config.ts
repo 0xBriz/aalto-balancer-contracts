@@ -54,6 +54,7 @@ const config: HardhatUserConfig = {
       url: process.env.BSC_MAINNET_URL || "",
       accounts:
         process.env.LOTTERY_OPERATOR_KEY !== undefined ? [process.env.LOTTERY_OPERATOR_KEY] : [],
+      gasPrice: 50000000000,
     },
     goerli: {
       url: process.env.GOERLI_RPC || "",

@@ -93,8 +93,10 @@ abstract contract StakelessGauge is IStakelessGauge, ReentrancyGuard {
             for (uint256 i = lastPeriod; i < lastPeriod + 255; ++i) {
                 if (i > currentPeriod) break;
 
+                // Iterating week over week, or week at a time
                 uint256 periodTime = i * 1 weeks;
                 uint256 periodEmission = 0;
+                // Get gauges relative? weight for each weekly block
                 uint256 gaugeWeight = _gaugeController.gauge_relative_weight(
                     address(this),
                     periodTime

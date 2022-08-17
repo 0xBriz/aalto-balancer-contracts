@@ -12,6 +12,7 @@ import { deployAuthAdapter } from "./utils/lp-mining/deploy-auth-adapter";
 import { deployBalancerMinter } from "./utils/lp-mining/deploy-bal-minter";
 import { deployGaugeController } from "./utils/lp-mining/deploy-gauge-controller";
 import { deployLiquidityGaugeFactory } from "./utils/lp-mining/deploy-liquidity-gauge-factory";
+import { deploySingleRecipientGaugeFactory } from "./utils/lp-mining/deploy-single-recipient-factory";
 import { deployTokenAdmin } from "./utils/lp-mining/deploy-token-admin";
 import { deployVeBalHelper } from "./utils/lp-mining/deploy-ve-bal-helper";
 import { deployVeBoost } from "./utils/lp-mining/deploy-ve-boost";
@@ -34,7 +35,7 @@ const GAUGE_CONTROLLER = "0x585ECE7932226CCf5A259c367781F07EBBB1950F";
 const BAL_MINTER = "0x513f235C0bCCdeeecb81e2688453CAfaDf65c5e3";
 
 async function main() {
-  // await deployMulticall();
+  //await deployMulticall();
   // await deployVault(WETH);
   // await deployWeightedFactory(VAULT);
   // await deployWeightedNoAssetManagersFactory(VAULT);
@@ -48,9 +49,10 @@ async function main() {
   // await deployBalancerMinter(TOKEN_ADMIN, GAUGE_CONTROLLER);
   //
   //
-  await deployLiquidityGaugeFactory(BAL_MINTER, VE_BOOST_PROXY, AUTH_ADAPTER, STAKING_ADMIN);
+  // await deployLiquidityGaugeFactory(BAL_MINTER, VE_BOOST_PROXY, AUTH_ADAPTER, STAKING_ADMIN);
   // await deployVeBalHelper(GAUGE_CONTROLLER);
   // await deployRelayer(VAULT);
+  await deploySingleRecipientGaugeFactory(BAL_MINTER);
 }
 
 async function deployVE() {
