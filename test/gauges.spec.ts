@@ -27,6 +27,8 @@ import {
 } from "./utils";
 import GC from "../artifacts/contracts/liquidity-mining/GaugeController.vy/GaugeController.json";
 import { deployLiquidityGaugeFactory } from "../scripts/utils/lp-mining/deploy-liquidity-gauge-factory";
+import { deploySingleRecipientGaugeFactory } from "../scripts/utils/lp-mining/deploy-single-recipient-factory";
+import { deployBalTokenHolder } from "../scripts/utils/lp-mining/deploy-token-holder";
 
 const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"; // ETH mainnet
 
@@ -65,9 +67,12 @@ describe("Gauges", () => {
   let veBoost: Contract;
   let gaugeController: Contract;
   let liquidityGaugeFactory: Contract;
+  let singleRecipientFactory: Contract;
   let balMinter: Contract;
   let weightedFactory: Contract;
   let testRewardToken: Contract;
+  let singleRecipientGauge: Contract;
+  let tokenHolder: Contract;
 
   const pools: PoolInfo[] = [];
 
@@ -119,6 +124,8 @@ describe("Gauges", () => {
       owner.address
     );
     liquidityGaugeFactory = factory;
+
+    singleRecipientFactory = await deploySingleRecipientGaugeFactory(balMinter.address);
 
     testRewardToken = await deployTestERC20(parseEther("1000000"));
   });
@@ -196,6 +203,10 @@ describe("Gauges", () => {
     await balTokenAdmin.activate();
   }
 
+  async function createSingleRecipientGauge() {
+    tokenHolder = await deployBalTokenHolder(AEQ.address, Vault.address, "AEQ Token Holder");
+  }
+
   // Create gauge, then add to controller
   async function createLiquidityGauge(poolAddress: string) {
     const tx = await liquidityGaugeFactory.create(poolAddress);
@@ -246,20 +257,24 @@ describe("Gauges", () => {
     return gaugeAddress;
   }
 
-  it("should add a gauge to the controller", async () => {
-    await setupGaugeForPool(GaugeType.LiquidityMiningCommittee);
-  });
+  // it("should add a gauge to the controller", async () => {
+  //   await setupGaugeForPool(GaugeType.LiquidityMiningCommittee);
+  // });
 
-  it("should add rewards to a gauge", async () => {
-    const gaugeAddress = await setupGaugeForPool(GaugeType.veBAL);
-    const gauge = getLiquidityGauge(gaugeAddress, owner);
+  // it("should add rewards to a gauge", async () => {
+  //   const gaugeAddress = await setupGaugeForPool(GaugeType.veBAL);
+  //   const gauge = getLiquidityGauge(gaugeAddress, owner);
 
-    const token = testRewardToken.address;
-    const distributor = owner.address;
-    await gauge.add_reward(token, distributor);
-  });
+  //   const token = testRewardToken.address;
+  //   const distributor = owner.address;
+  //   await gauge.add_reward(token, distributor);
+  // });
 
   // it("should deposit to a gauge", async () => {
   //   const gaugeAddress = await setupGaugeForPool(GaugeType.veBAL);
   // });
+
+  it("should setup the single recipient gauge", async () => {
+    await createSingleRecipientGauge();
+  });
 });

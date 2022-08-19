@@ -140,6 +140,7 @@ integrate_checkpoint_of: public(HashMap[address, uint256])
 
 # ∫(balance * rate(t) / totalSupply(t) dt) from 0 till checkpoint
 # Units: rate * t = already number of coins per address to issue
+# Minter will then subtract from this total to determine users current mintable amount
 integrate_fraction: public(HashMap[address, uint256])
 
 # The goal is to be able to calculate ∫(rate * balance / totalSupply dt) from 0 till checkpoint

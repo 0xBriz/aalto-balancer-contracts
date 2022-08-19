@@ -14,7 +14,9 @@ import { deployFeeDistributor } from "./utils/lp-mining/deploy-fee-distributor";
 import { deployGaugeController } from "./utils/lp-mining/deploy-gauge-controller";
 import { deployLiquidityGaugeFactory } from "./utils/lp-mining/deploy-liquidity-gauge-factory";
 import { deployRewardOnlyGaugeFactory } from "./utils/lp-mining/deploy-reward-gauge-factory";
+import { deploySingleRecipientGaugeFactory } from "./utils/lp-mining/deploy-single-recipient-factory";
 import { deployTokenAdmin } from "./utils/lp-mining/deploy-token-admin";
+import { deployBalTokenHolder } from "./utils/lp-mining/deploy-token-holder";
 import { deployVeBalHelper } from "./utils/lp-mining/deploy-ve-bal-helper";
 import { deployVeBoost } from "./utils/lp-mining/deploy-ve-boost";
 import { deployVotingEscrow } from "./utils/lp-mining/deploy-voting-escrow";
@@ -42,6 +44,7 @@ const BAL_TOKEN_ADMIN = "0x1435000056a6Af075a3144965fB875B80Dd58F78";
 const BAL_MINTER = "0x252A6B2958715B3Cc461Ce508ee9C7E55166C9c8";
 const VE_BAL_HELPER = "";
 const FEE_DISTRIBUTOR = "0xbD1a281ebCc494f4A2bd0E2Ef0ab6541638fc7e8";
+const SINGLE_GAUGE_FACTORY = "0x719ec9CBE4cE1D737e0730296Ba2231041fA17e7";
 
 const AEQ_BNB_BPT = "0x3a103f8614a9616af0706a729949fec8a81df05b";
 const STAKING_ADMIN = "0x570108E54d11348BD3734FF73dc55eC52c28d3EF";
@@ -57,9 +60,14 @@ async function main() {
   // await deployRewardOnlyGaugeFactory()
   // TODO: Need to then run auth process and active the token admin (once initial mints are complete)
   // await setupGovernance(BAL_TOKEN_ADMIN, AUTH_ADAPTER, AEQ_TOKEN);
+  // await deploySingleRecipientGaugeFactory(BAL_MINTER);
+  // await deployBalTokenHolder(AEQ_TOKEN, VAULT, "AEQ Token Holder");
+
+  const block = await ethers.provider.getBlock(await ethers.provider.getBlockNumber());
+  await deployFeeDistributor(VOTING_ESCROW, block.timestamp - ONE_WEEK_SECONDS);
 }
 
-async function deployVE() {
+async function deployVE(AEQ_TOKEN) {
   try {
     // Need the main pair pool already created
     // const auth = await deployAuthAdapter(VAULT);

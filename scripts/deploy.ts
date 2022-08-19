@@ -10,6 +10,7 @@ import { deployWeightedFactory } from "./utils/factories/weighted-factory";
 import { deployWeightedNoAssetManagersFactory } from "./utils/factories/weighted-nomanagers";
 import { deployAuthAdapter } from "./utils/lp-mining/deploy-auth-adapter";
 import { deployBalancerMinter } from "./utils/lp-mining/deploy-bal-minter";
+import { deployFeeDistributor } from "./utils/lp-mining/deploy-fee-distributor";
 import { deployGaugeController } from "./utils/lp-mining/deploy-gauge-controller";
 import { deployLiquidityGaugeFactory } from "./utils/lp-mining/deploy-liquidity-gauge-factory";
 import { deploySingleRecipientGaugeFactory } from "./utils/lp-mining/deploy-single-recipient-factory";
@@ -17,6 +18,7 @@ import { deployTokenAdmin } from "./utils/lp-mining/deploy-token-admin";
 import { deployVeBalHelper } from "./utils/lp-mining/deploy-ve-bal-helper";
 import { deployVeBoost } from "./utils/lp-mining/deploy-ve-boost";
 import { deployVotingEscrow } from "./utils/lp-mining/deploy-voting-escrow";
+import { ONE_WEEK_SECONDS } from "./utils/time";
 
 // MAINNET
 const WETH = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"; // WBNB
@@ -52,7 +54,10 @@ async function main() {
   // await deployLiquidityGaugeFactory(BAL_MINTER, VE_BOOST_PROXY, AUTH_ADAPTER, STAKING_ADMIN);
   // await deployVeBalHelper(GAUGE_CONTROLLER);
   // await deployRelayer(VAULT);
-  await deploySingleRecipientGaugeFactory(BAL_MINTER);
+  // await deploySingleRecipientGaugeFactory(BAL_MINTER);
+
+  const block = await ethers.provider.getBlock(await ethers.provider.getBlockNumber());
+  await deployFeeDistributor(VOTING_ESCROW, block.timestamp);
 }
 
 async function deployVE() {
