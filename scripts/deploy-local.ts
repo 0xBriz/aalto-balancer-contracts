@@ -1,9 +1,11 @@
+import { parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { MAINNET_VAULT } from "./addresses";
 import { deployGovernanceToken } from "./deploy-governance-token";
 import { deployMulticall } from "./deploy-multicall";
 import { deployRelayer } from "./deploy-relayer";
 import { deployVault } from "./deploy-vault";
+import { deployTestERC20 } from "./utils/deploy-test-erc20";
 import { deployBootstrapPoolFactory } from "./utils/factories/lbp-factory";
 import { deployStablePoolFactory } from "./utils/factories/stable-factory";
 import { deployWeightedFactory } from "./utils/factories/weighted-factory";
@@ -22,26 +24,33 @@ import { deployVeBoost } from "./utils/lp-mining/deploy-ve-boost";
 import { deployVotingEscrow } from "./utils/lp-mining/deploy-voting-escrow";
 import { ONE_WEEK_SECONDS } from "./utils/time";
 
-// MAINNET
-const WETH = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"; // WBNB
+const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
 
-const VAULT = "0xEE1c8DbfBf958484c6a4571F5FB7b99B74A54AA7";
-const AEQ = "0x0dDef12012eD645f12AEb1B845Cb5ad61C7423F5";
+const VAULT = "0x0a17FabeA4633ce714F1Fa4a2dcA62C3bAc4758d";
+const TIME_AUTH = "0x5e6CB7E728E1C320855587E1D9C6F7972ebdD6D5";
 
-const AUTH_ADAPTER = "0x12fd0D8d8dA6A5c423CdcF7f6481353A5E13CfBc";
-const TOKEN_ADMIN = "0xDe3258Fce4Afe0aB38CA3A61B21ACAD802250880";
+const WEIGHTED_FACTORY = "0x79E8AB29Ff79805025c9462a2f2F12e9A496f81d";
+const WEIGHTED_NOAM = "0x0Dd99d9f56A14E9D53b2DdC62D9f0bAbe806647A";
+const STABLE_FACTORY = "0xeAd789bd8Ce8b9E94F5D0FCa99F8787c7e758817";
+const LBP_FACTORY = "0x95775fD3Afb1F4072794CA4ddA27F2444BCf8Ac3";
+
+const AEQ = "0xd9fEc8238711935D6c8d79Bef2B9546ef23FC046";
+
+const AUTH_ADAPTER = "0x512F7469BcC83089497506b5df64c6E246B39925";
+const TOKEN_ADMIN = "0xd3FFD73C53F139cEBB80b6A524bE280955b3f4db";
 const STAKING_ADMIN = "0x891eFc56f5CD6580b2fEA416adC960F2A6156494";
 
-const AEQ_BNB_BPT = "0x7a09ddF458FdA6e324A97D1a8E4304856fb3e702";
-const VOTING_ESCROW = "0x06Aba6E8F69A0Be680f96D923EFB682E63Db6a9f";
-const VE_BOOST_PROXY = "0x63BeeBDc3Bad6893E96A6138641BF694c42b2CB4";
-const GAUGE_CONTROLLER = "0x585ECE7932226CCf5A259c367781F07EBBB1950F";
-const BAL_MINTER = "0x513f235C0bCCdeeecb81e2688453CAfaDf65c5e3";
-const SINGLE_GAUGE_FACTORY = "0xf7fE0c29A251a8A8E5Cd36A54daBD0357a98b591";
-const BAL_TOKEN_HOLDER = "0x97a1b849857bF8656fb150C45d125B0a8BAa88D0";
+const AEQ_BNB_BPT = "";
+const VOTING_ESCROW = "";
+const VE_BOOST_PROXY = "";
+const GAUGE_CONTROLLER = "";
+const BAL_MINTER = "";
+const SINGLE_GAUGE_FACTORY = "";
+const BAL_TOKEN_HOLDER = "";
 
 async function main() {
-  //await deployMulticall();
+  // await deployGovernanceToken();
+
   // await deployVault(WETH);
   // await deployWeightedFactory(VAULT);
   // await deployWeightedNoAssetManagersFactory(VAULT);
@@ -53,18 +62,17 @@ async function main() {
   // await deployVeBoost(VAULT, VOTING_ESCROW);
   // await deployGaugeController(VOTING_ESCROW, AUTH_ADAPTER, STAKING_ADMIN);
   // await deployBalancerMinter(TOKEN_ADMIN, GAUGE_CONTROLLER);
-  //
-  //
   // await deployLiquidityGaugeFactory(BAL_MINTER, VE_BOOST_PROXY, AUTH_ADAPTER, STAKING_ADMIN);
   // await deployVeBalHelper(GAUGE_CONTROLLER);
   // await deployRelayer(VAULT);
   // await deploySingleRecipientGaugeFactory(BAL_MINTER);
-
   // const block = await ethers.provider.getBlock(await ethers.provider.getBlockNumber());
   // await deployFeeDistributor(VOTING_ESCROW, block.timestamp);
+  // await deployBalTokenHolder(AEQ, VAULT, "AEQ Token holder");
+  // await deploySingleRecipientGauge(SINGLE_GAUGE_FACTORY, BAL_TOKEN_HOLDER);
+  // await deployMulticall();
 
-  //await deployBalTokenHolder(AEQ, VAULT, "AEQ Token holder");
-  await deploySingleRecipientGauge(SINGLE_GAUGE_FACTORY, BAL_TOKEN_HOLDER);
+  await deployTestERC20("USDC", "USDC", parseEther("1000000"));
 }
 
 async function deployVE() {

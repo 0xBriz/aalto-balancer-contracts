@@ -32,6 +32,7 @@ const WEIGHT_FACTORY_AM = "0x19187D93eE0b65F2B1Bb24fcFa56Fc14C63e9c1b";
 const LBP_FACTORY = "0xA8Ad983e0E909B486E7895ca555A877cd21E0b25";
 const STABLE_FACTORY = "0x9570018E227f6c0A8bDAbF4025F9D595f0C6Ad15";
 const WEIGHT_TWO_TOKEN_FACTORY = "0x37137Df03c5b9D05665Bfdf45c23d961ee70706C"; // different repo
+const SINGLE_RECIPIENT_FACTORY = "0x719ec9CBE4cE1D737e0730296Ba2231041fA17e7";
 
 // VE
 const AEQ_TOKEN = "0x875cf904E113470F039c5C5f1B85DD17837AD254";
@@ -62,9 +63,8 @@ async function main() {
   // await setupGovernance(BAL_TOKEN_ADMIN, AUTH_ADAPTER, AEQ_TOKEN);
   // await deploySingleRecipientGaugeFactory(BAL_MINTER);
   // await deployBalTokenHolder(AEQ_TOKEN, VAULT, "AEQ Token Holder");
-
-  const block = await ethers.provider.getBlock(await ethers.provider.getBlockNumber());
-  await deployFeeDistributor(VOTING_ESCROW, block.timestamp - ONE_WEEK_SECONDS);
+  // const block = await ethers.provider.getBlock(await ethers.provider.getBlockNumber());
+  // await deployFeeDistributor(VOTING_ESCROW, block.timestamp - ONE_WEEK_SECONDS);
 }
 
 async function deployVE(AEQ_TOKEN) {

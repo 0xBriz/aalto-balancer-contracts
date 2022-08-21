@@ -55,6 +55,9 @@ contract ProtocolFeesCollector is IProtocolFeesCollector, Authentication, Reentr
         Authentication(bytes32(uint256(address(this))))
     {
         vault = _vault;
+
+        _swapFeePercentage = _MAX_PROTOCOL_SWAP_FEE_PERCENTAGE;
+        _flashLoanFeePercentage = _MAX_PROTOCOL_FLASH_LOAN_FEE_PERCENTAGE;
     }
 
     function withdrawCollectedFees(

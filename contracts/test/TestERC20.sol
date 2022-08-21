@@ -4,8 +4,12 @@ pragma experimental ABIEncoderV2;
 
 import "../solidity-utils/openzeppelin/ERC20.sol";
 
-contract TestERC20 is ERC20("TESTERC20", "TESTERC20") {
-    constructor(uint256 _initMint) {
+contract TestERC20 is ERC20 {
+    constructor(
+        string memory _name,
+        string memory _symbol,
+        uint256 _initMint
+    ) ERC20(_name, _symbol) {
         _mint(msg.sender, _initMint);
     }
 }

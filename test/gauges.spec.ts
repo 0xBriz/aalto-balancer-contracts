@@ -205,6 +205,7 @@ describe("Gauges", () => {
 
   async function createSingleRecipientGauge() {
     tokenHolder = await deployBalTokenHolder(AEQ.address, Vault.address, "AEQ Token Holder");
+    await singleRecipientFactory.create(tokenHolder.address);
   }
 
   // Create gauge, then add to controller
