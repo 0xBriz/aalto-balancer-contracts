@@ -4,6 +4,7 @@ import { deployGovernanceToken } from "./deploy-governance-token";
 import { deployMulticall } from "./deploy-multicall";
 import { deployVault } from "./deploy-vault";
 import { setupGovernance } from "./setup-governance";
+import { deployTestERC20 } from "./utils/deploy-test-erc20";
 import { deployBootstrapPoolFactory } from "./utils/factories/lbp-factory";
 import { deployStablePoolFactory } from "./utils/factories/stable-factory";
 import { deployWeightedFactory } from "./utils/factories/weighted-factory";
@@ -65,6 +66,7 @@ async function main() {
   // await deployBalTokenHolder(AEQ_TOKEN, VAULT, "AEQ Token Holder");
   // const block = await ethers.provider.getBlock(await ethers.provider.getBlockNumber());
   // await deployFeeDistributor(VOTING_ESCROW, block.timestamp - ONE_WEEK_SECONDS);
+  await deployTestERC20("Bandit", "BANDIT", parseEther("1000000"));
 }
 
 async function deployVE(AEQ_TOKEN) {

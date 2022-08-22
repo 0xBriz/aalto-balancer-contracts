@@ -59,12 +59,10 @@ async function main() {
   // await deployVeBalHelper(GAUGE_CONTROLLER);
   // await deployRelayer(VAULT);
   // await deploySingleRecipientGaugeFactory(BAL_MINTER);
-
   // const block = await ethers.provider.getBlock(await ethers.provider.getBlockNumber());
   // await deployFeeDistributor(VOTING_ESCROW, block.timestamp);
-
   //await deployBalTokenHolder(AEQ, VAULT, "AEQ Token holder");
-  await deploySingleRecipientGauge(SINGLE_GAUGE_FACTORY, BAL_TOKEN_HOLDER);
+  // await deploySingleRecipientGauge(SINGLE_GAUGE_FACTORY, BAL_TOKEN_HOLDER);
 }
 
 async function deployVE() {
