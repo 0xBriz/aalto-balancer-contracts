@@ -44,7 +44,7 @@ const config: HardhatUserConfig = {
         url: process.env.ETH_ARCHIVE_RPC || "",
         blockNumber: 15282844, // 8/5 ~10:25AM
       },
-      loggingEnabled: true,
+      // loggingEnabled: true,
       // mining: {
       //   auto: false,
       //   interval: 2000,

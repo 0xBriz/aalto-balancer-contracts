@@ -89,7 +89,7 @@ describe("Gauges", () => {
     AEQ = await deployGovernanceToken();
     // Mint before handing ownership to token admin
     await AEQ.mint(owner.address, parseEther("1000000"));
-    testPairToken = await deployTestERC20(parseEther("1000000"));
+    testPairToken = await deployTestERC20('test', 'test',parseEther("1000000"));
     balTokenAdmin = await deployTokenAdmin(Vault.address, AEQ.address);
     tokenAdminAuthAdapter = new Contract(
       await balTokenAdmin.getAuthorizer(),
@@ -127,7 +127,9 @@ describe("Gauges", () => {
 
     singleRecipientFactory = await deploySingleRecipientGaugeFactory(balMinter.address);
 
-    testRewardToken = await deployTestERC20(parseEther("1000000"));
+    testRewardToken = await deployTestERC20('test', 'test',parseEther("1000000"));
+
+    await giveTokenAdminOwnership()
   });
 
   async function createPool() {
