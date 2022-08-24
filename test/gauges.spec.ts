@@ -29,6 +29,7 @@ import GC from "../artifacts/contracts/liquidity-mining/GaugeController.vy/Gauge
 import { deployLiquidityGaugeFactory } from "../scripts/utils/lp-mining/deploy-liquidity-gauge-factory";
 import { deploySingleRecipientGaugeFactory } from "../scripts/utils/lp-mining/deploy-single-recipient-factory";
 import { deployBalTokenHolder } from "../scripts/utils/lp-mining/deploy-token-holder";
+import { deployFeeDistributor } from "../scripts/utils/lp-mining/deploy-fee-distributor";
 
 const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"; // ETH mainnet
 
@@ -58,6 +59,7 @@ describe("Gauges", () => {
   let stakeForUser: SignerWithAddress;
   let AEQ: Contract;
   let testPairToken: Contract;
+  let aeqBNB: Contract;
   let Vault: Contract;
   let vaultAuthorizer: Contract;
   let authAdapter: Contract;
@@ -73,6 +75,7 @@ describe("Gauges", () => {
   let testRewardToken: Contract;
   let singleRecipientGauge: Contract;
   let tokenHolder: Contract;
+  let feeDist: Contract;
 
   const pools: PoolInfo[] = [];
 
@@ -185,6 +188,9 @@ describe("Gauges", () => {
       owner
     );
 
+    aeqBNB = new Contract(poolAddress, ['function balanceOf(address) public view returns (uint256)',
+  'function approve(address, uint256) external returns (bool)'], owner)
+
     return {
       poolId,
       poolAddress,
@@ -252,7 +258,7 @@ describe("Gauges", () => {
     // BalTokenAdmin has to be activated before creating gauges
     // Since their initialize function will call for epoch data from it
     // Which will trigger a max256 overflow if `activate` has not been triggered yet
-    await giveTokenAdminOwnership();
+    // await giveTokenAdminOwnership();
     const gaugeAddress = await createLiquidityGauge(poolAddress);
     // // Add to controller
     await addGauge(gaugeAddress, type);
@@ -278,6 +284,24 @@ describe("Gauges", () => {
   // });
 
   it("should setup the single recipient gauge", async () => {
-    await createSingleRecipientGauge();
+    // pool already created
+    // const bal = await aeqBNB.balanceOf(owner.address)
+    // console.log(formatEther(bal))
+    // do ve deposit
+    let now = await helpers.time.latest()
+    await aeqBNB.approve(votingEscrow.address, ethers.constants.MaxUint256)
+    await votingEscrow.create_lock(parseEther('100'), now + (ONE_WEEK * 50))
+    // fast forward and deploy fee dist
+    await helpers.time.increase(ONE_WEEK)
+    feeDist = await deployFeeDistributor(votingEscrow.address, await helpers.time.latest())
+    await AEQ.approve(feeDist.address, ethers.constants.MaxUint256)
+    await feeDist.depositToken(AEQ.address, parseEther('1000'))
+    // Check if user has rewards now, then fast for to next epoch and check again
+    let testCall = await feeDist.callStatic.claimToken(owner.address, AEQ.address)
+    console.log(testCall)
+    await helpers.time.increase(ONE_WEEK)
+    testCall = await feeDist.callStatic.claimToken(owner.address, AEQ.address)
+    console.log(formatEther(testCall))
+    // await createSingleRecipientGauge();
   });
 });

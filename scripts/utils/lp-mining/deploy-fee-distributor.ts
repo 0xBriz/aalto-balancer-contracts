@@ -6,7 +6,7 @@ export async function deployFeeDistributor(votingEscrow: string, startTime: numb
     const fees = await FeeDistributor.deploy(votingEscrow, startTime);
     await fees.deployed();
     console.log("FeeDistributor deployed to: ", fees.address);
-    return fees.address;
+    return fees;
   } catch (error) {
     console.error(error);
     process.exitCode = 1;
