@@ -19,7 +19,7 @@ const config: HardhatUserConfig = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 9999, // Need to crank this up to 9999 for production
+            runs: 200,
           },
         },
       },
@@ -28,7 +28,7 @@ const config: HardhatUserConfig = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 9999, // Need to crank this up to 9999 for production
+            runs: 200,
           },
         },
       },
