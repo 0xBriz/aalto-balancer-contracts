@@ -41,8 +41,8 @@ const config: HardhatUserConfig = {
     hardhat: {
       allowUnlimitedContractSize: true,
       forking: {
-        url: process.env.ETH_ARCHIVE_RPC || "",
-        blockNumber: 15282844, // 8/5 ~10:25AM
+        url: process.env.BSC_ARCHIVE_NODE || "",
+        blockNumber: 20928315, // 8/31 ~1:00PM
       },
       // loggingEnabled: true,
       // mining: {

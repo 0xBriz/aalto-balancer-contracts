@@ -365,12 +365,16 @@ contract FeeDistributor is IFeeDistributor, ReentrancyGuard {
      */
     function _checkpointToken(IERC20 token, bool force) internal {
         TokenState storage tokenState = _tokenState[token];
+
         uint256 lastTokenTime = tokenState.timeCursor;
         uint256 timeSinceLastCheckpoint;
+
         if (lastTokenTime == 0) {
             // If it's the first time we're checkpointing this token then start distributing from now.
             // Also mark at which timestamp users should start attempts to claim this token from.
             lastTokenTime = block.timestamp;
+
+            // Beginning of current week
             tokenState.startTime = uint64(_roundDownTimestamp(block.timestamp));
 
             // Prevent someone from assigning tokens to an inaccessible week.
@@ -380,11 +384,13 @@ contract FeeDistributor is IFeeDistributor, ReentrancyGuard {
 
             if (!force) {
                 // Checkpointing N times within a single week is completely equivalent to checkpointing once at the end.
+                // (Fees are distributed the "following" week anyway, after fee epoch change at Thurs 00:00 UTC)
                 // We then want to get as close as possible to a single checkpoint every Wed 23:59 UTC to save gas.
 
                 // We then skip checkpointing if we're in the same week as the previous checkpoint.
                 bool alreadyCheckpointedThisWeek = _roundDownTimestamp(block.timestamp) ==
                     _roundDownTimestamp(lastTokenTime);
+
                 // However we want to ensure that all of this week's fees are assigned to the current week without
                 // overspilling into the next week. To mitigate this, we checkpoint if we're near the end of the week.
                 bool nearingEndOfWeek = _roundUpTimestamp(block.timestamp) - block.timestamp <
@@ -398,29 +404,38 @@ contract FeeDistributor is IFeeDistributor, ReentrancyGuard {
             }
         }
 
+        // Mark last distribution for the token
         tokenState.timeCursor = uint64(block.timestamp);
 
         uint256 tokenBalance = token.balanceOf(address(this));
         uint256 tokensToDistribute = tokenBalance.sub(tokenState.cachedBalance);
         if (tokensToDistribute == 0) return;
+
         require(tokenBalance <= type(uint128).max, "Maximum token balance exceeded");
         tokenState.cachedBalance = uint128(tokenBalance);
 
+        // This could be started in the past(a previous week) depending on last checkpoint for this token
         uint256 thisWeek = _roundDownTimestamp(lastTokenTime);
         uint256 nextWeek = 0;
 
         // Distribute `tokensToDistribute` evenly across the time period from `lastTokenTime` to now.
+        // This can span over more than the current week
         // These tokens are assigned to weeks proportionally to how much of this period falls into each week.
         mapping(uint256 => uint256) storage tokensPerWeek = _tokensPerWeek[token];
+
+        // Set tokens per week for the token
         for (uint256 i = 0; i < 20; ++i) {
             // This is safe as we're incrementing a timestamp.
             nextWeek = thisWeek + 1 weeks;
+
             if (block.timestamp < nextWeek) {
                 // `thisWeek` is now the beginning of the current week, i.e. this is the final iteration.
                 if (timeSinceLastCheckpoint == 0 && block.timestamp == lastTokenTime) {
+                    // Update the amount for this week with the new additional token amount
                     tokensPerWeek[thisWeek] += tokensToDistribute;
                 } else {
                     // block.timestamp >= lastTokenTime by definition.
+                    // Update current week proportionally
                     tokensPerWeek[thisWeek] +=
                         (tokensToDistribute * (block.timestamp - lastTokenTime)) /
                         timeSinceLastCheckpoint;
