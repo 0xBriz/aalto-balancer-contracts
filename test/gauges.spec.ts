@@ -271,18 +271,11 @@
 
 //     return gaugeAddress;
 //   }
-//   it("should mint tokens to users", async () => {
-//     // minter should mint users token based on user integrate_fraction from the gauge
-//     const adminId = await tokenAdminAuthAdapter.getActionId([balTokenAdmin.interface.getSighash('mint(address, uint256)')])
-//     console.log(adminId)
-//     // Use id to give vault approval
-
-//     // steps:
-//     // approve minter to call mint on admin contract
-//     // user deposit in gauge
-//     // fast forward stuff
-//     // user should be able to be minted for
-//   });
+//   //   it("should mint tokens to users", async () => {
+//   //     // minter should mint users token based on user integrate_fraction from the gauge
+//   //     const adminId = await tokenAdminAuthAdapter.getActionId([balTokenAdmin.interface.getSighash('mint(address, uint256)')])
+//   //     console.log(adminId)
+//   //   });
 
 //   // it("should add a gauge to the controller", async () => {
 //   //   await setupGaugeForPool(GaugeType.LiquidityMiningCommittee);

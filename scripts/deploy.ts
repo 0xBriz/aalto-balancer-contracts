@@ -1,9 +1,11 @@
+import { parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { MAINNET_VAULT } from "./addresses";
 import { deployGovernanceToken } from "./deploy-governance-token";
 import { deployMulticall } from "./deploy-multicall";
 import { deployRelayer } from "./deploy-relayer";
 import { deployVault } from "./deploy-vault";
+import { deployTestERC20 } from "./utils/deploy-test-erc20";
 import { deployBootstrapPoolFactory } from "./utils/factories/lbp-factory";
 import { deployStablePoolFactory } from "./utils/factories/stable-factory";
 import { deployWeightedFactory } from "./utils/factories/weighted-factory";
@@ -63,6 +65,7 @@ async function main() {
   // await deployFeeDistributor(VOTING_ESCROW, block.timestamp);
   //await deployBalTokenHolder(AEQ, VAULT, "AEQ Token holder");
   // await deploySingleRecipientGauge(SINGLE_GAUGE_FACTORY, BAL_TOKEN_HOLDER);
+  // await deployTestERC20("Aalto", "AALTO", parseEther("1000000"));
 }
 
 async function deployVE() {
