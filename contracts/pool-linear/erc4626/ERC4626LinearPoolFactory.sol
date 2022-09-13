@@ -16,16 +16,14 @@ pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "../../interfaces/vault/IVault.sol";
-
-import "../../pool-utils/factories/BasePoolFactoryV2.sol";
+import "../../pool-utils/factories/BasePoolSplitCodeFactory.sol";
 import "../../pool-utils/factories/FactoryWidePauseWindow.sol";
-import "../../interfaces/standalone-utils/IProtocolFeePercentagesProvider.sol";
 
 import "./ERC4626LinearPool.sol";
 
-contract ERC4626LinearPoolFactory is BasePoolFactoryV2, FactoryWidePauseWindow {
-    constructor(IVault vault, IProtocolFeePercentagesProvider protocolFeeProvider)
-        BasePoolFactoryV2(vault, protocolFeeProvider, type(ERC4626LinearPool).creationCode)
+contract ERC4626LinearPoolFactory is BasePoolSplitCodeFactory, FactoryWidePauseWindow {
+    constructor(IVault vault)
+        BasePoolSplitCodeFactory(vault, type(ERC4626LinearPool).creationCode)
     {
         // solhint-disable-previous-line no-empty-blocks
     }
@@ -37,7 +35,7 @@ contract ERC4626LinearPoolFactory is BasePoolFactoryV2, FactoryWidePauseWindow {
         string memory name,
         string memory symbol,
         IERC20 mainToken,
-        IERC4626 wrappedToken,
+        IERC20 wrappedToken,
         uint256 upperTarget,
         uint256 swapFeePercentage,
         address owner

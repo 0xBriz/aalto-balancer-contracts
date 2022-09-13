@@ -15,7 +15,9 @@
 pragma solidity ^0.7.0;
 
 library LinearPoolUserData {
-    enum ExitKind { EMERGENCY_EXACT_BPT_IN_FOR_TOKENS_OUT }
+    enum ExitKind {
+        EMERGENCY_EXACT_BPT_IN_FOR_TOKENS_OUT
+    }
 
     function exitKind(bytes memory self) internal pure returns (ExitKind) {
         return abi.decode(self, (ExitKind));

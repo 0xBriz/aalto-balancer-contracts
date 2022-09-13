@@ -39,6 +39,8 @@ library WordCodec {
     uint256 private constant _MASK_1 = 2**(1) - 1;
     uint256 private constant _MASK_192 = 2**(192) - 1;
 
+    uint256 private constant _MASK_96 = 2**(96) - 1;
+
     // In-place insertion
 
     /**
@@ -96,6 +98,11 @@ library WordCodec {
         return bytes32(value << offset);
     }
 
+    /// @dev For backwards compatibility
+    function encodeUintLegacy(uint256 value, uint256 offset) internal pure returns (bytes32) {
+        return bytes32(value << offset);
+    }
+
     /**
      * @dev Encodes a signed integer shifted by an offset.
      *
@@ -147,13 +154,16 @@ library WordCodec {
     // Special cases
 
     /**
+     * @dev Decodes and returns a 96 bit unsigned integer shifted by an offset from a 256 bit word.
+     */
+    function decodeUint96(bytes32 word, uint256 offset) internal pure returns (uint256) {
+        return uint256(word >> offset) & _MASK_96;
+    }
+
+    /**
      * @dev Decodes and returns a boolean shifted by an offset from a 256 bit word.
      */
-    function decodeBool(bytes32 word, uint256 offset)
-        internal
-        pure
-        returns (bool)
-    {
+    function decodeBool(bytes32 word, uint256 offset) internal pure returns (bool) {
         return (uint256(word >> offset) & _MASK_1) == 1;
     }
 
@@ -195,10 +205,7 @@ library WordCodec {
         _require(offset < 256, Errors.OUT_OF_BOUNDS);
         // We never accept 256 bit values (which would make the codec pointless), and the larger the offset the smaller
         // the maximum bit length.
-        _require(
-            bitLength >= 1 && bitLength <= Math.min(255, 256 - offset),
-            Errors.OUT_OF_BOUNDS
-        );
+        _require(bitLength >= 1 && bitLength <= Math.min(255, 256 - offset), Errors.OUT_OF_BOUNDS);
 
         // Testing unsigned values for size is straightforward: their upper bits must be cleared.
         _require(value >> bitLength == 0, Errors.CODEC_OVERFLOW);
@@ -212,10 +219,7 @@ library WordCodec {
         _require(offset < 256, Errors.OUT_OF_BOUNDS);
         // We never accept 256 bit values (which would make the codec pointless), and the larger the offset the smaller
         // the maximum bit length.
-        _require(
-            bitLength >= 1 && bitLength <= Math.min(255, 256 - offset),
-            Errors.OUT_OF_BOUNDS
-        );
+        _require(bitLength >= 1 && bitLength <= Math.min(255, 256 - offset), Errors.OUT_OF_BOUNDS);
 
         // Testing signed values for size is a bit more involved.
         if (value >= 0) {
@@ -225,10 +229,7 @@ library WordCodec {
         } else {
             // Negative values can receive the same treatment by making them positive, with the caveat that the range
             // for negative values in two's complement supports one more value than for the positive case.
-            _require(
-                Math.abs(value + 1) >> (bitLength - 1) == 0,
-                Errors.CODEC_OVERFLOW
-            );
+            _require(Math.abs(value + 1) >> (bitLength - 1) == 0, Errors.CODEC_OVERFLOW);
         }
     }
 }

@@ -25,14 +25,14 @@ import "../LinearPool.sol";
 contract ERC4626LinearPool is LinearPool {
     using Math for uint256;
 
-    uint256 private immutable _rateScaleFactor;
+    uint256 private immutable _wrappedTokenRateScale;
 
     constructor(
         IVault vault,
         string memory name,
         string memory symbol,
         IERC20 mainToken,
-        IERC4626 wrappedToken,
+        IERC20 wrappedToken,
         uint256 upperTarget,
         uint256 swapFeePercentage,
         uint256 pauseWindowDuration,
@@ -46,49 +46,40 @@ contract ERC4626LinearPool is LinearPool {
             mainToken,
             wrappedToken,
             upperTarget,
-            new address[](2),
             swapFeePercentage,
             pauseWindowDuration,
             bufferPeriodDuration,
             owner
         )
     {
-        // We do NOT enforce mainToken == wrappedToken.asset() even
-        // though this is the expected behavior in most cases. Instead,
-        // we assume a 1:1 relationship between mainToken and
-        // wrappedToken.asset(), but they do not have to be the same
-        // token. It is vitally important that this 1:1 relationship is
-        // respected, or the pool will not function as intended.
-        //
-        // This allows for use cases where the wrappedToken is
-        // double-wrapped into an ERC-4626 token. For example, consider
-        // a linear pool whose goal is to pair DAI with aDAI. Because
-        // aDAI is a rebasing token, it needs to be wrapped, and let's
-        // say an ERC-4626 wrapper is chosen for compatibility with this
-        // linear pool. Then wrappedToken.asset() will return aDAI,
-        // whereas mainToken is DAI. But the 1:1 relationship holds, and
-        // the pool is still valid.
+        _require(
+            address(mainToken) == IERC4626(address(wrappedToken)).asset(),
+            Errors.TOKENS_MISMATCH
+        );
 
-        // _getWrappedTokenRate is scaled e18, so we may need to scale IERC4626.convertToAssets()
+        // _getWrappedTokenRate is scaled e18, we may need to scale the totalAssets/totalSupply (in terms
+        // of asset decimals)
         uint256 wrappedTokenDecimals = ERC20(address(wrappedToken)).decimals();
         uint256 mainTokenDecimals = ERC20(address(mainToken)).decimals();
-
-        // This is always positive because we only accept tokens with <= 18 decimals
         uint256 digitsDifference = Math.add(18, wrappedTokenDecimals).sub(mainTokenDecimals);
-        _rateScaleFactor = 10**digitsDifference;
+        _wrappedTokenRateScale = 10**digitsDifference;
     }
 
     function _getWrappedTokenRate() internal view override returns (uint256) {
-        IERC4626 wrappedToken = IERC4626(address(getWrappedToken()));
+        address wrappedToken = getWrappedToken();
 
-        // Main tokens per 1e18 wrapped token wei
-        //     decimals: main + (18 - wrapped)
-        uint256 assetsPerShare = wrappedToken.convertToAssets(FixedPoint.ONE);
+        // at _mainToken.decimals() decimals of precision
+        uint256 totalMain = IERC4626(wrappedToken).totalAssets();
+        if (totalMain == 0) {
+            // on empty pool return 1:1 rate
+            return FixedPoint.ONE;
+        }
 
-        // This function returns a 18 decimal fixed point number
-        //     assetsPerShare decimals:   18 + main - wrapped
-        //     _rateScaleFactor decimals: 18 - main + wrapped
-        uint256 rate = assetsPerShare.mul(_rateScaleFactor).divDown(FixedPoint.ONE);
+        // as _wrappedToken.decimals() decimals of precision, potentially may be ZERO
+        uint256 totalWrapped = ERC20(wrappedToken).totalSupply();
+
+        // This function returns a 18 decimal fixed point number so upscale to be as if _mainToken had 18 decimals
+        uint256 rate = _wrappedTokenRateScale.mul(totalMain).divDown(totalWrapped);
         return rate;
     }
 }

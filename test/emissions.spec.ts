@@ -170,7 +170,7 @@ describe("Token Emissions", () => {
     Start of next epoch:                ${convertDate(nextEpochStart)}
     Epoch starting supply:              ${commify(formatEther(epochStartingSupply))}
     Current rate:                       ${formatEther(rate)}
-    Minig epoch:                        ${miningEpoch.toNumber()}
+    Mining epoch:                        ${miningEpoch.toNumber()}
     Mintable amount this epoch:         ${mintable}
     Total available supply:             ${commify(formatEther(availableSupply))}
     `);

@@ -66,6 +66,11 @@ async function main() {
   //await deployBalTokenHolder(AEQ, VAULT, "AEQ Token holder");
   // await deploySingleRecipientGauge(SINGLE_GAUGE_FACTORY, BAL_TOKEN_HOLDER);
   // await deployTestERC20("Aalto", "AALTO", parseEther("1000000"));
+
+  const Multicall2 = await ethers.getContractFactory("BalancerHelpers");
+  const multi = await Multicall2.deploy(VAULT);
+  await multi.deployed();
+  console.log("BalancerHelpers deployed to: ", multi.address);
 }
 
 async function deployVE() {

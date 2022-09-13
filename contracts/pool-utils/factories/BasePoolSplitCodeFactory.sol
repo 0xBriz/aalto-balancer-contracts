@@ -34,10 +34,7 @@ import "../../solidity-utils/helpers/BaseSplitCodeFactory.sol";
  * become increasingly important. Governance can deprecate a factory by calling `disable`, which will permanently
  * prevent the creation of any future pools from the factory.
  */
-abstract contract BasePoolSplitCodeFactory is
-    BaseSplitCodeFactory,
-    SingletonAuthentication
-{
+abstract contract BasePoolSplitCodeFactory is BaseSplitCodeFactory, SingletonAuthentication {
     mapping(address => bool) private _isPoolFromFactory;
     bool private _disabled;
 
@@ -81,11 +78,7 @@ abstract contract BasePoolSplitCodeFactory is
         _require(!isDisabled(), Errors.DISABLED);
     }
 
-    function _create(bytes memory constructorArgs)
-        internal
-        override
-        returns (address)
-    {
+    function _create(bytes memory constructorArgs) internal override returns (address) {
         _ensureEnabled();
 
         address pool = super._create(constructorArgs);
