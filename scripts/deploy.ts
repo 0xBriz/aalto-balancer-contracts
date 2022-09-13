@@ -1,6 +1,7 @@
 import { parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { MAINNET_VAULT } from "./addresses";
+import { deployERC4626Factory } from "./deploy-erc4626-factory";
 import { deployGovernanceToken } from "./deploy-governance-token";
 import { deployMulticall } from "./deploy-multicall";
 import { deployRelayer } from "./deploy-relayer";
@@ -43,58 +44,7 @@ const SINGLE_GAUGE_FACTORY = "0xf7fE0c29A251a8A8E5Cd36A54daBD0357a98b591";
 const BAL_TOKEN_HOLDER = "0x97a1b849857bF8656fb150C45d125B0a8BAa88D0";
 
 async function main() {
-  //await deployMulticall();
-  // await deployVault(WETH);
-  // await deployWeightedFactory(VAULT);
-  // await deployWeightedNoAssetManagersFactory(VAULT);
-  // await deployStablePoolFactory(VAULT);
-  // await deployBootstrapPoolFactory(VAULT);
-  // await deployTokenAdmin(VAULT, AEQ);
-  // await deployAuthAdapter(VAULT);
-  // await deployVotingEscrow(AEQ_BNB_BPT, "veAEQ", "veAEQ", AUTH_ADAPTER, STAKING_ADMIN);
-  // await deployVeBoost(VAULT, VOTING_ESCROW);
-  // await deployGaugeController(VOTING_ESCROW, AUTH_ADAPTER, STAKING_ADMIN);
-  // await deployBalancerMinter(TOKEN_ADMIN, GAUGE_CONTROLLER);
-  //
-  //
-  // await deployLiquidityGaugeFactory(BAL_MINTER, VE_BOOST_PROXY, AUTH_ADAPTER, STAKING_ADMIN);
-  // await deployVeBalHelper(GAUGE_CONTROLLER);
-  // await deployRelayer(VAULT);
-  // await deploySingleRecipientGaugeFactory(BAL_MINTER);
-  // const block = await ethers.provider.getBlock(await ethers.provider.getBlockNumber());
-  // await deployFeeDistributor(VOTING_ESCROW, block.timestamp);
-  //await deployBalTokenHolder(AEQ, VAULT, "AEQ Token holder");
-  // await deploySingleRecipientGauge(SINGLE_GAUGE_FACTORY, BAL_TOKEN_HOLDER);
-  // await deployTestERC20("Aalto", "AALTO", parseEther("1000000"));
-
-  const Multicall2 = await ethers.getContractFactory("BalancerHelpers");
-  const multi = await Multicall2.deploy(VAULT);
-  await multi.deployed();
-  console.log("BalancerHelpers deployed to: ", multi.address);
-}
-
-async function deployVE() {
-  try {
-    // Need the main pair pool already created
-    // const auth = await deployAuthAdapter(VAULT);
-    // await deployVotingEscrow(AEQ_BNB_BPT, "veAEQ", "veAEQ", auth.address, STAKING_ADMIN);
-    // await deployVeBalHelper(GAUGE_CONTROLLER); // TODO: Will probably need this for front end
-    // await deployGaugeFactory(BAL_MINTER, "", AUTH_ADAPTER);
-    // await deployVeBoost(VAULT_ADDY, VOTING_ESCROW);
-    // await deployLiquidityGaugeFactory(BAL_MINTER, VE_BOOST_PROXY, AUTH_ADAPTER, STAKING_ADMIN);
-    // await deployGaugeController(VOTING_ESCROW, AUTH_ADAPTER);
-    //
-    // BAL: "We assume that `votingEscrow` has been deployed in a week previous to this one."
-    // So we need ve setup and running for some time yet to have a supply (or create it manually for testing purposes)
-    // const block = await ethers.provider.getBlock(await ethers.provider.getBlockNumber());
-    // await deployFeeDistributor(
-    //   VOTING_ESCROW,
-    //   block.timestamp
-    // );
-    //
-  } catch (error) {
-    throw error;
-  }
+  await deployERC4626Factory(VAULT);
 }
 
 main().catch((error) => {
