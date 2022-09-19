@@ -23,7 +23,7 @@ import "./ERC4626LinearPool.sol";
 
 contract ERC4626LinearPoolFactory is BasePoolSplitCodeFactory, FactoryWidePauseWindow {
     constructor(IVault vault)
-        BasePoolSplitCodeFactory(vault, type(ERC4626LinearPool).creationCode)
+    BasePoolSplitCodeFactory(vault, type(ERC4626LinearPool).creationCode)
     {
         // solhint-disable-previous-line no-empty-blocks
     }
@@ -35,7 +35,7 @@ contract ERC4626LinearPoolFactory is BasePoolSplitCodeFactory, FactoryWidePauseW
         string memory name,
         string memory symbol,
         IERC20 mainToken,
-        IERC20 wrappedToken,
+        IERC4626 wrappedToken,
         uint256 upperTarget,
         uint256 swapFeePercentage,
         address owner
