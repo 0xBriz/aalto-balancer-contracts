@@ -42,9 +42,9 @@ const config: HardhatUserConfig = {
       allowUnlimitedContractSize: true,
       forking: {
         url: process.env.BSC_ARCHIVE_NODE || "",
-        blockNumber: 20956556, // 9/1 ~12:30PM
+        blockNumber: 21527290,
       },
-      // loggingEnabled: true,
+      loggingEnabled: true,
       // mining: {
       //   auto: false,
       //   interval: 2000,

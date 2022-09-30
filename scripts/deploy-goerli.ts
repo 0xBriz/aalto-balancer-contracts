@@ -1,5 +1,6 @@
 import { parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { deployERC4626Factory } from "./deploy-erc4626-factory";
 import { deployGovernanceToken } from "./deploy-governance-token";
 import { deployMulticall } from "./deploy-multicall";
 import { deployVault } from "./deploy-vault";
@@ -52,68 +53,7 @@ const AEQ_BNB_BPT = "0x3a103f8614a9616af0706a729949fec8a81df05b";
 const STAKING_ADMIN = "0x570108E54d11348BD3734FF73dc55eC52c28d3EF";
 
 async function main() {
-  // await deployCoreContracts()
-  //
-  // await deployFactories();
-  //
-  // await deployMulticall();
-  // await deployVE();
-  //
-  // await deployRewardOnlyGaugeFactory()
-  // TODO: Need to then run auth process and active the token admin (once initial mints are complete)
-  // await setupGovernance(BAL_TOKEN_ADMIN, AUTH_ADAPTER, AEQ_TOKEN);
-  // await deploySingleRecipientGaugeFactory(BAL_MINTER);
-  // await deployBalTokenHolder(AEQ_TOKEN, VAULT, "AEQ Token Holder");
-  // const block = await ethers.provider.getBlock(await ethers.provider.getBlockNumber());
-  // await deployFeeDistributor(VOTING_ESCROW, block.timestamp - ONE_WEEK_SECONDS);
-  await deployTestERC20("Bandit", "BANDIT", parseEther("1000000"));
-}
-
-async function deployVE(AEQ_TOKEN) {
-  try {
-    // Need the main pair pool already created
-    // const auth = await deployAuthAdapter(VAULT);
-    // await deployVotingEscrow(AEQ_BNB_BPT, "veAEQ", "veAEQ", AUTH_ADAPTER, STAKING_ADMIN);
-    // await deployGaugeController(VOTING_ESCROW, AUTH_ADAPTER, STAKING_ADMIN);
-    // await deployVeBalHelper(GAUGE_CONTROLLER);
-    // await deployVeBoost(VAULT, VOTING_ESCROW);
-    // await deployTokenAdmin(VAULT, AEQ_TOKEN);
-    // await deployBalancerMinter(BAL_TOKEN_ADMIN, GAUGE_CONTROLLER);
-    //  await deployLiquidityGaugeFactory(BAL_MINTER, VE_BOOST_PROXY, AUTH_ADAPTER, STAKING_ADMIN);
-    //
-    // await deployLiquidityGaugeFactory(BAL_MINTER, VE_BOOST_PROXY, AUTH_ADAPTER, STAKING_ADMIN);
-    //
-    // BAL: "We assume that `votingEscrow` has been deployed in a week previous to this one."
-    // So we need ve setup and running for some time yet to have a supply (or create it manually for testing purposes)
-    const block = await ethers.provider.getBlock(await ethers.provider.getBlockNumber());
-    const startTime = Math.round((block.timestamp / ONE_WEEK_SECONDS) * ONE_WEEK_SECONDS) + 1;
-    // console.log(new Date(roundedStart * 1000).toLocaleString());
-    await deployFeeDistributor(VOTING_ESCROW, startTime);
-    //
-  } catch (error) {
-    throw error;
-  }
-}
-
-async function deployCoreContracts() {
-  try {
-    // const AEQ = await deployAdminToken();
-    // await AEQ.mint(STAKING_ADMIN, parseEther("1000000"));
-    // await deployVault(WETH);
-  } catch (error) {
-    throw error;
-  }
-}
-
-async function deployFactories() {
-  try {
-    // await deployWeightedFactory(VAULT);
-    // await deployWeightedNoAssetManagersFactory(VAULT);
-    // await deployStablePoolFactory(VAULT);
-    // await deployBootstrapPoolFactory(VAULT);
-  } catch (error) {
-    throw error;
-  }
+  await deployERC4626Factory(VAULT);
 }
 
 main().catch((error) => {
