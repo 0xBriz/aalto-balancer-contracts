@@ -53,7 +53,8 @@ const AEQ_BNB_BPT = "0x3a103f8614a9616af0706a729949fec8a81df05b";
 const STAKING_ADMIN = "0x570108E54d11348BD3734FF73dc55eC52c28d3EF";
 
 async function main() {
-  await deployERC4626Factory(VAULT);
+  await deployTestERC20("Wrapped USD+", "wUSD+", parseEther("1000000"));
+  // await deployERC4626Factory(VAULT);
 }
 
 main().catch((error) => {

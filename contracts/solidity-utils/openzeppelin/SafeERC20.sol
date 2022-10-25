@@ -19,6 +19,25 @@ import "../../interfaces/solidity-utils/openzeppelin/IERC20.sol";
  * which allows you to call the safe operations as `token.safeTransfer(...)`, etc.
  */
 library SafeERC20 {
+    function safeApprove(
+        IERC20 token,
+        address to,
+        uint256 value
+    ) internal {
+        // Some contracts need their allowance reduced to 0 before setting it to an arbitrary amount.
+        if (value != 0 && token.allowance(address(this), address(to)) != 0) {
+            _callOptionalReturn(
+                address(token),
+                abi.encodeWithSelector(token.approve.selector, to, 0)
+            );
+        }
+
+        _callOptionalReturn(
+            address(token),
+            abi.encodeWithSelector(token.approve.selector, to, value)
+        );
+    }
+
     function safeTransfer(
         IERC20 token,
         address to,
