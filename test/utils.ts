@@ -1,6 +1,6 @@
 import { BigNumber, Contract, ContractTransaction, ethers } from "ethers";
 import { defaultAbiCoder, Interface } from "ethers/lib/utils";
-import { string } from "hardhat/internal/core/params/argumentTypes";
+import { sub } from "date-fns";
 import { MAX_UINT256 } from "../scripts/utils/constants";
 import { ERC20_ABI } from "./abis/ERC20ABI";
 import { WEIGHTED_POOL_ABI } from "./abis/WeightPool";
@@ -8,6 +8,8 @@ import { IERC20, JoinPoolRequest } from "./types";
 import liqV5 from "../artifacts/contracts/liquidity-mining/gauges/LiquidityGaugeV5.vy/LiquidityGaugeV5.json";
 import AuthAdapter from "../artifacts/contracts/liquidity-mining/admin/AuthorizerAdaptor.sol/AuthorizerAdaptor.json";
 import BPT from "../artifacts/contracts/pool-utils/BalancerPoolToken.sol/BalancerPoolToken.json";
+
+export const oneSecondInMs = 1000;
 
 // Contract storage slots for user balances
 // Use to overwrite a users balance to any value for testing
@@ -40,6 +42,17 @@ export const setStorageAt = async (
     toBytes32(value).toString(),
   ]);
   await provider.send("evm_mine", []); // Just mines to the next block
+};
+
+export const giveTokenBalanceFor = async (
+  provider: ethers.providers.JsonRpcProvider,
+  contractAddress: string,
+  addressToSet: string,
+  storageSlot: number,
+  amount: BigNumber
+) => {
+  const index = prepStorageSlotWrite(addressToSet, storageSlot);
+  await setStorageAt(provider, contractAddress, index, amount);
 };
 
 export async function moveUpBlocks(blockCount: number, provider: ethers.providers.JsonRpcProvider) {
@@ -149,4 +162,22 @@ export function getFunctionSigHash(functionPrototype: string) {
   // "function fn() external".split(' ')[1] = portion needed for getSighash
   const selector = iface.getSighash(functionPrototype.split(" ")[1]);
   return selector;
+}
+
+export function getPreviousEpoch(weeksToGoBack = 0): Date {
+  const now = new Date();
+  const todayAtMidnightUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+
+  let daysSinceThursday = now.getDay() - 4;
+  if (daysSinceThursday < 0) daysSinceThursday += 7;
+
+  daysSinceThursday = daysSinceThursday + weeksToGoBack * 7;
+
+  return sub(todayAtMidnightUTC, {
+    days: daysSinceThursday,
+  });
+}
+
+export function toUnixTimestamp(jsTimestamp: number): number {
+  return Math.round(jsTimestamp / oneSecondInMs);
 }

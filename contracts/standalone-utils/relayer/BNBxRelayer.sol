@@ -31,7 +31,7 @@ import "./interfaces/IBNBxStakeManager.sol";
 /**
  * @title BNBxWrapping
  * @notice Allows users to wrap and unwrap BNBx
- * @dev All functions must be payable so they can be called from a multicall involving ETH
+ * @dev All functions must be payable so they can be called from a multicall involving ETH(BNB)
  */
 abstract contract BNBxRelayer is RelayerAssetHelpers, ReentrancyGuard {
     using Address for address payable;
@@ -135,15 +135,15 @@ abstract contract BNBxRelayer is RelayerAssetHelpers, ReentrancyGuard {
             require(i < assets.length - 1, "Does not require wstETH");
         }
 
-        int256 wstETHLimit = limits[wBNBxIndex];
-        if (wstETHLimit > 0) {
+        int256 wBNBxLimit = limits[wBNBxIndex];
+        if (wBNBxLimit > 0) {
             // If wBNBx is being used as input then we want to send it from the relayer
             // as we wrap it there.
             funds.sender = address(this);
             require(!funds.fromInternalBalance, "Cannot send from internal balance");
 
-            _pullBNBxAndWrap(msg.sender, uint256(wstETHLimit));
-            _approveToken(IERC20(address(_wBNBx)), address(getVault()), uint256(wstETHLimit));
+            _pullBNBxAndWrap(msg.sender, uint256(wBNBxLimit));
+            _approveToken(IERC20(address(_wBNBx)), address(getVault()), uint256(wBNBxLimit));
 
             swapAmounts = getVault().batchSwap{value: msg.value}(
                 kind,
@@ -159,7 +159,7 @@ abstract contract BNBxRelayer is RelayerAssetHelpers, ReentrancyGuard {
             _unwrapAndPushBNBx(msg.sender, IERC20(address(_wBNBx)).balanceOf(address(this)));
         } else {
             // If wBNBx is being used as output then we want to receive it on the relayer
-            // so we can unwrap it before forwarding stETH to the user
+            // so we can unwrap it before forwarding BNBx to the user
             funds.recipient = payable(address(this));
             require(!funds.toInternalBalance, "Cannot send to internal balance");
 
@@ -192,7 +192,7 @@ abstract contract BNBxRelayer is RelayerAssetHelpers, ReentrancyGuard {
     ) external payable nonReentrant {
         require(sender == msg.sender, "Invalid sender");
 
-        // Pull in wstETH, wrap and return to user
+        // Pull in BNBx, wrap and return to user
         uint256 wBNBxAmount;
         for (uint256 i; i < request.assets.length; i++) {
             if (request.assets[i] == IAsset(address(_wBNBx))) {
