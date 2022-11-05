@@ -19,7 +19,7 @@ import { JsonRpcSigner } from "@ethersproject/providers";
 import { defaultAbiCoder, formatEther, parseEther, parseUnits } from "ethers/lib/utils";
 import moment from "moment";
 import { getLiquidityGauge, getPreviousEpoch, toUnixTimestamp } from "./utils";
-import { GaugeType, GAUGE_ADDRESSES, OPERATOR } from "./data";
+import { CORE_POOLS, GaugeType, GAUGE_ADDRESSES, OPERATOR } from "./data";
 import { deployLiquidityGaugeFactory } from "../scripts/utils/lp-mining/deploy-liquidity-gauge-factory";
 
 describe("Gauge Reset Process", () => {
@@ -30,6 +30,8 @@ describe("Gauge Reset Process", () => {
   let gaugeFactory: Contract;
   let balMinter: Contract;
   let veBoost: Contract;
+
+  const newGauges = [];
 
   beforeEach(async () => {
     // Dev owner account
@@ -74,38 +76,61 @@ describe("Gauge Reset Process", () => {
     await gaugeController.change_type_weight(GaugeType.veBAL, 0);
   }
 
-  it("should set the current voting gauges type to zero", async () => {
-    // zero old typed weight
-    await zeroOldTypeWeight();
-    expect(await gaugeController.get_type_weight(GaugeType.veBAL)).to.equal(0);
-  });
-
-  it("should kill the current voting gauges", async () => {
-    // kill current voting gauges
+  async function killGauges() {
     for (const address of GAUGE_ADDRESSES.slice(1)) {
       const gauge = getLiquidityGauge(address, owner);
       await gauge.killGauge();
       expect(await gauge.is_killed()).to.be.true;
     }
-  });
+  }
 
-  it("should add a new gauge type with proper weight", async () => {
-    // Update stake gauge type weight accordingly with the new gauge types according to the contracts math
-    // (Get it right this time)
-    // add new gauge type
-  });
+  async function createPoolGauges() {
+    for (const pool of CORE_POOLS) {
+      const tx = await gaugeFactory.create(pool.address);
+      const receipt = await tx.wait();
+      const events = receipt.events.filter((e) => e.event === "GaugeCreated");
+      const gaugeAddress = events[0].args.gauge;
+      console.log("gaugeAddress: " + gaugeAddress);
 
-  it("should deploy a new factory", async () => {
-    // Need to account for subgraph and front end with this then
-    // deploy new factory
-    await expect(createNewFactory()).to.not.be.reverted;
-  });
+      newGauges.push({
+        ...pool,
+        ...{
+          gauge: gaugeAddress,
+        },
+      });
+    }
+  }
+
+  //   it("should set the current voting gauges type to zero", async () => {
+  //     // zero old typed weight
+  //     await zeroOldTypeWeight();
+  //     expect(await gaugeController.get_type_weight(GaugeType.veBAL)).to.equal(0);
+  //   });
+
+  //   it("should kill the current voting gauges", async () => {
+  //     // kill current voting gauges
+  //     await killGauges();
+  //   });
+
+  //   it("should add a new gauge type with proper weight", async () => {
+  //     // Update stake gauge type weight accordingly with the new gauge types according to the contracts math
+  //     // (Get it right this time)
+  //     // add new gauge type
+  //   });
+
+  //   it("should deploy a new factory", async () => {
+  //     // Need to account for subgraph and front end with this then
+  //     // deploy new factory
+  //     await expect(createNewFactory()).to.not.be.reverted;
+  //   });
 
   it("should create new gauges for core pools", async () => {
     // deploy new gauges for pools with new factory
+    await createNewFactory();
+    await createPoolGauges();
   });
 
-  it("should add new gauges to gauge controller", async () => {
+  it("should add new gauges to controller under new type", async () => {
     // Add new ones to controller
   });
 });
