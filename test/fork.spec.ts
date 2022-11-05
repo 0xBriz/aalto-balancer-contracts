@@ -59,7 +59,7 @@ describe("Mainnet setup", () => {
   const veGauge = "0x177cA62c024Aaa0c3c65F7c8BA283b824556DAB0";
 
   const gaugeAddresses = [
-    veGauge,
+    // veGauge,
     stablesGauge,
     ashareBusdGaugeAddress,
     amesBusdGauge,
@@ -136,89 +136,15 @@ describe("Mainnet setup", () => {
   });
 
   it("should not end us", async () => {
-    // Make sure this isnt some crazy amount
-    // console.log(formatEther(await AEQ.balanceOf(balTokenHolder.address)));
-    // let calldata = singleRecipientGauge.interface.encodeFunctionData("checkpoint");
-    // await authAdapter.performAction(singleRecipientGauge.address, calldata);
-    // console.log(formatEther(await AEQ.balanceOf(balTokenHolder.address)));
-    // VE Gauge gets 78,700 AEQ here.
-    //
-    // Fast forward and check again?
-    // await logWeights(epochStamp);
-
-    // await gaugeController.change_gauge_weight(veGauge, 0);
-
-    // // const w1 = await gaugeController.get_type_weight(0);
-    // // console.log(formatEther(w1));
-    // // const w2 = await gaugeController.get_type_weight(1);
-    // // console.log(formatEther(w2));
-    // await gaugeController.change_type_weight(0, 0);
-    // // await gaugeController.change_type_weight(1, 1);
-
-    // // await helpers.time.increase(86400);
-
-    // console.log(`
-    // `);
-
+    const epochStamp = BigNumber.from(toUnixTimestamp(getPreviousEpoch(0).getTime()));
     const next = moment().add(1, "day").startOf("day").utc().unix();
-    // // await logWeights(next);
-
-    // let pt = await gaugeController.points_weight(technicolorGauge, epochStamp);
-    // console.log("bias: " + formatEther(pt.bias));
-    // console.log("slope: " + formatEther(pt.slope));
-
-    // pt = await gaugeController.points_weight(technicolorGauge, next);
-    // console.log("bias: " + formatEther(pt.bias));
-    // console.log("slope: " + formatEther(pt.slope));
-
-    // await helpers.stopImpersonatingAccount(OPERATOR)
-
-    // const trez = "0x3fF07607c5C8C619C69b1fd4C08aebF069AA10c7";
-    // await helpers.impersonateAccount(trez);
-    // const me = await ethers.provider.getSigner(trez);
-    // const gauge = new Contract(
-    //   technicolorGauge,
-    //   [
-    //     "function withdraw(uint256) external",
-    //     "function balanceOf(address) public view returns (uint256)",
-    //   ],
-    //   me
-    // );
-
-    // await helpers.time.increase(86400);
-    // await gauge.withdraw(await gauge.balanceOf(trez));
-
-    // point time was off for the other effected ones. CHECK THE TECHNICOLOR
-
-    // await runForGauges(async (gAdd) => {
-    //   let pt = await gaugeController.points_weight(gAdd, epochStamp);
-    //   console.log("bias: " + formatEther(pt.bias));
-    //   console.log("slope: " + formatEther(pt.slope));
-    // });
-
-    // await gaugeController.change_type_weight(0, 30);
-    // await gaugeController.change_type_weight(1, 70);
-    // // Shrink this
-    // await gaugeController.change_gauge_weight(veGauge, 1);
-
     const DAY = 86400;
     const WEEK = DAY * 7;
-
-    const account = "0xda7a763bde6ee9cafc3876ef33d67f8eed7891f7";
-    await helpers.impersonateAccount(account);
-    const user = await ethers.provider.getSigner(account);
-    let gauge = new Contract(
-      triBlueChipsGuage,
-      [
-        "function withdraw(uint256) external",
-        "function balanceOf(address) public view returns (uint256)",
-      ],
-      user
-    );
-
     // await gaugeController.change_type_weight(0, 1);
     // await gaugeController.change_type_weight(1, 1);
-    // await gaugeController.change_gauge_weight(amesBusdGauge, 1);
+    // await gaugeController.change_gauge_weight(stablesGauge, 0);
+    // await gaugeController.change_gauge_weight(wAaltoBusd, parseEther("0"));
+    // await gaugeController.change_gauge_weight(ashareBusdGaugeAddress, 1);
     // await gaugeController.change_gauge_weight(amesBusdGauge, 1);
     // await helpers.time.increase(DAY);
     // await gaugeController.checkpoint();
@@ -227,30 +153,25 @@ describe("Mainnet setup", () => {
     // await gauge.withdraw(await gauge.balanceOf(account));
 
     // await logWeights(epochStamp);
+    // 0x5123d8e7f978273f82256a971edf5e9052caf8c6e33be8f8eefb60a755e794cf
+    // 0xaCC31d29022C8Eb2683597bF4c07De228Ed9EA07
 
-    const epochStamp = BigNumber.from(toUnixTimestamp(getPreviousEpoch(0).getTime()));
-
-    await runForGauges(async (addy) => {
-      const pt = await gaugeController.points_weight(addy, epochStamp);
-      console.log(formatEther(pt.bias));
-      console.log(formatEther(pt.slope));
-    });
-
-    // await calculateTokenPayableToGauge(wbnbBusdGauge);
-
-    // await authAdapter.performAction(singleRecipientGauge.address, calldata);
-    // console.log(formatEther(await AEQ.balanceOf(balTokenHolder.address)));
-    // //
-    // Check mintable amounts to make sure gauges can get their share of emissions
-    // const avb = await balTokenAdmin.getAvailableSupply();
-    // console.log(formatEther(avb));
-
-    // const start = toUnixTimestamp(getPreviousEpoch(0).getTime());
-    // const end = start + WEEK;
-    // const range = await balTokenAdmin.mintableInTimeframe(start, end);
-    // console.log(formatEther(range)); // 210k
-
-    //await logWeights(epochStamp);
+    for (const epoch of [0, 1]) {
+      await runForGauges(async (addy) => {
+        console.log("Gauge: " + addy);
+        // const tw = await gaugeController.time_weight(addy);
+        // console.log("time_weight: " + formatEther(tw));
+        console.log("epochs ago: " + epoch);
+        const pt = await gaugeController.points_weight(
+          addy,
+          BigNumber.from(toUnixTimestamp(getPreviousEpoch(epoch).getTime()))
+        );
+        console.log("bias: " + formatEther(pt.bias));
+        console.log("slope: " + formatEther(pt.slope));
+      });
+      console.log(`
+      `);
+    }
   });
 
   async function calculateTokenPayableToGauge(address: string) {
