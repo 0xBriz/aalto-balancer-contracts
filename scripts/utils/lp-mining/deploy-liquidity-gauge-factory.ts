@@ -3,13 +3,12 @@ import { ethers } from "hardhat";
 export async function deployLiquidityGaugeFactory(
   minter: string,
   veBoostProxy: string,
-  auth: string,
-  stakingAdmin: string
+  auth: string
 ) {
   try {
     // __init__(minter: address, veBoostProxy: address, authorizerAdaptor: address)
     const LiquidityGaugeV5 = await ethers.getContractFactory("LiquidityGaugeV5");
-    const gaugeContract = await LiquidityGaugeV5.deploy(minter, veBoostProxy, auth, stakingAdmin);
+    const gaugeContract = await LiquidityGaugeV5.deploy(minter, veBoostProxy, auth);
     await gaugeContract.deployed();
     console.log("LiquidityGaugeV5 deployed to: ", gaugeContract.address);
 

@@ -154,11 +154,9 @@ period_timestamp: public(uint256[100000000000000000000000000000])
 # 1e18 * ∫(rate(t) / totalSupply(t) dt) from 0 till checkpoint
 integrate_inv_supply: public(uint256[100000000000000000000000000000])  # bump epoch when rate() changes
 
-stakingAdmin: immutable(address)
-
 
 @external
-def __init__(minter: address, veBoostProxy: address, authorizerAdaptor: address, _stakingAdmin: address):
+def __init__(minter: address, veBoostProxy: address, authorizerAdaptor: address):
     """
     @param minter Address of minter contract
     @param veBoostProxy Address of boost delegation contract
@@ -174,12 +172,6 @@ def __init__(minter: address, veBoostProxy: address, authorizerAdaptor: address,
     VEBOOST_PROXY = veBoostProxy
     # prevent initialization of implementation
     self.lp_token = 0x000000000000000000000000000000000000dEaD
-    stakingAdmin = _stakingAdmin
-
-@external
-@view
-def staking_admin() -> address:
-    return stakingAdmin
 
 @external
 @view
@@ -692,7 +684,7 @@ def add_reward(_reward_token: address, _distributor: address):
     @param _distributor Address permitted to fund this contract with the reward token
     """
     assert _distributor != ZERO_ADDRESS
-    assert msg.sender == AUTHORIZER_ADAPTOR or msg.sender == stakingAdmin # dev: only owner
+    assert msg.sender == AUTHORIZER_ADAPTOR # dev: only owner
 
     reward_count: uint256 = self.reward_count
     assert reward_count < MAX_REWARDS, "Exceeds max rewwards"
@@ -725,7 +717,7 @@ def killGauge():
     """
     @notice Kills the gauge so it always yields a rate of 0 and so cannot mint BAL
     """
-    assert msg.sender == AUTHORIZER_ADAPTOR or msg.sender == stakingAdmin # dev: only owner
+    assert msg.sender == AUTHORIZER_ADAPTOR # dev: only owner
 
     self.is_killed = True
 
@@ -734,7 +726,7 @@ def unkillGauge():
     """
     @notice Unkills the gauge so it can mint BAL again
     """
-    assert msg.sender == AUTHORIZER_ADAPTOR or msg.sender == stakingAdmin  # dev: only owner
+    assert msg.sender == AUTHORIZER_ADAPTOR  # dev: only owner
 
     self.is_killed = False
 
