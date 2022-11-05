@@ -18,8 +18,8 @@ import { expect } from "chai";
 import { JsonRpcSigner } from "@ethersproject/providers";
 import { defaultAbiCoder, formatEther, parseEther, parseUnits } from "ethers/lib/utils";
 import moment from "moment";
-import { getPreviousEpoch, toUnixTimestamp } from "./utils";
-import { OPERATOR } from "./data";
+import { getLiquidityGauge, getPreviousEpoch, toUnixTimestamp } from "./utils";
+import { GaugeType, GAUGE_ADDRESSES, OPERATOR } from "./data";
 import { deployLiquidityGaugeFactory } from "../scripts/utils/lp-mining/deploy-liquidity-gauge-factory";
 
 describe("Gauge Reset Process", () => {
@@ -70,13 +70,23 @@ describe("Gauge Reset Process", () => {
     gaugeFactory = factory;
   }
 
+  async function zeroOldTypeWeight() {
+    await gaugeController.change_type_weight(GaugeType.veBAL, 0);
+  }
+
   it("should set the current voting gauges type to zero", async () => {
-    // add new gauge type
     // zero old typed weight
+    await zeroOldTypeWeight();
+    expect(await gaugeController.get_type_weight(GaugeType.veBAL)).to.equal(0);
+  });
+
+  it("should kill the current voting gauges", async () => {
     // kill current voting gauges
-    // deploy new factory
-    // deploy new gauges for pools with new factory
-    //
+    for (const address of GAUGE_ADDRESSES.slice(1)) {
+      const gauge = getLiquidityGauge(address, owner);
+      await gauge.killGauge();
+      expect(await gauge.is_killed()).to.be.true;
+    }
   });
 
   it("should add a new gauge type with proper weight", async () => {
@@ -85,14 +95,10 @@ describe("Gauge Reset Process", () => {
     // add new gauge type
   });
 
-  it("should kill the current voting gauges", async () => {
-    // kill current voting gauges
-  });
-
   it("should deploy a new factory", async () => {
     // Need to account for subgraph and front end with this then
     // deploy new factory
-    await createNewFactory();
+    await expect(createNewFactory()).to.not.be.reverted;
   });
 
   it("should create new gauges for core pools", async () => {
