@@ -36,12 +36,14 @@ export const CORE_POOLS = [
     id: "0x7a09ddf458fda6e324a97d1a8e4304856fb3e702000200000000000000000000",
     address: "0x7a09ddF458FdA6e324A97D1a8E4304856fb3e702",
     gauge: "0x177cA62c024Aaa0c3c65F7c8BA283b824556DAB0",
+    startWeight: 1,
   },
   {
     name: "BUSD-USDC-USDT",
     id: "0xb3a07a9cef918b2ccec4bc85c6f2a7975c5e83f9000000000000000000000001",
     address: "0xb3A07a9CeF918b2ccEC4bC85C6F2A7975c5E83f9",
     gauge: "0xaCC31d29022C8Eb2683597bF4c07De228Ed9EA07",
+    startWeight: 1,
   },
   {
     name: "AMES-BUSD",
