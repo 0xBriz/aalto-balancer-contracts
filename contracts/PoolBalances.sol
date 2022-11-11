@@ -35,12 +35,7 @@ import "./UserBalance.sol";
  *
  * `managePoolBalance` handles all Asset Manager interactions.
  */
-abstract contract PoolBalances is
-    Fees,
-    ReentrancyGuard,
-    PoolTokens,
-    UserBalance
-{
+abstract contract PoolBalances is Fees, ReentrancyGuard, PoolTokens, UserBalance {
     using Math for uint256;
     using SafeERC20 for IERC20;
     using BalanceAllocation for bytes32;
@@ -133,18 +128,12 @@ abstract contract PoolBalances is
         // etc.), which leads to 'stack too deep' issues. It relies on private functions with seemingly arbitrary
         // interfaces to work around this limitation.
 
-        InputHelpers.ensureInputLengthMatch(
-            change.assets.length,
-            change.limits.length
-        );
+        InputHelpers.ensureInputLengthMatch(change.assets.length, change.limits.length);
 
         // We first check that the caller passed the Pool's registered tokens in the correct order, and retrieve the
         // current balance for each.
         IERC20[] memory tokens = _translateToIERC20(change.assets);
-        bytes32[] memory balances = _validateTokensAndGetBalances(
-            poolId,
-            tokens
-        );
+        bytes32[] memory balances = _validateTokensAndGetBalances(poolId, tokens);
 
         // The bulk of the work is done here: the corresponding Pool hook is called, its final balances are computed,
         // assets are transferred, and fees are paid.
@@ -152,14 +141,7 @@ abstract contract PoolBalances is
             bytes32[] memory finalBalances,
             uint256[] memory amountsInOrOut,
             uint256[] memory paidProtocolSwapFeeAmounts
-        ) = _callPoolBalanceChange(
-            kind,
-            poolId,
-            sender,
-            recipient,
-            change,
-            balances
-        );
+        ) = _callPoolBalanceChange(kind, poolId, sender, recipient, change, balances);
 
         // All that remains is storing the new Pool balances.
         PoolSpecialization specialization = _getPoolSpecialization(poolId);
@@ -212,8 +194,7 @@ abstract contract PoolBalances is
         .totalsAndLastChangeBlock();
 
         IBasePool pool = IBasePool(_getPoolAddress(poolId));
-        (amountsInOrOut, dueProtocolFeeAmounts) = kind ==
-            PoolBalanceChangeKind.JOIN
+        (amountsInOrOut, dueProtocolFeeAmounts) = kind == PoolBalanceChangeKind.JOIN
             ? pool.onJoinPool(
                 poolId,
                 sender,
@@ -329,9 +310,7 @@ abstract contract PoolBalances is
             _payFeeAmount(_translateToIERC20(asset), feeAmount);
 
             // Compute the new Pool balances. A Pool's token balance always decreases after an exit (potentially by 0).
-            finalBalances[i] = balances[i].decreaseCash(
-                amountOut.add(feeAmount)
-            );
+            finalBalances[i] = balances[i].decreaseCash(amountOut.add(feeAmount));
         }
     }
 
@@ -341,25 +320,17 @@ abstract contract PoolBalances is
      * `expectedTokens` must exactly equal the token array returned by `getPoolTokens`: both arrays must have the same
      * length, elements and order. Additionally, the Pool must have at least one registered token.
      */
-    function _validateTokensAndGetBalances(
-        bytes32 poolId,
-        IERC20[] memory expectedTokens
-    ) private view returns (bytes32[] memory) {
-        (
-            IERC20[] memory actualTokens,
-            bytes32[] memory balances
-        ) = _getPoolTokens(poolId);
-        InputHelpers.ensureInputLengthMatch(
-            actualTokens.length,
-            expectedTokens.length
-        );
+    function _validateTokensAndGetBalances(bytes32 poolId, IERC20[] memory expectedTokens)
+        private
+        view
+        returns (bytes32[] memory)
+    {
+        (IERC20[] memory actualTokens, bytes32[] memory balances) = _getPoolTokens(poolId);
+        InputHelpers.ensureInputLengthMatch(actualTokens.length, expectedTokens.length);
         _require(actualTokens.length > 0, Errors.POOL_NO_TOKENS);
 
         for (uint256 i = 0; i < actualTokens.length; ++i) {
-            _require(
-                actualTokens[i] == expectedTokens[i],
-                Errors.TOKENS_MISMATCH
-            );
+            _require(actualTokens[i] == expectedTokens[i], Errors.TOKENS_MISMATCH);
         }
 
         return balances;

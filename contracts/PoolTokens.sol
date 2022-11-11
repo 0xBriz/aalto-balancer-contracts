@@ -32,10 +32,7 @@ abstract contract PoolTokens is ReentrancyGuard, PoolRegistry, AssetManagers {
         IERC20[] memory tokens,
         address[] memory assetManagers
     ) external override nonReentrant whenNotPaused onlyPool(poolId) {
-        InputHelpers.ensureInputLengthMatch(
-            tokens.length,
-            assetManagers.length
-        );
+        InputHelpers.ensureInputLengthMatch(tokens.length, assetManagers.length);
 
         // Validates token addresses and assigns Asset Managers
         for (uint256 i = 0; i < tokens.length; ++i) {

@@ -37,10 +37,8 @@ abstract contract MinimalSwapInfoPoolsBalance is PoolRegistry {
     // some balance getters we skip checking for token registration if a non-zero balance is found, saving gas by
     // performing a single read instead of two.
 
-    mapping(bytes32 => mapping(IERC20 => bytes32))
-        internal _minimalSwapInfoPoolsBalances;
-    mapping(bytes32 => EnumerableSet.AddressSet)
-        internal _minimalSwapInfoPoolsTokens;
+    mapping(bytes32 => mapping(IERC20 => bytes32)) internal _minimalSwapInfoPoolsBalances;
+    mapping(bytes32 => EnumerableSet.AddressSet) internal _minimalSwapInfoPoolsTokens;
 
     /**
      * @dev Registers a list of tokens in a Minimal Swap Info Pool.
@@ -52,13 +50,8 @@ abstract contract MinimalSwapInfoPoolsBalance is PoolRegistry {
      * - `tokens` must not be registered in the Pool
      * - `tokens` must not contain duplicates
      */
-    function _registerMinimalSwapInfoPoolTokens(
-        bytes32 poolId,
-        IERC20[] memory tokens
-    ) internal {
-
-            EnumerableSet.AddressSet storage poolTokens
-         = _minimalSwapInfoPoolsTokens[poolId];
+    function _registerMinimalSwapInfoPoolTokens(bytes32 poolId, IERC20[] memory tokens) internal {
+        EnumerableSet.AddressSet storage poolTokens = _minimalSwapInfoPoolsTokens[poolId];
 
         for (uint256 i = 0; i < tokens.length; ++i) {
             bool added = poolTokens.add(address(tokens[i]));
@@ -79,13 +72,8 @@ abstract contract MinimalSwapInfoPoolsBalance is PoolRegistry {
      * - `tokens` must have zero balance in the Vault
      * - `tokens` must not contain duplicates
      */
-    function _deregisterMinimalSwapInfoPoolTokens(
-        bytes32 poolId,
-        IERC20[] memory tokens
-    ) internal {
-
-            EnumerableSet.AddressSet storage poolTokens
-         = _minimalSwapInfoPoolsTokens[poolId];
+    function _deregisterMinimalSwapInfoPoolTokens(bytes32 poolId, IERC20[] memory tokens) internal {
+        EnumerableSet.AddressSet storage poolTokens = _minimalSwapInfoPoolsTokens[poolId];
 
         for (uint256 i = 0; i < tokens.length; ++i) {
             IERC20 token = tokens[i];
@@ -129,12 +117,7 @@ abstract contract MinimalSwapInfoPoolsBalance is PoolRegistry {
         IERC20 token,
         uint256 amount
     ) internal {
-        _updateMinimalSwapInfoPoolBalance(
-            poolId,
-            token,
-            BalanceAllocation.cashToManaged,
-            amount
-        );
+        _updateMinimalSwapInfoPoolBalance(poolId, token, BalanceAllocation.cashToManaged, amount);
     }
 
     /**
@@ -148,12 +131,7 @@ abstract contract MinimalSwapInfoPoolsBalance is PoolRegistry {
         IERC20 token,
         uint256 amount
     ) internal {
-        _updateMinimalSwapInfoPoolBalance(
-            poolId,
-            token,
-            BalanceAllocation.managedToCash,
-            amount
-        );
+        _updateMinimalSwapInfoPoolBalance(poolId, token, BalanceAllocation.managedToCash, amount);
     }
 
     /**
@@ -170,12 +148,7 @@ abstract contract MinimalSwapInfoPoolsBalance is PoolRegistry {
         uint256 amount
     ) internal returns (int256) {
         return
-            _updateMinimalSwapInfoPoolBalance(
-                poolId,
-                token,
-                BalanceAllocation.setManaged,
-                amount
-            );
+            _updateMinimalSwapInfoPoolBalance(poolId, token, BalanceAllocation.setManaged, amount);
     }
 
     /**
@@ -212,9 +185,7 @@ abstract contract MinimalSwapInfoPoolsBalance is PoolRegistry {
         view
         returns (IERC20[] memory tokens, bytes32[] memory balances)
     {
-
-            EnumerableSet.AddressSet storage poolTokens
-         = _minimalSwapInfoPoolsTokens[poolId];
+        EnumerableSet.AddressSet storage poolTokens = _minimalSwapInfoPoolsTokens[poolId];
         tokens = new IERC20[](poolTokens.length());
         balances = new bytes32[](tokens.length);
 
@@ -268,9 +239,7 @@ abstract contract MinimalSwapInfoPoolsBalance is PoolRegistry {
         view
         returns (bool)
     {
-
-            EnumerableSet.AddressSet storage poolTokens
-         = _minimalSwapInfoPoolsTokens[poolId];
+        EnumerableSet.AddressSet storage poolTokens = _minimalSwapInfoPoolsTokens[poolId];
         return poolTokens.contains(address(token));
     }
 }
