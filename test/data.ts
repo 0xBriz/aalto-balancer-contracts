@@ -28,6 +28,7 @@ export enum GaugeType {
   LiquidityMiningCommittee,
   veBAL,
   VotingV2,
+  veBALV2,
 }
 
 export const CORE_POOLS = [

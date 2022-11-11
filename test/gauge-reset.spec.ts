@@ -25,16 +25,26 @@ import {
   deployLiquidityGaugeFactoryNoAdmin,
 } from "../scripts/utils/lp-mining/deploy-liquidity-gauge-factory";
 import { WEEK } from "../scripts/utils/time";
+import { deploySingleRecipientGaugeFactory } from "../scripts/utils/lp-mining/deploy-single-recipient-factory";
+import { deployBalTokenHolder } from "../scripts/utils/lp-mining/deploy-token-holder";
 
 describe("Gauge Reset Process", () => {
   let owner: JsonRpcSigner;
-
+  let AEQ: Contract;
   let gaugeController: Contract;
   let authAdapter: Contract;
   let gaugeFactory: Contract;
   let balMinter: Contract;
   let veBoost: Contract;
   let balTokenAdmin: Contract;
+  let Vault: Contract;
+  let vaultAuthorizer: Contract;
+  let votingEscrow: Contract;
+  let singleRecipientGauge: Contract;
+  let balTokenHolder: Contract;
+  let feeDistributor: Contract;
+  let veBalHelper: Contract;
+  let AEQ_BNB: Contract;
 
   const ashareBusdGaugeAddress = "0x1dA7F4b2B9B644f307A313e304E1B061Eb605965";
   const amesBusdGauge = "0xDA9D57cAabBe48301d71b7eEaf546B4A206118d3";
@@ -61,12 +71,20 @@ describe("Gauge Reset Process", () => {
   ];
 
   const newGauges = [];
+  let newVeGauge = "";
 
   beforeEach(async () => {
     // Dev owner account
     await helpers.impersonateAccount(OPERATOR);
     owner = await ethers.provider.getSigner(OPERATOR);
     await helpers.setBalance(OPERATOR, parseEther("100"));
+
+    Vault = await ethers.getContractAt(VA.abi, "0xEE1c8DbfBf958484c6a4571F5FB7b99B74A54AA7", owner);
+    AEQ = await ethers.getContractAt(
+      Token.abi,
+      "0x0dDef12012eD645f12AEb1B845Cb5ad61C7423F5",
+      owner
+    );
 
     gaugeController = await ethers.getContractAt(
       GC.abi,
@@ -95,63 +113,6 @@ describe("Gauge Reset Process", () => {
       owner
     );
   });
-
-  async function createNewFactory() {
-    const { factory } = await deployLiquidityGaugeFactoryNoAdmin(
-      balMinter.address,
-      veBoost.address,
-      authAdapter.address
-    );
-
-    gaugeFactory = factory;
-  }
-
-  async function zeroOldTypeWeight() {
-    await gaugeController.change_type_weight(GaugeType.veBAL, 0);
-  }
-
-  async function killGauges() {
-    for (const address of GAUGE_ADDRESSES.slice(1)) {
-      const gauge = getLiquidityGauge(address, owner);
-      await gauge.killGauge();
-      expect(await gauge.is_killed()).to.be.true;
-    }
-  }
-
-  async function createPoolGauges() {
-    // Exclude AEQ-BNB
-    for (const pool of CORE_POOLS.slice(1)) {
-      const tx = await gaugeFactory.create(pool.address);
-      const receipt = await tx.wait();
-      const events = receipt.events.filter((e) => e.event === "GaugeCreated");
-      const gaugeAddress = events[0].args.gauge;
-      console.log("gaugeAddress: " + gaugeAddress);
-
-      newGauges.push({
-        ...pool,
-        ...{
-          gaugeAddress,
-        },
-      });
-    }
-  }
-
-  async function updateGaugeTypes() {
-    // Check effects in next epoch for all gauges
-    // Should update the stakeless gauge as well to bring weights in line and down
-    await zeroOldTypeWeight();
-    // BAL USES 1 FOR ALL TYPES
-    await gaugeController.change_type_weight(GaugeType.LiquidityMiningCommittee, 1);
-    await gaugeController.change_gauge_weight(veGauge, parseUnits("0.65"));
-    await gaugeController.add_type("VotingV2", 1);
-  }
-
-  async function addNewGaugesToController() {
-    for (const gauge of newGauges) {
-      // 0.35 / 8 gauges
-      await gaugeController.add_gauge(gauge.gaugeAddress, 2, parseUnits("0.0388888889"));
-    }
-  }
 
   //   it("should set the current voting gauges type to zero", async () => {
   //     // zero old typed weight
@@ -182,27 +143,132 @@ describe("Gauge Reset Process", () => {
   //     // await createPoolGauges();
   //   });
 
-  it("should add new gauges to controller under new type", async () => {
-    // Add new ones to controller
-    await killGauges();
-    await createNewFactory();
-    await createPoolGauges();
-    await updateGaugeTypes();
-    await addNewGaugesToController();
-
-    const epochStamp = BigNumber.from(toUnixTimestamp(getPreviousEpoch().getTime()));
-
-    // const pt = await gaugeController.points_total(epochStamp);
-    // console.log(formatEther(pt));
+  it("should add new ve gauge", async () => {
+    await createNewVeAEQGauge();
   });
 
-  //   it("should have proper allocations in the following epoch", async () => {
-  //     // Setup the rest of the items needed first and then run simulations then
-  //     const epochStamp = BigNumber.from(toUnixTimestamp(getPreviousEpoch(1).getTime()));
+  //   it("should add new gauges to controller under new type", async () => {
+  //     // Add new ones to controller
+  //     let epochStamp = BigNumber.from(toUnixTimestamp(getPreviousEpoch(0).getTime()));
+
+  //     console.log(formatEther(await gaugeController.points_total(epochStamp)));
+
+  //     let veTypeBiasSum = await gaugeController.points_sum(0, epochStamp);
+  //     console.log(formatEther(veTypeBiasSum.bias));
+
+  //     await killGauges();
+  //     await createNewFactory();
+  //     await createPoolGauges();
+  //     await updateGaugeTypes();
+  //     await addNewGaugesToController();
+
+  //     veTypeBiasSum = await gaugeController.points_sum(0, epochStamp);
+  //     let lmTypeBiasSum = await gaugeController.points_sum(2, epochStamp);
+
+  //     console.log(formatEther(veTypeBiasSum.bias));
+  //     console.log(formatEther(lmTypeBiasSum.bias));
+
+  //     // await gaugeController.vote_for_gauge_weights(
+  //     //   "0xB1fa5e990c51F28D7eDc57AF348EcEc2cc2309EC",
+  //     //   5000
+  //     // );
+  //     // await gaugeController.vote_for_gauge_weights(
+  //     //   "0x58aDC7764edFB14041072EdadB87c397cFcf8c5B",
+  //     //   5000
+  //     // );
+
+  //     await gaugeController.checkpoint();
+
+  //     const timestamp = await helpers.time.increase(WEEK * 2);
+
+  //     console.log(`
+  //     `);
+
+  //     // const timestamp = moment().startOf("day").add(1, "week").utc().unix();
+  //     veTypeBiasSum = await gaugeController.points_sum(0, timestamp);
+  //     lmTypeBiasSum = await gaugeController.points_sum(2, timestamp);
+
+  //     console.log(formatEther(veTypeBiasSum.bias));
+  //     console.log(formatEther(lmTypeBiasSum.bias));
+  //     console.log(formatEther(await gaugeController.points_total(timestamp)));
   //   });
 
-  async function logWeights(time) {
-    for (const gAdd of gaugeAddresses) {
+  async function addNewGaugesToController() {
+    for (const gauge of newGauges) {
+      await gaugeController.add_gauge(gauge.gaugeAddress, GaugeType.VotingV2, 0);
+    }
+  }
+
+  async function createNewFactory() {
+    const { factory } = await deployLiquidityGaugeFactoryNoAdmin(
+      balMinter.address,
+      veBoost.address,
+      authAdapter.address
+    );
+
+    gaugeFactory = factory;
+  }
+
+  async function createNewVeAEQGauge() {
+    const factory = await deploySingleRecipientGaugeFactory(balMinter.address);
+    balTokenHolder = await deployBalTokenHolder(AEQ.address, Vault.address, "AEQ token holder");
+    const tx = await factory.create(balTokenHolder.address);
+    const receipt = await tx.wait();
+    const events = receipt.events.filter((e) => e.event === "SingleRecipientGaugeCreated");
+    newVeGauge = events[0].args.gauge;
+    console.log(newVeGauge);
+  }
+
+  async function killGauges() {
+    for (const address of GAUGE_ADDRESSES.slice(1)) {
+      const gauge = getLiquidityGauge(address, owner);
+      await gauge.killGauge();
+      expect(await gauge.is_killed()).to.be.true;
+    }
+  }
+
+  async function createPoolGauges() {
+    // Exclude AEQ-BNB
+    for (const pool of CORE_POOLS.slice(1)) {
+      const tx = await gaugeFactory.create(pool.address);
+      const receipt = await tx.wait();
+      const events = receipt.events.filter((e) => e.event === "GaugeCreated");
+      const gaugeAddress = events[0].args.gauge;
+      //console.log("gaugeAddress: " + gaugeAddress);
+
+      newGauges.push({
+        ...pool,
+        ...{
+          gaugeAddress,
+        },
+      });
+    }
+  }
+
+  async function updateGaugeTypes() {
+    await gaugeController.change_type_weight(GaugeType.LiquidityMiningCommittee, 0);
+    await gaugeController.change_type_weight(GaugeType.veBAL, 0);
+
+    // BAL USES 1 FOR ALL TYPES
+    //await gaugeController.change_type_weight(GaugeType.LiquidityMiningCommittee, 1);
+    await gaugeController.add_type("VotingV2", 1);
+    await gaugeController.add_type("veAEQV2", 1);
+
+    // await gaugeController.change_gauge_weight(veGauge, parseUnits("1"));
+  }
+
+  async function logPoint(gauge: string, time) {
+    const pt = await gaugeController.points_weight(gauge, time);
+    console.log(gauge);
+    console.log("slope: " + formatEther(pt.slope));
+    console.log("bias: " + formatEther(pt.bias));
+  }
+
+  async function logWeights(time, gauges = gaugeAddresses) {
+    console.log(`
+    `);
+
+    for (const gAdd of gauges) {
       console.log(gAdd);
       const relWeight = await gaugeController.gauge_relative_weight(gAdd, time);
       console.log("relativeWeight: " + formatEther(relWeight));
