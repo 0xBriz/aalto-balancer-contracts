@@ -18,6 +18,7 @@ export const ASHARE_BALANCEOF_SLOT = 0;
 export const BUSD_BALANCEOF_SLOT = 1;
 export const USDC_BALANCEOF_SLOT = 1;
 export const AMES_BALANCEOF_SLOT = 0;
+export const WBNB_BALANCEOF_SLOT = 3;
 
 export const prepStorageSlotWrite = (receiverAddress: string, storageSlot: number) => {
   return ethers.utils.solidityKeccak256(
@@ -61,7 +62,7 @@ export async function moveUpBlocks(blockCount: number, provider: ethers.provider
 }
 
 export function sortTokens(tokens: string[]) {
-  tokens.sort((t1, t2) => (t1 > t2 ? 1 : -1));
+  return tokens.sort((t1, t2) => (t1 > t2 ? 1 : -1));
 }
 
 export function getBalancerPoolToken(address: string, signer) {
