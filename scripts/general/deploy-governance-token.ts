@@ -1,11 +1,11 @@
 import { ethers } from "hardhat";
 
-export async function deployGovernanceToken() {
+export async function deployGovernanceToken(name: string, symbol: string) {
   try {
     const AequinoxToken = await ethers.getContractFactory("AequinoxToken");
-    const token = await AequinoxToken.deploy("Aequinox", "AEQ");
+    const token = await AequinoxToken.deploy(name, symbol);
     await token.deployed();
-    console.log("AequinoxToken address: ", token.address);
+    console.log(`${name} address: `, token.address);
     return token;
   } catch (error) {
     console.error(error);

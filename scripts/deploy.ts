@@ -1,10 +1,10 @@
 import { parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import { MAINNET_VAULT } from "./addresses";
-import { deployERC4626Factory } from "./deploy-erc4626-factory";
-import { deployGovernanceToken } from "./deploy-governance-token";
-import { deployMulticall } from "./deploy-multicall";
-import { deployRelayer } from "./deploy-relayer";
+import { MAINNET_VAULT } from "../data/addresses";
+import { deployERC4626Factory } from "./utils/factories/deploy-erc4626-factory";
+import { deployGovernanceToken } from "./general/deploy-governance-token";
+import { deployMulticall } from "./general/deploy-multicall";
+import { deployRelayer } from "./general/deploy-relayer";
 import { deployVault } from "./deploy-vault";
 import { deployTestERC20 } from "./utils/deploy-test-erc20";
 import { deployBootstrapPoolFactory } from "./utils/factories/lbp-factory";
@@ -43,9 +43,7 @@ const BAL_MINTER = "0x513f235C0bCCdeeecb81e2688453CAfaDf65c5e3";
 const SINGLE_GAUGE_FACTORY = "0xf7fE0c29A251a8A8E5Cd36A54daBD0357a98b591";
 const BAL_TOKEN_HOLDER = "0x97a1b849857bF8656fb150C45d125B0a8BAa88D0";
 
-async function main() {
-  await deployERC4626Factory(VAULT);
-}
+async function main() {}
 
 main().catch((error) => {
   console.error(error);

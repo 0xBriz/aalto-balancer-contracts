@@ -1,8 +1,8 @@
 import { parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import { deployERC4626Factory } from "./deploy-erc4626-factory";
-import { deployGovernanceToken } from "./deploy-governance-token";
-import { deployMulticall } from "./deploy-multicall";
+import { deployERC4626Factory } from "./utils/factories/deploy-erc4626-factory";
+import { deployGovernanceToken } from "./general/deploy-governance-token";
+import { deployMulticall } from "./general/deploy-multicall";
 import { deployVault } from "./deploy-vault";
 import { setupGovernance } from "./setup-governance";
 import { deployTestERC20 } from "./utils/deploy-test-erc20";
