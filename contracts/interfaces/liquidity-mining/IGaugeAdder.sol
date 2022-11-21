@@ -19,9 +19,16 @@ import "./IGaugeController.sol";
 import "./ILiquidityGauge.sol";
 import "./ILiquidityGaugeFactory.sol";
 import "./IStakingLiquidityGauge.sol";
+import "./IAuthorizerAdaptorEntrypoint.sol";
 
 interface IGaugeAdder is IAuthentication {
-    enum GaugeType { LiquidityMiningCommittee, veBAL, Ethereum, Polygon, Arbitrum }
+    enum GaugeType {
+        LiquidityMiningCommittee,
+        veBAL,
+        Ethereum,
+        Polygon,
+        Arbitrum
+    }
 
     event GaugeFactoryAdded(GaugeType indexed gaugeType, ILiquidityGaugeFactory gaugeFactory);
 
@@ -42,7 +49,10 @@ interface IGaugeAdder is IAuthentication {
     /**
      * @notice Returns the `index`'th factory for gauge type `gaugeType`
      */
-    function getFactoryForGaugeType(GaugeType gaugeType, uint256 index) external view returns (address);
+    function getFactoryForGaugeType(GaugeType gaugeType, uint256 index)
+        external
+        view
+        returns (address);
 
     /**
      * @notice Returns the number of factories for gauge type `gaugeType`
@@ -52,7 +62,10 @@ interface IGaugeAdder is IAuthentication {
     /**
      * @notice Returns whether `gauge` has been deployed by one of the listed factories for the gauge type `gaugeType`
      */
-    function isGaugeFromValidFactory(address gauge, GaugeType gaugeType) external view returns (bool);
+    function isGaugeFromValidFactory(address gauge, GaugeType gaugeType)
+        external
+        view
+        returns (bool);
 
     /**
      * @notice Adds a new gauge to the GaugeController for the "Ethereum" type.
@@ -77,4 +90,9 @@ interface IGaugeAdder is IAuthentication {
      * @notice Adds `factory` as an allowlisted factory contract for gauges with type `gaugeType`.
      */
     function addGaugeFactory(ILiquidityGaugeFactory factory, GaugeType gaugeType) external;
+
+    /**
+     * @notice Returns the address of the Authorizer adaptor entrypoint contract.
+     */
+    function getAuthorizerAdaptorEntrypoint() external view returns (IAuthorizerAdaptorEntrypoint);
 }

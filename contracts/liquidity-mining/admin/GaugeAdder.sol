@@ -15,6 +15,7 @@
 pragma solidity ^0.7.0;
 
 import "../../interfaces/liquidity-mining/IGaugeAdder.sol";
+import "../../interfaces/liquidity-mining/IAuthorizerAdaptorEntrypoint.sol";
 import "../../interfaces/liquidity-mining/IStakingLiquidityGauge.sol";
 import "../../interfaces/vault/IVault.sol";
 
@@ -27,25 +28,31 @@ contract GaugeAdder is IGaugeAdder, SingletonAuthentication, ReentrancyGuard {
     using EnumerableSet for EnumerableSet.AddressSet;
 
     IGaugeController private immutable _gaugeController;
-    IAuthorizerAdaptor private _authorizerAdaptor;
+    IAuthorizerAdaptorEntrypoint private _authorizerAdaptorEntrypoint;
 
     // Mapping from gauge type to a list of address for approved factories for that type
     mapping(GaugeType => EnumerableSet.AddressSet) internal _gaugeFactoriesByType;
     // Mapping from mainnet BPT addresses to canonical liquidity gauge as listed on the GaugeController
     mapping(IERC20 => ILiquidityGauge) internal _poolGauge;
 
-    constructor(IGaugeController gaugeController)
-        SingletonAuthentication(gaugeController.admin().getVault())
-    {
+    constructor(
+        IGaugeController gaugeController,
+        IAuthorizerAdaptorEntrypoint authorizerAdaptorEntrypoint
+    ) SingletonAuthentication(gaugeController.admin().getVault()) {
         _gaugeController = gaugeController;
-        _authorizerAdaptor = gaugeController.admin();
+        _authorizerAdaptorEntrypoint = authorizerAdaptorEntrypoint;
     }
 
     /**
-     * @notice Returns the address of the Authorizer adaptor contract.
+     * @notice Returns the address of the Authorizer adaptor entry contract.
      */
-    function getAuthorizerAdaptor() external view returns (IAuthorizerAdaptor) {
-        return _authorizerAdaptor;
+    function getAuthorizerAdaptorEntrypoint()
+        external
+        view
+        override
+        returns (IAuthorizerAdaptorEntrypoint)
+    {
+        return _authorizerAdaptorEntrypoint;
     }
 
     /**
@@ -183,9 +190,9 @@ contract GaugeAdder is IGaugeAdder, SingletonAuthentication, ReentrancyGuard {
         require(isGaugeFromValidFactory(gauge, gaugeType), "Invalid gauge");
 
         // `_gaugeController` enforces that duplicate gauges may not be added so we do not need to check here.
-        _authorizerAdaptor.performAction(
+        _authorizerAdaptorEntrypoint.performAction(
             address(_gaugeController),
-            abi.encodeWithSelector(IGaugeController.add_gauge.selector, gauge, gaugeType) // This is what I need in the test case
+            abi.encodeWithSelector(IGaugeController.add_gauge.selector, gauge, gaugeType)
         );
     }
 }
