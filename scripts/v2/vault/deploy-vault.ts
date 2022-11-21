@@ -13,7 +13,7 @@ export async function deployVault(WETH: string) {
 
     const { vault, basicAuthorizer } = await doVault(chainId, WETH); // Will deploy a dummy authorizer to start
     const authAdapter = await deployAuthAdapter(vault.address);
-    const entryAdapter = await deployAuthEntry(authAdapter.address);
+    const entryAdapter = await deployAuthEntry(authAdapter.address, chainId);
 
     // Then, with the entrypoint correctly deployed, we create the actual authorizer to be used and set it in the vault.
     const sigHash = vault.interface.getSighash("setAuthorizer");
@@ -63,7 +63,7 @@ async function doVault(chainId: number, weth: string) {
   console.log("vaultArgs:");
   console.log(vaultArgs);
 
-  await saveDeplomentData("Vault", vaultArgs);
+  await saveDeplomentData("Vault", vaultArgs, chainId);
   return {
     vault,
     basicAuthorizer,
@@ -85,12 +85,12 @@ async function deployTimelock(chainId: number, admin: string, entryAdapter: stri
     entryAdapter,
   };
 
-  await saveDeplomentData("TimelockAuthorizer", authArgs);
+  await saveDeplomentData("TimelockAuthorizer", authArgs, chainId);
 
   return authorizer;
 }
 
-export async function deployAuthEntry(authAdapter: string) {
+export async function deployAuthEntry(authAdapter: string, chainId: number) {
   try {
     const AuthorizerAdaptorEntrypoint = await ethers.getContractFactory(
       "AuthorizerAdaptorEntrypoint"
@@ -98,6 +98,14 @@ export async function deployAuthEntry(authAdapter: string) {
     const ct = await AuthorizerAdaptorEntrypoint.deploy(authAdapter);
     await ct.deployed();
     console.log("AuthorizerAdaptorEntrypoint deployed to: ", ct.address);
+
+    await saveDeplomentData(
+      "AuthorizerAdaptorEntrypoint",
+      {
+        authAdapter,
+      },
+      chainId
+    );
 
     return ct;
   } catch (error) {

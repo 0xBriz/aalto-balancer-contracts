@@ -6,12 +6,13 @@ const CHAINS = {
   56: "bsc",
 };
 
-export async function saveDeplomentData(filename: string, data: { chainId: number }) {
+export async function saveDeplomentData(filename: string, data, chainId: number) {
   try {
     const file = filename + ".json";
-    await fs.writeJSON(join(process.cwd(), "deployments", `${CHAINS[data.chainId]}`, file), data);
+    await fs.writeJSON(join(process.cwd(), "deployments", `${CHAINS[chainId]}`, file), data);
     console.log("Save deploy data for: " + filename);
     console.log(data);
+    console.log("VERIFY CONTRACT!!");
   } catch (error) {
     throw error;
   }

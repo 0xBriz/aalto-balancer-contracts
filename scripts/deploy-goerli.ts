@@ -26,7 +26,7 @@ import { ONE_DAY_SECONDS, ONE_WEEK_SECONDS } from "./utils/time";
 
 const VAULT = "";
 const TIME_AUTH = "";
-const WETH = ""; // Mock WBNB
+const WETH = "0xe4E96Cf369D4d604Bedc4d7962F94D53E4B5e3C6"; // Mock WBNB
 
 // Factories
 const WEIGHT_FACTORY_NOAM = ""; // No asset managers
@@ -53,7 +53,14 @@ const AEQ_BNB_BPT = "";
 const STAKING_ADMIN = "";
 
 async function main() {
-  await deployTestERC20("Wrapped BNB", "wBNB", parseEther("1000000"));
+  await ethers.provider.ready;
+  // const chainId = ethers.provider.network.chainId;
+  // await deployTestERC20("Tether USDT", "USDT", parseEther("1000000"), chainId);
+  // await deployTestERC20("USD Coin", "USDC", parseEther("1000000"), chainId);
+  // await deployTestERC20("Dai Coin", "DAI", parseEther("1000000"), chainId);
+  // await deployTestERC20("Binance Pegged USD", "BUSD", parseEther("1000000"), chainId);
+
+  await deployVault(WETH);
 }
 
 main().catch((error) => {
