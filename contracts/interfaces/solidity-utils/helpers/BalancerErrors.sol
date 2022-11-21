@@ -58,7 +58,10 @@ function _revert(uint256 errorCode) pure {
         // per character = 56) to locate it in the most significant part of the 256 slot (the beginning of a byte
         // array).
 
-        let revertReason := shl(200, add(0x42414c23000000, add(add(units, shl(8, tenths)), shl(16, hundreds))))
+        let revertReason := shl(
+            200,
+            add(0x42414c23000000, add(add(units, shl(8, tenths)), shl(16, hundreds)))
+        )
 
         // We can now encode the reason in memory, which can be safely overwritten as we're about to revert. The encoded
         // message will have the following layout:
@@ -99,6 +102,7 @@ library Errors {
     uint256 internal constant UNSORTED_TOKENS = 102;
     uint256 internal constant INPUT_LENGTH_MISMATCH = 103;
     uint256 internal constant ZERO_TOKEN = 104;
+    uint256 internal constant INSUFFICIENT_DATA = 105;
 
     // Shared pools
     uint256 internal constant MIN_TOKENS = 200;
@@ -168,6 +172,11 @@ library Errors {
     uint256 internal constant MAX_WEIGHT = 350;
     uint256 internal constant UNAUTHORIZED_JOIN = 351;
     uint256 internal constant MAX_MANAGEMENT_AUM_FEE_PERCENTAGE = 352;
+    uint256 internal constant FRACTIONAL_TARGET = 353;
+    uint256 internal constant ADD_OR_REMOVE_BPT = 354;
+    uint256 internal constant INVALID_CIRCUIT_BREAKER_BOUNDS = 355;
+    uint256 internal constant CIRCUIT_BREAKER_TRIPPED = 356;
+    uint256 internal constant MALICIOUS_QUERY_REVERT = 357;
 
     // Lib
     uint256 internal constant REENTRANCY = 400;
@@ -209,6 +218,9 @@ library Errors {
     uint256 internal constant CODEC_OVERFLOW = 436;
     uint256 internal constant IN_RECOVERY_MODE = 437;
     uint256 internal constant NOT_IN_RECOVERY_MODE = 438;
+    uint256 internal constant INDUCED_FAILURE = 439;
+    uint256 internal constant EXPIRED_SIGNATURE = 440;
+    uint256 internal constant MALFORMED_SIGNATURE = 441;
 
     // Vault
     uint256 internal constant INVALID_POOL_ID = 500;
