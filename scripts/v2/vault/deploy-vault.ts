@@ -1,43 +1,105 @@
 import { ethers } from "hardhat";
-import { predictAddresses } from "../../utils/predictAddresses";
-import { DAY, MONTH, ONE_MONTH_SECONDS } from "../../utils/time";
+import { deployAuthAdapter } from "../../utils/lp-mining/deploy-auth-adapter";
+import { saveDeplomentData } from "../../utils/save-deploy-data";
+import { DAY, ONE_MONTH_SECONDS } from "../../utils/time";
 
 export async function deployVault(WETH: string) {
   try {
+    const admin = (await ethers.getSigners())[0];
+    const chainId = ethers.provider.network.chainId;
+
     // This sequence breaks the circular dependency between authorizer, vault, adaptor and entrypoint.
     // First we deploy the vault, adaptor and entrypoint with a basic authorizer.
 
-    const admin = (await ethers.getSigners())[0];
-    const { vaultAddress, authorizerAddress } = await predictAddresses(admin.address);
-    console.log("Predicted Vault address: " + vaultAddress);
-    console.log("Predicted TimelockAuthorizer address: " + authorizerAddress);
+    const { vault, basicAuthorizer } = await doVault(chainId, WETH); // Will deploy a dummy authorizer to start
+    const authAdapter = await deployAuthAdapter(vault.address);
+    const entryAdapter = await deployAuthEntry(authAdapter.address);
 
-    // Set to max values
-    const pauseWindowDuration = ONE_MONTH_SECONDS * 3;
-    const bufferPeriodDuration = DAY * 30;
+    // Then, with the entrypoint correctly deployed, we create the actual authorizer to be used and set it in the vault.
+    const sigHash = vault.interface.getSighash("setAuthorizer");
+    const setAuthorizerActionId = await basicAuthorizer.getActionId(sigHash);
+    await basicAuthorizer.grantRolesToMany([setAuthorizerActionId], [admin.address]);
+    const vaultAuthorizer = await deployTimelock(chainId, admin.address, entryAdapter.address);
+    await vault.connect(admin).setAuthorizer(vaultAuthorizer.address);
 
-    const Vault = await ethers.getContractFactory("Vault");
-    const vault = await Vault.deploy(
-      authorizerAddress,
-      WETH,
-      pauseWindowDuration,
-      bufferPeriodDuration
+    return {
+      vault,
+      vaultAuthorizer,
+      authAdapter,
+      entryAdapter,
+    };
+  } catch (error) {
+    console.error(error);
+    process.exitCode = 1;
+  }
+}
+
+async function doVault(chainId: number, weth: string) {
+  const MockBasicAuthorizer = await ethers.getContractFactory("MockBasicAuthorizer");
+  const basicAuthorizer = await MockBasicAuthorizer.deploy();
+
+  // Set to max values
+  const pauseWindowDuration = ONE_MONTH_SECONDS * 3;
+  const bufferPeriodDuration = DAY * 30;
+
+  const Vault = await ethers.getContractFactory("Vault");
+  // Use mock authorizer at first
+  const vault = await Vault.deploy(
+    basicAuthorizer.address,
+    weth,
+    pauseWindowDuration,
+    bufferPeriodDuration
+  );
+  await vault.deployed();
+  console.log("Vault deployed to: ", vault.address);
+
+  const vaultArgs = {
+    chainId,
+    authorizer: basicAuthorizer.address, //  use original value
+    WETH: weth,
+    pauseWindowDuration,
+    bufferPeriodDuration,
+  };
+  console.log("vaultArgs:");
+  console.log(vaultArgs);
+
+  await saveDeplomentData("Vault", vaultArgs);
+  return {
+    vault,
+    basicAuthorizer,
+  };
+}
+
+async function deployTimelock(chainId: number, admin: string, entryAdapter: string) {
+  // AUTH
+  const rootTransferDelay = 0; // Timelock until root(admin/boss) status can be transferred
+  const TimelockAuthorizer = await ethers.getContractFactory("TimelockAuthorizer");
+  const authorizer = await TimelockAuthorizer.deploy(admin, entryAdapter, rootTransferDelay);
+  await authorizer.deployed();
+  console.log("TimelockAuthorizer deployed to: ", authorizer.address);
+
+  const authArgs = {
+    chainId,
+    admin: admin,
+    rootTransferDelay,
+    entryAdapter,
+  };
+
+  await saveDeplomentData("TimelockAuthorizer", authArgs);
+
+  return authorizer;
+}
+
+export async function deployAuthEntry(authAdapter: string) {
+  try {
+    const AuthorizerAdaptorEntrypoint = await ethers.getContractFactory(
+      "AuthorizerAdaptorEntrypoint"
     );
-    await vault.deployed();
-    console.log("Vault deployed to: ", vault.address);
+    const ct = await AuthorizerAdaptorEntrypoint.deploy(authAdapter);
+    await ct.deployed();
+    console.log("AuthorizerAdaptorEntrypoint deployed to: ", ct.address);
 
-    // AUTH
-    const rootTransferDelay = 0; // Timelock until root(admin/boss) status can be transferred
-    const TimelockAuthorizer = await ethers.getContractFactory("TimelockAuthorizer");
-    const authorizer = await TimelockAuthorizer.deploy(
-      admin.address,
-      vault.address,
-      rootTransferDelay
-    );
-    await authorizer.deployed();
-    console.log("TimelockAuthorizer deployed to: ", authorizer.address);
-
-    return vault;
+    return ct;
   } catch (error) {
     console.error(error);
     process.exitCode = 1;
