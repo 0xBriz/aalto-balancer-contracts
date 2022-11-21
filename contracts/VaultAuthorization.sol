@@ -20,7 +20,7 @@ import "./interfaces/vault/IVault.sol";
 import "./interfaces/vault/IAuthorizer.sol";
 
 import "./solidity-utils/helpers/Authentication.sol";
-import "./solidity-utils/helpers/SignaturesValidator.sol";
+import "./solidity-utils/helpers/ExtraCalldataEOASignaturesValidator.sol";
 import "./solidity-utils/helpers/TemporarilyPausable.sol";
 import "./solidity-utils/openzeppelin/ReentrancyGuard.sol";
 
@@ -33,7 +33,7 @@ abstract contract VaultAuthorization is
     IVault,
     ReentrancyGuard,
     Authentication,
-    SignaturesValidator,
+    ExtraCalldataEOASignaturesValidator,
     TemporarilyPausable
 {
     // Ideally, we'd store the type hashes as immutable state variables to avoid computing the hash at runtime, but
@@ -79,17 +79,12 @@ abstract contract VaultAuthorization is
     constructor(IAuthorizer authorizer)
         // The Vault is a singleton, so it simply uses its own address to disambiguate action identifiers.
         Authentication(bytes32(uint256(address(this))))
-        SignaturesValidator("Balancer V2 Vault")
+        EIP712("Balancer V2 Vault", "1")
     {
         _setAuthorizer(authorizer);
     }
 
-    function setAuthorizer(IAuthorizer newAuthorizer)
-        external
-        override
-        nonReentrant
-        authenticate
-    {
+    function setAuthorizer(IAuthorizer newAuthorizer) external override nonReentrant authenticate {
         _setAuthorizer(newAuthorizer);
     }
 
@@ -134,7 +129,7 @@ abstract contract VaultAuthorization is
             // Being a relayer is not sufficient: `user` must have also approved the caller either via
             // `setRelayerApproval`, or by providing a signature appended to the calldata.
             if (!_hasApprovedRelayer(user, msg.sender)) {
-                _validateSignature(user, Errors.USER_DOESNT_ALLOW_RELAYER);
+                _validateExtraCalldataSignature(user, Errors.USER_DOESNT_ALLOW_RELAYER);
             }
         }
     }
@@ -142,25 +137,16 @@ abstract contract VaultAuthorization is
     /**
      * @dev Returns true if `user` approved `relayer` to act as a relayer for them.
      */
-    function _hasApprovedRelayer(address user, address relayer)
-        internal
-        view
-        returns (bool)
-    {
+    function _hasApprovedRelayer(address user, address relayer) internal view returns (bool) {
         return _approvedRelayers[user][relayer];
     }
 
-    function _canPerform(bytes32 actionId, address user)
-        internal
-        view
-        override
-        returns (bool)
-    {
+    function _canPerform(bytes32 actionId, address user) internal view override returns (bool) {
         // Access control is delegated to the Authorizer.
         return _authorizer.canPerform(actionId, user, address(this));
     }
 
-    function _typeHash() internal pure override returns (bytes32 hash) {
+    function _entrypointTypeHash() internal pure override returns (bytes32 hash) {
         // This is a simple switch-case statement, trivially written in Solidity by chaining else-if statements, but the
         // assembly implementation results in much denser bytecode.
         // solhint-disable-next-line no-inline-assembly
