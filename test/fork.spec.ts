@@ -17,7 +17,14 @@ import { expect } from "chai";
 import { JsonRpcSigner } from "@ethersproject/providers";
 import { defaultAbiCoder, formatEther, parseEther, parseUnits } from "ethers/lib/utils";
 import moment from "moment";
-import { getPreviousEpoch, toUnixTimestamp } from "./utils";
+import {
+  approveTokensIfNeeded,
+  getLiquidityGauge,
+  getPreviousEpoch,
+  toUnixTimestamp,
+} from "./utils";
+import * as W2T from "./abis/WeightedPool2Tokens.json";
+import { max } from "date-fns";
 
 describe("Mainnet setup", () => {
   let AEQ: Contract;
@@ -33,6 +40,7 @@ describe("Mainnet setup", () => {
   let balTokenHolder: Contract;
   let feeDistributor: Contract;
   let veBalHelper: Contract;
+  let AEQ_BNB: Contract;
 
   let veBoost: Contract;
 
@@ -51,7 +59,7 @@ describe("Mainnet setup", () => {
   const amesBusdGauge = "0xDA9D57cAabBe48301d71b7eEaf546B4A206118d3";
   const wAaltoBusd = "0xD105D7e65922e1ac725b799481c5c113cFfA2f0D";
   const wbnbBusdGauge = "0x34EA84d3565824573073b1A63057baf57f842F02";
-  const triBlueChipsGuage = "0x00687547D75A2d1378984bE922e1450CcC89211E";
+  const triBlueChipsGauge = "0x00687547D75A2d1378984bE922e1450CcC89211E";
   const stablesGauge = "0xaCC31d29022C8Eb2683597bF4c07De228Ed9EA07";
   const usdcBnb = "0x9721189e8ac5DD0011EaB1Ee7c25B24624b75801";
   const technicolorGauge = "0xc328f8308B915D7DCD7D65d9c0e0a225abb3A95f";
@@ -59,13 +67,13 @@ describe("Mainnet setup", () => {
   const veGauge = "0x177cA62c024Aaa0c3c65F7c8BA283b824556DAB0";
 
   const gaugeAddresses = [
-    // veGauge,
-    stablesGauge,
-    ashareBusdGaugeAddress,
+    veGauge,
+    // stablesGauge,
+    // ashareBusdGaugeAddress,
     amesBusdGauge,
-    wAaltoBusd,
+    // wAaltoBusd,
     wbnbBusdGauge,
-    triBlueChipsGuage,
+    triBlueChipsGauge,
     usdcBnb,
     technicolorGauge,
     blueMaxiGauge,
@@ -77,6 +85,11 @@ describe("Mainnet setup", () => {
     owner = await ethers.provider.getSigner(OPERATOR);
     await helpers.setBalance(OPERATOR, parseEther("100"));
 
+    AEQ_BNB = await ethers.getContractAt(
+      W2T.abi,
+      "0x7a09ddF458FdA6e324A97D1a8E4304856fb3e702",
+      owner
+    );
     AEQ = await ethers.getContractAt(
       Token.abi,
       "0x0dDef12012eD645f12AEb1B845Cb5ad61C7423F5",
@@ -87,11 +100,11 @@ describe("Mainnet setup", () => {
       "0x13C3d00FB2F37dEea036B1dF6Ca9963e8690fAa6",
       owner
     );
-    // balMinter = await ethers.getContractAt(
-    //   Mint.abi,
-    //   "0x513f235C0bCCdeeecb81e2688453CAfaDf65c5e3",
-    //   owner
-    // );
+    balMinter = await ethers.getContractAt(
+      Mint.abi,
+      "0x513f235C0bCCdeeecb81e2688453CAfaDf65c5e3",
+      owner
+    );
     balTokenAdmin = await ethers.getContractAt(
       BA.abi,
       "0xDe3258Fce4Afe0aB38CA3A61B21ACAD802250880",
@@ -140,41 +153,57 @@ describe("Mainnet setup", () => {
     const next = moment().add(1, "day").startOf("day").utc().unix();
     const DAY = 86400;
     const WEEK = DAY * 7;
-    // await gaugeController.change_type_weight(0, 1);
-    // await gaugeController.change_type_weight(1, 1);
-    // await gaugeController.change_gauge_weight(stablesGauge, 0);
-    // await gaugeController.change_gauge_weight(wAaltoBusd, parseEther("0"));
-    // await gaugeController.change_gauge_weight(ashareBusdGaugeAddress, 1);
-    // await gaugeController.change_gauge_weight(amesBusdGauge, 1);
-    // await helpers.time.increase(DAY);
-    // await gaugeController.checkpoint();
-    // // await helpers.time.increase(WEEK);
-    // // await gaugeController.checkpoint();
-    // await gauge.withdraw(await gauge.balanceOf(account));
+
+    const technicolorUser = "0x179c4ef17188fe081b977b5e522bcd2071551b52";
+    const triBlueChipsGaugeUser = "0xd0c5c6454524eb80056e345fa283f461b2b1ecc3";
+    const amesBusdGaugeUser = "0x276aae2cb997ba9e00292b7f3f7ff151a79b199d"; // owns 27%
+    const usdcBnbUser = "0x2e7d56de3a38d60d9c9cb30bbeaf32f3a3a7e19d";
+    const blueMaxiGaugeUser = "0x5b39829b09a1b81e920a0c514a46a390cb0aa4cb"; // owns 95%
+    const wbnbBusdGaugeUser = "0xe2036acc4a5aef7df28ee817f093edb3e1de3e0b";
+
+    // const user = amesBusdGaugeUser;
+    // const aeqGauge = amesBusdGauge;
+    // await helpers.impersonateAccount(user);
+    // const signer = await ethers.provider.getSigner(user);
+    // const gauge = new Contract(
+    //   aeqGauge,
+    //   [
+    //     "function withdraw(uint256) external",
+    //     "function balanceOf(address) public view returns (uint256)",
+    //     "function claimable_tokens(address) public view returns (uint256)",
+    //   ],
+    //   signer
+    // );
+
+    // console.log(formatEther(await AEQ.balanceOf(balTokenHolder.address)));
+    // const calldata = singleRecipientGauge.interface.encodeFunctionData("checkpoint");
+    // await authAdapter.performAction(singleRecipientGauge.address, calldata);
+    // console.log(formatEther(await AEQ.balanceOf(balTokenHolder.address)));
 
     // await logWeights(epochStamp);
-    // 0x5123d8e7f978273f82256a971edf5e9052caf8c6e33be8f8eefb60a755e794cf
-    // 0xaCC31d29022C8Eb2683597bF4c07De228Ed9EA07
 
-    for (const epoch of [0, 1]) {
-      await runForGauges(async (addy) => {
-        console.log("Gauge: " + addy);
-        // const tw = await gaugeController.time_weight(addy);
-        // console.log("time_weight: " + formatEther(tw));
-        console.log("epochs ago: " + epoch);
-        const pt = await gaugeController.points_weight(
-          addy,
-          BigNumber.from(toUnixTimestamp(getPreviousEpoch(epoch).getTime()))
-        );
-        console.log("bias: " + formatEther(pt.bias));
-        console.log("slope: " + formatEther(pt.slope));
-      });
-      console.log(`
-      `);
-    }
+    // await gaugeController.change_gauge_weight(amesBusdGauge, 1);
+    // await gaugeController.change_gauge_weight(wbnbBusdGauge, 1);
+    // await gaugeController.change_gauge_weight(usdcBnb, 1);
+    // await gaugeController.change_gauge_weight(technicolorGauge, 1);
+    // await gaugeController.change_gauge_weight(blueMaxiGauge, 1);
+
+    // console.log(`
+    // `);
+    // await logWeights(next);
+
+    const stables = getLiquidityGauge(stablesGauge, owner);
+    const wrapped = getLiquidityGauge(wAaltoBusd, owner);
+    const ashare = getLiquidityGauge(ashareBusdGaugeAddress, owner);
+    const maxi = getLiquidityGauge(blueMaxiGauge, owner);
+
+    // await gaugeController.checkpoint();
+
+    // const calldata = singleRecipientGauge.interface.encodeFunctionData("checkpoint");
+    // await authAdapter.performAction(singleRecipientGauge.address, calldata);
   });
 
-  async function calculateTokenPayableToGauge(address: string) {
+  async function calculateTokenPayableToGauge(address: string, inflationRate) {
     const gauge = new Contract(
       address,
       ["function working_supply() public view returns (uint256)"],
@@ -182,26 +211,19 @@ describe("Mainnet setup", () => {
     );
 
     const gaugeRelativeWeight = await veBalHelper.gauge_relative_weight(address);
-    const inflationRate = await balTokenAdmin.getInflationRate();
-    const balPayableToGauge = inflationRate.mul(7).mul(86400).mul(gaugeRelativeWeight);
     const weightNum = Number(formatEther(gaugeRelativeWeight));
-    const payableNum = Number(formatEther(inflationRate)) * 86400 * 7 * weightNum;
+    console.log("weight: " + weightNum);
+    console.log("inflationRate: " + inflationRate);
+    const payable = inflationRate * 86400 * 7 * weightNum;
+    const workingSupply = Number(formatEther(await gauge.working_supply()));
+    console.log("workingSupply: " + inflationRate);
+    const workingBalance = 0.4;
+    const share = workingBalance / (workingSupply + workingBalance);
+    console.log("share: " + share);
+    const weeklyAmount = share * payable;
+    console.log("weeklyAmount: " + weeklyAmount);
 
-    const workingSupply = await gauge.working_supply();
-    const workNum = Number(formatEther(workingSupply));
-    const workingBalanceNum = 0.4;
-    const shareNum = workingBalanceNum / (workNum + workingBalanceNum);
-    //  const payableNum = Number(formatEther(balPayableToGauge));
-    const weekNum = shareNum * payableNum;
-    console.log(weekNum);
-
-    const workingBalance = parseUnits("0.4");
-    const shareForOneBpt = workingBalance.div(workingSupply.add(workingBalance));
-    //console.log(formatEther(shareForOneBpt));
-    const weeklyReward = shareForOneBpt.mul(balPayableToGauge);
-
-    //console.log(formatEther(weeklyReward));
-    // return Number(formatEther(weeklyReward));
+    return weeklyAmount;
   }
 
   async function logWeights(time) {
