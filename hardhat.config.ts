@@ -19,7 +19,7 @@ const config: HardhatUserConfig = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 200,
+            runs: 9999,
           },
         },
       },
@@ -33,6 +33,17 @@ const config: HardhatUserConfig = {
         },
       },
     ],
+    overrides: {
+      "contracts/Vault.sol": {
+        version: "0.7.1",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 500,
+          },
+        },
+      },
+    },
   },
   vyper: {
     compilers: [{ version: "0.3.1" }, { version: "0.3.3" }],

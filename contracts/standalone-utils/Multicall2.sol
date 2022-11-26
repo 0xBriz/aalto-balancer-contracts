@@ -1,11 +1,4 @@
-/**
- *Submitted for verification at Etherscan.io on 2021-04-29
- */
-
-/**
- *Submitted for verification at Etherscan.io on 2021-03-23
- */
-
+// SPDX-License-Identifier: MIT
 pragma solidity >=0.5.0;
 pragma experimental ABIEncoderV2;
 

@@ -3,7 +3,6 @@ import { ethers } from "hardhat";
 import { deployERC4626Factory } from "./utils/factories/deploy-erc4626-factory";
 import { deployGovernanceToken } from "./general/deploy-governance-token";
 import { deployMulticall } from "./general/deploy-multicall";
-import { deployVault } from "./deploy-vault";
 import { setupGovernance } from "./setup-governance";
 import { deployTestERC20 } from "./utils/deploy-test-erc20";
 import { deployBootstrapPoolFactory } from "./utils/factories/lbp-factory";
@@ -23,6 +22,7 @@ import { deployVeBalHelper } from "./utils/lp-mining/deploy-ve-bal-helper";
 import { deployVeBoost } from "./utils/lp-mining/deploy-ve-boost";
 import { deployVotingEscrow } from "./utils/lp-mining/deploy-voting-escrow";
 import { ONE_DAY_SECONDS, ONE_WEEK_SECONDS } from "./utils/time";
+import { deployVault } from "./v2/vault/deploy-vault";
 
 const VAULT = "";
 const TIME_AUTH = "";
@@ -54,13 +54,18 @@ const STAKING_ADMIN = "";
 
 async function main() {
   await ethers.provider.ready;
-  // const chainId = ethers.provider.network.chainId;
+  const chainId = ethers.provider.network.chainId;
+  // test tokens
   // await deployTestERC20("Tether USDT", "USDT", parseEther("1000000"), chainId);
   // await deployTestERC20("USD Coin", "USDC", parseEther("1000000"), chainId);
   // await deployTestERC20("Dai Coin", "DAI", parseEther("1000000"), chainId);
   // await deployTestERC20("Binance Pegged USD", "BUSD", parseEther("1000000"), chainId);
+  // await deployTestERC20("Amethyst", "AMES", parseEther("1000000"), chainId);
+  // await deployTestERC20("Ashare", "ASHARE", parseEther("1000000"), chainId);
 
+  // vault
   await deployVault(WETH);
+  // factories
 }
 
 main().catch((error) => {

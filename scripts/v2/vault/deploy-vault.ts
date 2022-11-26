@@ -17,7 +17,7 @@ export async function deployVault(WETH: string) {
 
     // Then, with the entrypoint correctly deployed, we create the actual authorizer to be used and set it in the vault.
     const sigHash = vault.interface.getSighash("setAuthorizer");
-    const setAuthorizerActionId = await basicAuthorizer.getActionId(sigHash);
+    const setAuthorizerActionId = await vault.getActionId(sigHash);
     await basicAuthorizer.grantRolesToMany([setAuthorizerActionId], [admin.address]);
     const vaultAuthorizer = await deployTimelock(chainId, admin.address, entryAdapter.address);
     await vault.connect(admin).setAuthorizer(vaultAuthorizer.address);
@@ -36,7 +36,8 @@ export async function deployVault(WETH: string) {
 
 async function doVault(chainId: number, weth: string) {
   const MockBasicAuthorizer = await ethers.getContractFactory("MockBasicAuthorizer");
-  const basicAuthorizer = await MockBasicAuthorizer.deploy();
+  let basicAuthorizer = await MockBasicAuthorizer.deploy();
+  basicAuthorizer = await basicAuthorizer.deployed();
 
   // Set to max values
   const pauseWindowDuration = ONE_MONTH_SECONDS * 3;
@@ -60,10 +61,10 @@ async function doVault(chainId: number, weth: string) {
     pauseWindowDuration,
     bufferPeriodDuration,
   };
-  console.log("vaultArgs:");
-  console.log(vaultArgs);
+  // console.log("vaultArgs:");
+  // console.log(vaultArgs);
 
-  await saveDeplomentData("Vault", vaultArgs, chainId);
+  // await saveDeplomentData("Vault", vaultArgs, chainId);
   return {
     vault,
     basicAuthorizer,
@@ -85,7 +86,7 @@ async function deployTimelock(chainId: number, admin: string, entryAdapter: stri
     entryAdapter,
   };
 
-  await saveDeplomentData("TimelockAuthorizer", authArgs, chainId);
+  // await saveDeplomentData("TimelockAuthorizer", authArgs, chainId);
 
   return authorizer;
 }
@@ -99,13 +100,13 @@ export async function deployAuthEntry(authAdapter: string, chainId: number) {
     await ct.deployed();
     console.log("AuthorizerAdaptorEntrypoint deployed to: ", ct.address);
 
-    await saveDeplomentData(
-      "AuthorizerAdaptorEntrypoint",
-      {
-        authAdapter,
-      },
-      chainId
-    );
+    // await saveDeplomentData(
+    //   "AuthorizerAdaptorEntrypoint",
+    //   {
+    //     authAdapter,
+    //   },
+    //   chainId
+    // );
 
     return ct;
   } catch (error) {
