@@ -21,7 +21,7 @@ import "../../interfaces/liquidity-mining/ILiquidityGaugeFactory.sol";
 import "../../solidity-utils/openzeppelin/Clones.sol";
 
 contract LiquidityGaugeFactory is ILiquidityGaugeFactory {
-    ILiquidityGauge private immutable _gaugeImplementation;
+    IStakingLiquidityGauge private immutable _gaugeImplementation;
 
     mapping(address => bool) private _isGaugeFromFactory;
     mapping(address => address) private _poolGauge;
@@ -31,22 +31,22 @@ contract LiquidityGaugeFactory is ILiquidityGaugeFactory {
     // Pools share the same gauge implementation contract
     // LiquidityGaugeV5.vy, RewardsOnlyGauge.vy(rewards non protocol tokens), SingleRecipientGauge
     // Factory for each type
-    constructor(ILiquidityGauge gauge) {
+    constructor(IStakingLiquidityGauge gauge) {
         _gaugeImplementation = gauge;
     }
 
     /**
      * @notice Returns the address of the implementation used for gauge deployments.
      */
-    function getGaugeImplementation() public view returns (ILiquidityGauge) {
+    function getGaugeImplementation() public view returns (IStakingLiquidityGauge) {
         return _gaugeImplementation;
     }
 
     /**
      * @notice Returns the address of the gauge belonging to `pool`.
      */
-    function getPoolGauge(address pool) external view returns (ILiquidityGauge) {
-        return ILiquidityGauge(_poolGauge[pool]);
+    function getPoolGauge(address pool) external view returns (IStakingLiquidityGauge) {
+        return IStakingLiquidityGauge(_poolGauge[pool]);
     }
 
     /**
