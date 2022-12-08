@@ -24,7 +24,7 @@ import { deployVotingEscrow } from "./utils/lp-mining/deploy-voting-escrow";
 import { ONE_DAY_SECONDS, ONE_WEEK_SECONDS } from "./utils/time";
 import { deployVault } from "./v2/vault/deploy-vault";
 
-const VAULT = "";
+const VAULT = "0x84259CbD70aA17EB282Cb40666d2687Cd8E100AA";
 const TIME_AUTH = "";
 const WETH = "0xe4E96Cf369D4d604Bedc4d7962F94D53E4B5e3C6"; // Mock WBNB
 
@@ -64,8 +64,9 @@ async function main() {
   // await deployTestERC20("Ashare", "ASHARE", parseEther("1000000"), chainId);
 
   // vault
-  await deployVault(WETH);
+  // await deployVault(WETH);
   // factories
+  await deployWeightedFactory(VAULT);
 }
 
 main().catch((error) => {
