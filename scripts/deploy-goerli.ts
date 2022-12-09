@@ -62,11 +62,19 @@ async function main() {
   // await deployTestERC20("Binance Pegged USD", "BUSD", parseEther("1000000"), chainId);
   // await deployTestERC20("Amethyst", "AMES", parseEther("1000000"), chainId);
   // await deployTestERC20("Ashare", "ASHARE", parseEther("1000000"), chainId);
+  // await deployTestERC20("Wrapped Ether", "ETH", parseEther("1000000"), chainId);
+  // await deployTestERC20("Wrapped Bitcoin", "WBTC", parseEther("1000000"), chainId);
 
   // vault
   // await deployVault(WETH);
+
   // factories
-  await deployWeightedFactory(VAULT);
+  // await deployWeightedFactory(VAULT);
+
+  // token setup
+  // await deployGovernanceToken("Vertek", "VRTK");
+
+  // liquidity mining
 }
 
 main().catch((error) => {

@@ -4,7 +4,7 @@ pragma solidity ^0.6.0;
 import "./ERC20Snapshot.sol";
 import "./AccessControl.sol";
 
-contract AequinoxToken is AccessControl, ERC20Snapshot {
+contract GovernanceToken is AccessControl, ERC20Snapshot {
     string public constant version = "1";
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant SNAPSHOT_ROLE = keccak256("SNAPSHOT_ROLE");
