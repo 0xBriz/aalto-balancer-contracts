@@ -6,7 +6,8 @@ export async function deployTestERC20(
   name: string,
   symbol: string,
   initialMint: BigNumber,
-  chainId: number
+  chainId: number,
+  saveData = true
 ) {
   try {
     const TestERC20 = await ethers.getContractFactory("TestERC20");
@@ -14,13 +15,16 @@ export async function deployTestERC20(
     await token.deployed();
     console.log(`${symbol} address:  `, token.address);
 
-    await saveDeplomentData(
-      symbol,
-      {
-        address: token.address,
-      },
-      chainId
-    );
+    if (saveData) {
+      await saveDeplomentData(
+        symbol,
+        {
+          address: token.address,
+        },
+        chainId
+      );
+    }
+
     return token;
   } catch (error) {
     console.error(error);

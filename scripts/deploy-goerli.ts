@@ -37,7 +37,7 @@ const WEIGHT_TWO_TOKEN_FACTORY = ""; // different repo
 const SINGLE_RECIPIENT_FACTORY = "";
 
 // VE
-const AEQ_TOKEN = "";
+const GOV_TOKEN = "0xb269A278E427478712e2AF0eBa728021157A2114";
 const AUTH_ADAPTER = "";
 const VOTING_ESCROW = "";
 const VE_BOOST_PROXY = "";
@@ -71,10 +71,9 @@ async function main() {
   // factories
   // await deployWeightedFactory(VAULT);
 
-  // token setup
+  // token setup/liquidity mining
   // await deployGovernanceToken("Vertek", "VRTK");
-
-  // liquidity mining
+  await deployTokenAdmin(VAULT, GOV_TOKEN, parseEther("2000000"));
 }
 
 main().catch((error) => {

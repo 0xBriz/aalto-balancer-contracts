@@ -35,7 +35,7 @@ interface IBalancerTokenAdmin is IAuthentication {
      */
     function getBalancerToken() external view returns (IBalancerToken);
 
-    function activate() external;
+    function activate(address initialMintReceiver) external;
 
     function rate() external view returns (uint256);
 
