@@ -22,11 +22,12 @@ import { deployVeBalHelper } from "./utils/lp-mining/deploy-ve-bal-helper";
 import { deployVeBoost } from "./utils/lp-mining/deploy-ve-boost";
 import { deployVotingEscrow } from "./utils/lp-mining/deploy-voting-escrow";
 import { ONE_DAY_SECONDS, ONE_WEEK_SECONDS } from "./utils/time";
-import { deployVault } from "./v2/vault/deploy-vault";
+import { deployAuthEntry, deployTimelock, deployVault } from "./v2/vault/deploy-vault";
 
 const VAULT = "0x84259CbD70aA17EB282Cb40666d2687Cd8E100AA";
 const TIME_AUTH = "";
 const WETH = "0xe4E96Cf369D4d604Bedc4d7962F94D53E4B5e3C6"; // Mock WBNB
+const ADMIN = "0x891eFc56f5CD6580b2fEA416adC960F2A6156494";
 
 // Factories
 const WEIGHT_FACTORY_NOAM = ""; // No asset managers
@@ -67,13 +68,19 @@ async function main() {
 
   // vault
   // await deployVault(WETH);
+  const adapter = "0x6dB0f5F98FB6cEA6c1A90232194D153c94E9C58b";
+  const authEntry = "0x4A5eC9D5C7dA0A24b9daACFf636aFc87c6a4fcE2";
+  const timelockAuth = "0xe775Ce316d91c8A40487338Bc14c745Ba52D8C7a";
+  //await deployAuthAdapter(VAULT);
+  // await deployAuthEntry(adapter);
+  // await deployTimelock(ADMIN, authEntry);
 
   // factories
   // await deployWeightedFactory(VAULT);
 
   // token setup/liquidity mining
   // await deployGovernanceToken("Vertek", "VRTK");
-  await deployTokenAdmin(VAULT, GOV_TOKEN, parseEther("2000000"));
+  //await deployTokenAdmin(VAULT, GOV_TOKEN, parseEther("2000000"));
 }
 
 main().catch((error) => {

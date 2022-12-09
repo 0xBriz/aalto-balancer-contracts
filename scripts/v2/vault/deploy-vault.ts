@@ -13,13 +13,13 @@ export async function deployVault(WETH: string) {
 
     const { vault, basicAuthorizer } = await doVault(chainId, WETH); // Will deploy a dummy authorizer to start
     const authAdapter = await deployAuthAdapter(vault.address);
-    const entryAdapter = await deployAuthEntry(authAdapter.address, chainId);
+    const entryAdapter = await deployAuthEntry(authAdapter.address);
 
     // Then, with the entrypoint correctly deployed, we create the actual authorizer to be used and set it in the vault.
     const sigHash = vault.interface.getSighash("setAuthorizer");
     const setAuthorizerActionId = await vault.getActionId(sigHash);
     await basicAuthorizer.grantRolesToMany([setAuthorizerActionId], [admin.address]);
-    const vaultAuthorizer = await deployTimelock(chainId, admin.address, entryAdapter.address);
+    const vaultAuthorizer = await deployTimelock(admin.address, entryAdapter.address);
     await vault.connect(admin).setAuthorizer(vaultAuthorizer.address);
 
     return {
@@ -71,7 +71,7 @@ async function doVault(chainId: number, weth: string) {
   };
 }
 
-async function deployTimelock(chainId: number, admin: string, entryAdapter: string) {
+export async function deployTimelock(admin: string, entryAdapter: string) {
   // AUTH
   const rootTransferDelay = 0; // Timelock until root(admin/boss) status can be transferred
   const TimelockAuthorizer = await ethers.getContractFactory("TimelockAuthorizer");
@@ -79,19 +79,10 @@ async function deployTimelock(chainId: number, admin: string, entryAdapter: stri
   await authorizer.deployed();
   console.log("TimelockAuthorizer deployed to: ", authorizer.address);
 
-  const authArgs = {
-    chainId,
-    admin: admin,
-    rootTransferDelay,
-    entryAdapter,
-  };
-
-  // await saveDeplomentData("TimelockAuthorizer", authArgs, chainId);
-
   return authorizer;
 }
 
-export async function deployAuthEntry(authAdapter: string, chainId: number) {
+export async function deployAuthEntry(authAdapter: string) {
   try {
     const AuthorizerAdaptorEntrypoint = await ethers.getContractFactory(
       "AuthorizerAdaptorEntrypoint"
@@ -99,15 +90,6 @@ export async function deployAuthEntry(authAdapter: string, chainId: number) {
     const ct = await AuthorizerAdaptorEntrypoint.deploy(authAdapter);
     await ct.deployed();
     console.log("AuthorizerAdaptorEntrypoint deployed to: ", ct.address);
-
-    // await saveDeplomentData(
-    //   "AuthorizerAdaptorEntrypoint",
-    //   {
-    //     authAdapter,
-    //   },
-    //   chainId
-    // );
-
     return ct;
   } catch (error) {
     console.error(error);
