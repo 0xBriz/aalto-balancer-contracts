@@ -59,8 +59,15 @@ contract BalancerTokenAdmin is IBalancerTokenAdmin, SingletonAuthentication, Ree
     uint256 private _startEpochSupply;
     uint256 private _rate;
 
-    constructor(IVault vault, IBalancerToken balancerToken) SingletonAuthentication(vault) {
+    uint256 private _initialMintAllowance;
+
+    constructor(
+        IVault vault,
+        IBalancerToken balancerToken,
+        uint256 initialMintAllowance
+    ) SingletonAuthentication(vault) {
         _balancerToken = balancerToken;
+        _initialMintAllowance = initialMintAllowance;
     }
 
     /**
@@ -154,7 +161,7 @@ contract BalancerTokenAdmin is IBalancerTokenAdmin, SingletonAuthentication, Ree
         );
 
         // As BAL inflation is now enforced by this contract we can initialise the relevant variables.
-        _startEpochSupply = _balancerToken.totalSupply();
+        _startEpochSupply = _balancerToken.totalSupply().sub(_initialMintAllowance);
         _startEpochTime = block.timestamp;
         _rate = INITIAL_RATE;
         emit MiningParametersUpdated(INITIAL_RATE, _startEpochSupply);
@@ -171,7 +178,8 @@ contract BalancerTokenAdmin is IBalancerTokenAdmin, SingletonAuthentication, Ree
         }
 
         require(
-            _balancerToken.totalSupply().add(amount) <= _availableSupply(),
+            _balancerToken.totalSupply().sub(_initialMintAllowance).add(amount) <=
+                _availableSupply(),
             "Mint amount exceeds remaining available supply"
         );
         _balancerToken.mint(to, amount);
@@ -291,7 +299,9 @@ contract BalancerTokenAdmin is IBalancerTokenAdmin, SingletonAuthentication, Ree
 
     function _updateMiningParameters() internal {
         uint256 inflationRate = _rate;
-        uint256 startEpochSupply = _startEpochSupply.add(inflationRate.mul(RATE_REDUCTION_TIME));
+        uint256 startEpochSupply = _startEpochSupply.sub(_initialMintAllowance).add(
+            inflationRate.mul(RATE_REDUCTION_TIME)
+        );
         inflationRate = inflationRate.mul(RATE_DENOMINATOR).divDown(RATE_REDUCTION_COEFFICIENT);
 
         _miningEpoch = _miningEpoch.add(1);

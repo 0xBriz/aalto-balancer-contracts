@@ -56,15 +56,15 @@ describe("Token Emissions", () => {
   let balTokenAdmin: Contract;
   let balMinter: Contract;
 
+  const initialMintAllowance = parseEther("2000000");
+
   beforeEach(async () => {
     const accounts = await ethers.getSigners();
     owner = accounts[0];
     const { vault, vaultAuthorizer } = await deployVault(WETH);
     vaultAuth = vaultAuthorizer;
     govToken = await deployGovernanceToken("Vertek", "VRTK");
-    // // await AEQ.mint(owner.address, parseEther("100000"));
-    balTokenAdmin = await deployTokenAdmin(vault.address, govToken.address);
-    // await giveTokenAdminOwnership();
+    balTokenAdmin = await deployTokenAdmin(vault.address, govToken.address, initialMintAllowance);
   });
 
   async function giveTokenAdminOwnership() {
@@ -82,6 +82,12 @@ describe("Token Emissions", () => {
   }
 
   it("should follow the correct emissions curve", async () => {
+    await govToken.mint(owner.address, initialMintAllowance);
+    await giveTokenAdminOwnership();
+    console.log((await balTokenAdmin.getStartEpochTime()).toNumber());
+    console.log(formatEther(await balTokenAdmin.getStartEpochSupply()));
+    await helpers.time.increase(ONE_WEEK_SECONDS);
+    console.log(formatEther(await balTokenAdmin.getAvailableSupply()));
     // await runTimeLoop();
     // await logEmissionsInfo();
   });
