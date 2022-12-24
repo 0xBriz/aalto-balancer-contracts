@@ -50,13 +50,12 @@ contract ProtocolFeesCollector is IProtocolFeesCollector, Authentication, Reentr
     uint256 private _flashLoanFeePercentage;
 
     constructor(IVault _vault)
-        // The ProtocolFeesCollector is a singleton, so it simply uses its own address to disambiguate action
-        // identifiers.
+        // The ProtocolFeesCollector is a singleton, so it simply uses its own address to disambiguate action identifiers
         Authentication(bytes32(uint256(address(this))))
     {
         vault = _vault;
 
-        _swapFeePercentage = _MAX_PROTOCOL_SWAP_FEE_PERCENTAGE;
+        _swapFeePercentage = _MAX_PROTOCOL_SWAP_FEE_PERCENTAGE / 2;
         _flashLoanFeePercentage = _MAX_PROTOCOL_FLASH_LOAN_FEE_PERCENTAGE;
     }
 
