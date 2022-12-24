@@ -37,8 +37,8 @@ abstract contract TemporarilyPausable is ITemporarilyPausable {
     // The Pause Window and Buffer Period are timestamp-based: they should not be relied upon for sub-minute accuracy.
     // solhint-disable not-rely-on-time
 
-    uint256 private constant _MAX_PAUSE_WINDOW_DURATION = 90 days;
-    uint256 private constant _MAX_BUFFER_PERIOD_DURATION = 30 days;
+    uint256 private constant _MAX_PAUSE_WINDOW_DURATION = 180 days;
+    uint256 private constant _MAX_BUFFER_PERIOD_DURATION = 90 days;
 
     uint256 private immutable _pauseWindowEndTime;
     uint256 private immutable _bufferPeriodEndTime;
@@ -96,15 +96,9 @@ abstract contract TemporarilyPausable is ITemporarilyPausable {
      */
     function _setPaused(bool paused) internal {
         if (paused) {
-            _require(
-                block.timestamp < _getPauseWindowEndTime(),
-                Errors.PAUSE_WINDOW_EXPIRED
-            );
+            _require(block.timestamp < _getPauseWindowEndTime(), Errors.PAUSE_WINDOW_EXPIRED);
         } else {
-            _require(
-                block.timestamp < _getBufferPeriodEndTime(),
-                Errors.BUFFER_PERIOD_EXPIRED
-            );
+            _require(block.timestamp < _getBufferPeriodEndTime(), Errors.BUFFER_PERIOD_EXPIRED);
         }
 
         _paused = paused;
