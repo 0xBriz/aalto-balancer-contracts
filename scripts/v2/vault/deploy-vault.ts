@@ -40,8 +40,8 @@ async function doVault(chainId: number, weth: string) {
   basicAuthorizer = await basicAuthorizer.deployed();
 
   // Set to max values
-  const pauseWindowDuration = ONE_MONTH_SECONDS * 3;
-  const bufferPeriodDuration = DAY * 30;
+  const pauseWindowDuration = ONE_MONTH_SECONDS * 6;
+  const bufferPeriodDuration = DAY * 90;
 
   const Vault = await ethers.getContractFactory("Vault");
   // Use mock authorizer at first
