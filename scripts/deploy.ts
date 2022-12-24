@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { MAINNET_VAULT } from "../data/addresses";
 import { deployERC4626Factory } from "./utils/factories/deploy-erc4626-factory";
 import { deployGovernanceToken } from "./general/deploy-governance-token";
-import { deployMulticall } from "./general/deploy-multicall";
+import { deployMulticall, deployMulticallV1 } from "./general/deploy-multicall";
 import { deployRelayer } from "./general/deploy-relayer";
 import { deployVault } from "./deploy-vault";
 import { deployTestERC20 } from "./utils/deploy-test-erc20";
@@ -43,7 +43,12 @@ const BAL_MINTER = "0x513f235C0bCCdeeecb81e2688453CAfaDf65c5e3";
 const SINGLE_GAUGE_FACTORY = "0xf7fE0c29A251a8A8E5Cd36A54daBD0357a98b591";
 const BAL_TOKEN_HOLDER = "0x97a1b849857bF8656fb150C45d125B0a8BAa88D0";
 
-async function main() {}
+async function main() {
+  await ethers.provider.ready;
+  const chainId = ethers.provider.network.chainId;
+  console.log("Current block number: " + (await ethers.provider.getBlockNumber()));
+  await deployMulticallV1();
+}
 
 main().catch((error) => {
   console.error(error);

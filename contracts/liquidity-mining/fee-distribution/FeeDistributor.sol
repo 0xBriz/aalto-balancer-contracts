@@ -73,7 +73,7 @@ contract FeeDistributor is IFeeDistributor, ReentrancyGuard {
     mapping(address => mapping(uint256 => uint256)) private _userBalanceAtTimestamp;
     mapping(address => mapping(IERC20 => uint256)) private _userTokenTimeCursor;
 
-    // Start time needs to be out in front in a week
+    // Start time needs to be at least in the "next" epoch week
     // Can't just deploy and rip
     constructor(IVotingEscrow votingEscrow, uint256 startTime) {
         _votingEscrow = votingEscrow;

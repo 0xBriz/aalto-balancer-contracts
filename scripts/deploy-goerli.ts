@@ -2,7 +2,7 @@ import { parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { deployERC4626Factory } from "./utils/factories/deploy-erc4626-factory";
 import { deployGovernanceToken } from "./general/deploy-governance-token";
-import { deployMulticall } from "./general/deploy-multicall";
+import { deployMulticall, deployMulticallV1 } from "./general/deploy-multicall";
 import { setupGovernance } from "./setup-governance";
 import { deployTestERC20 } from "./utils/deploy-test-erc20";
 import { deployBootstrapPoolFactory } from "./utils/factories/lbp-factory";
@@ -59,6 +59,7 @@ async function main() {
   await ethers.provider.ready;
   const chainId = ethers.provider.network.chainId;
   console.log("Current block number: " + (await ethers.provider.getBlockNumber()));
+  await deployMulticallV1();
   // test tokens
   // await deployTestERC20("Tether USDT", "USDT", parseEther("1000000"), chainId);
   // await deployTestERC20("USD Coin", "USDC", parseEther("1000000"), chainId);
@@ -90,6 +91,8 @@ async function main() {
   // await deployVeBoost(VAULT, VOTING_ESCROW);
   // await deployBalancerMinter(BAL_TOKEN_ADMIN, GAUGE_CONTROLLER);
   // await deployLiquidityGaugeFactoryNoAdmin(BAL_MINTER, VE_BOOST_PROXY, AUTH_ENTRY_ADAPTER);
+  // await deployBalTokenHolder(GOV_TOKEN, VAULT, "BalTokenHolder");
+  // await deploySingleRecipientGaugeFactory(BAL_MINTER);
 }
 
 main().catch((error) => {
