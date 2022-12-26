@@ -59,7 +59,8 @@ async function main() {
   await ethers.provider.ready;
   const chainId = ethers.provider.network.chainId;
   console.log("Current block number: " + (await ethers.provider.getBlockNumber()));
-  await deployMulticallV1();
+  //
+  // await deployMulticallV1();
   // test tokens
   // await deployTestERC20("Tether USDT", "USDT", parseEther("1000000"), chainId);
   // await deployTestERC20("USD Coin", "USDC", parseEther("1000000"), chainId);
@@ -93,6 +94,9 @@ async function main() {
   // await deployLiquidityGaugeFactoryNoAdmin(BAL_MINTER, VE_BOOST_PROXY, AUTH_ENTRY_ADAPTER);
   // await deployBalTokenHolder(GOV_TOKEN, VAULT, "BalTokenHolder");
   // await deploySingleRecipientGaugeFactory(BAL_MINTER);
+
+  // Once initial VE deposit has been made, or if not starting until the week after deployment
+  // await deployFeeDistributor(VOTING_ESCROW, Date.now() * 1000);
 }
 
 main().catch((error) => {
