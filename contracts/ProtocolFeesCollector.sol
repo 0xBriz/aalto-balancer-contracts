@@ -33,7 +33,7 @@ import "./solidity-utils/openzeppelin/SafeERC20.sol";
 contract ProtocolFeesCollector is IProtocolFeesCollector, Authentication, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
-    // Absolute maximum fee percentages (1e18 = 100%, 1e17 = 10%).
+    // Absolute maximum fee percentages (1e18 = 100%, 1e16 = 1%).
     uint256 private constant _MAX_PROTOCOL_SWAP_FEE_PERCENTAGE = 1e18; // 100%
     uint256 private constant _MAX_PROTOCOL_FLASH_LOAN_FEE_PERCENTAGE = 1e16; // 1%
 
