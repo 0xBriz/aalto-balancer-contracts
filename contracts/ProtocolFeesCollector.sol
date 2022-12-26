@@ -35,7 +35,7 @@ contract ProtocolFeesCollector is IProtocolFeesCollector, Authentication, Reentr
 
     // Absolute maximum fee percentages (1e18 = 100%, 1e17 = 10%).
     uint256 private constant _MAX_PROTOCOL_SWAP_FEE_PERCENTAGE = 1e18; // 100%
-    uint256 private constant _MAX_PROTOCOL_FLASH_LOAN_FEE_PERCENTAGE = 1e17; // 10%
+    uint256 private constant _MAX_PROTOCOL_FLASH_LOAN_FEE_PERCENTAGE = 1e16; // 1%
 
     IVault public immutable override vault;
 
