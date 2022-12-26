@@ -848,7 +848,7 @@ def initialize(_lp_token: address):
     self.lp_token = _lp_token
 
     symbol: String[32] = ERC20Extended(_lp_token).symbol()
-    name: String[64] = concat("Aequinox ", symbol, " Gauge Deposit")
+    name: String[64] = concat("Vertek ", symbol, " Gauge Deposit")
 
     self.name = name
     self.symbol = concat(symbol, "-gauge")
