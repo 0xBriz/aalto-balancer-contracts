@@ -49,7 +49,7 @@ const VE_BOOST_PROXY = "0x63BeeBDc3Bad6893E96A6138641BF694c42b2CB4";
 const GAUGE_CONTROLLER = "0x2ee2f54e95ce6f24dAdbDfa8221a6F763E8eEB96";
 const BAL_TOKEN_ADMIN = "0x9Ad2B6bc51B1bFe3E21918447f3B189324AD62bc";
 const BAL_MINTER = "0x2c38100e5A697d2284Fc2b2e4E948d0215E2fCa2";
-const VE_BAL_HELPER = "";
+const VE_BAL_HELPER = "0xe030325aDa7e0365EBD0efb4adf3ef55F5Fd3BAE";
 const FEE_DISTRIBUTOR = "";
 const SINGLE_GAUGE_FACTORY = "";
 
@@ -94,6 +94,7 @@ async function main() {
   // await deployLiquidityGaugeFactoryNoAdmin(BAL_MINTER, VE_BOOST_PROXY, AUTH_ENTRY_ADAPTER);
   // await deployBalTokenHolder(GOV_TOKEN, VAULT, "BalTokenHolder");
   // await deploySingleRecipientGaugeFactory(BAL_MINTER);
+  // await deployVeBalHelper(GAUGE_CONTROLLER);
 
   // Once initial VE deposit has been made, or if not starting until the week after deployment
   // await deployFeeDistributor(VOTING_ESCROW, Date.now() * 1000);
