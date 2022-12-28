@@ -14,7 +14,7 @@
 
 pragma solidity ^0.7.0;
 
-import "../solidity-utils/openzeppelin/IERC20.sol";
+import "../interfaces/solidity-utils/openzeppelin/IERC20.sol";
 
 library WeightedPoolUserData {
     // In order to preserve backwards compatibility, make sure new join and exit kinds are added at the end of the enum.
@@ -55,10 +55,7 @@ library WeightedPoolUserData {
         pure
         returns (uint256[] memory amountsIn, uint256 minBPTAmountOut)
     {
-        (, amountsIn, minBPTAmountOut) = abi.decode(
-            self,
-            (JoinKind, uint256[], uint256)
-        );
+        (, amountsIn, minBPTAmountOut) = abi.decode(self, (JoinKind, uint256[], uint256));
     }
 
     function tokenInForExactBptOut(bytes memory self)
@@ -66,10 +63,7 @@ library WeightedPoolUserData {
         pure
         returns (uint256 bptAmountOut, uint256 tokenIndex)
     {
-        (, bptAmountOut, tokenIndex) = abi.decode(
-            self,
-            (JoinKind, uint256, uint256)
-        );
+        (, bptAmountOut, tokenIndex) = abi.decode(self, (JoinKind, uint256, uint256));
     }
 
     function allTokensInForExactBptOut(bytes memory self)
@@ -80,11 +74,7 @@ library WeightedPoolUserData {
         (, bptAmountOut) = abi.decode(self, (JoinKind, uint256));
     }
 
-    function addToken(bytes memory self)
-        internal
-        pure
-        returns (uint256 amountIn)
-    {
+    function addToken(bytes memory self) internal pure returns (uint256 amountIn) {
         (, amountIn) = abi.decode(self, (JoinKind, uint256));
     }
 
@@ -95,17 +85,10 @@ library WeightedPoolUserData {
         pure
         returns (uint256 bptAmountIn, uint256 tokenIndex)
     {
-        (, bptAmountIn, tokenIndex) = abi.decode(
-            self,
-            (ExitKind, uint256, uint256)
-        );
+        (, bptAmountIn, tokenIndex) = abi.decode(self, (ExitKind, uint256, uint256));
     }
 
-    function exactBptInForTokensOut(bytes memory self)
-        internal
-        pure
-        returns (uint256 bptAmountIn)
-    {
+    function exactBptInForTokensOut(bytes memory self) internal pure returns (uint256 bptAmountIn) {
         (, bptAmountIn) = abi.decode(self, (ExitKind, uint256));
     }
 
@@ -114,18 +97,11 @@ library WeightedPoolUserData {
         pure
         returns (uint256[] memory amountsOut, uint256 maxBPTAmountIn)
     {
-        (, amountsOut, maxBPTAmountIn) = abi.decode(
-            self,
-            (ExitKind, uint256[], uint256)
-        );
+        (, amountsOut, maxBPTAmountIn) = abi.decode(self, (ExitKind, uint256[], uint256));
     }
 
     // Managed Pool
-    function removeToken(bytes memory self)
-        internal
-        pure
-        returns (uint256 tokenIndex)
-    {
+    function removeToken(bytes memory self) internal pure returns (uint256 tokenIndex) {
         (, tokenIndex) = abi.decode(self, (ExitKind, uint256));
     }
 }

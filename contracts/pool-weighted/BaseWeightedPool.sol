@@ -15,7 +15,7 @@
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "../interfaces/pool-weighted/WeightedPoolUserData.sol";
+import "./WeightedPoolUserData.sol";
 
 import "../solidity-utils/math/FixedPoint.sol";
 import "../solidity-utils/helpers/InputHelpers.sol";
