@@ -4,7 +4,7 @@ import { sub } from "date-fns";
 import { MAX_UINT256 } from "../scripts/utils/constants";
 import { ERC20_ABI } from "./abis/ERC20ABI";
 import { WEIGHTED_POOL_ABI } from "./abis/WeightPool";
-import { IERC20, JoinPoolRequest } from "./types";
+import { IERC20, JoinPoolRequest } from "../utils/types";
 import liqV5 from "../artifacts/contracts/liquidity-mining/gauges/LiquidityGaugeV5.vy/LiquidityGaugeV5.json";
 import AuthAdapter from "../artifacts/contracts/liquidity-mining/admin/AuthorizerAdaptor.sol/AuthorizerAdaptor.json";
 import BPT from "../artifacts/contracts/pool-utils/BalancerPoolToken.sol/BalancerPoolToken.json";
@@ -156,13 +156,6 @@ export function getLiquidityGauge(address: string, signer) {
 
 export function getAuthAdapter(address: string, signer) {
   return new Contract(address, AuthAdapter.abi, signer);
-}
-
-export function getFunctionSigHash(functionPrototype: string) {
-  const iface = new Interface([functionPrototype]);
-  // "function fn() external".split(' ')[1] = portion needed for getSighash
-  const selector = iface.getSighash(functionPrototype.split(" ")[1]);
-  return selector;
 }
 
 export function getPreviousEpoch(weeksToGoBack = 0): Date {

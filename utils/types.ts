@@ -1,4 +1,4 @@
-import { BigNumber, ContractTransaction, ethers } from 'ethers';
+import { BigNumber, ContractTransaction, ethers } from "ethers";
 
 export enum ExitKindWeighted {
   EXACT_BPT_IN_FOR_ONE_TOKEN_OUT,
@@ -59,22 +59,10 @@ export interface CreateWeightedPoolArgs {
   owner: string;
 }
 
-export interface CreateWeightedTwoTokensPoolArgs
-  extends CreateWeightedPoolArgs {
+export interface CreateWeightedTwoTokensPoolArgs extends CreateWeightedPoolArgs {
   oracleEnabled: boolean;
 }
 
 export interface StablePoolCreationArgs extends CreateWeightedPoolArgs {
   amplificationParameter: BigNumber;
-}
-
-export interface ChefPoolAllocation {
-  poolId: number;
-  allocPoints: number;
-}
-
-export interface ChefAddPoolArgs {
-  allocPoints: number;
-  lpToken: string;
-  rewarder?: string;
 }
