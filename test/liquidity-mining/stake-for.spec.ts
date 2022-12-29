@@ -2,17 +2,17 @@ import { ethers } from "hardhat";
 import * as helpers from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { BigNumber, Contract } from "ethers";
-import { deployVault } from "../scripts/v2/vault/deploy-vault";
-import { deployGovernanceToken } from "../scripts/general/deploy-governance-token";
+import { deployVault } from "../../scripts/v2/vault/deploy-vault";
+import { deployGovernanceToken } from "../../scripts/general/deploy-governance-token";
 import { expect } from "chai";
-import { deployTokenAdmin } from "../scripts/utils/lp-mining/deploy-token-admin";
-import TimeAuth from "../artifacts/contracts/authorizer/TimelockAuthorizer.sol/TimelockAuthorizer.json";
-import AuthAdapter from "../artifacts/contracts/liquidity-mining/admin/AuthorizerAdaptor.sol/AuthorizerAdaptor.json";
+import { deployTokenAdmin } from "../../scripts/utils/lp-mining/deploy-token-admin";
+import TimeAuth from "../../artifacts/contracts/authorizer/TimelockAuthorizer.sol/TimelockAuthorizer.json";
+import AuthAdapter from "../../artifacts/contracts/liquidity-mining/admin/AuthorizerAdaptor.sol/AuthorizerAdaptor.json";
 import { formatEther, Interface, parseEther } from "ethers/lib/utils";
-import { deployAuthAdapter } from "../scripts/utils/lp-mining/deploy-auth-adapter";
-import { deployTestERC20 } from "../scripts/utils/deploy-test-erc20";
-import { deployVotingEscrowAdmin } from "../scripts/utils/lp-mining/deploy-voting-escrow-admin";
-import { deployGaugeController } from "../scripts/utils/lp-mining/deploy-gauge-controller";
+import { deployAuthAdapter } from "../../scripts/utils/lp-mining/deploy-auth-adapter";
+import { deployTestERC20 } from "../../scripts/utils/deploy-test-erc20";
+import { deployVotingEscrowAdmin } from "../../scripts/utils/lp-mining/deploy-voting-escrow-admin";
+import { deployGaugeController } from "../../scripts/utils/lp-mining/deploy-gauge-controller";
 
 const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"; // ETH mainnet
 
