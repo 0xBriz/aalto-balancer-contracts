@@ -44,7 +44,7 @@ contract BalancerTokenAdmin is IBalancerTokenAdmin, SingletonAuthentication, Ree
     // uint256 public constant override RATE_DENOMINATOR = 1e18;
 
     uint256 public constant override INITIAL_RATE = (210000 * 1e18) / uint256(1 weeks); // BAL has 18 decimals
-    uint256 public constant override RATE_REDUCTION_TIME = 90 days;
+    uint256 public constant override RATE_REDUCTION_TIME = 7 days;
     uint256 public constant override RATE_REDUCTION_COEFFICIENT = 1139207115002721024;
     // uint256 public constant override RATE_REDUCTION_COEFFICIENT = 2378414230005442048;  // 2 ** (1/2) * 1e18
     uint256 public constant override RATE_DENOMINATOR = 1e18;
@@ -181,6 +181,7 @@ contract BalancerTokenAdmin is IBalancerTokenAdmin, SingletonAuthentication, Ree
             _updateMiningParameters();
         }
 
+        // Available supply will already account for initial mint
         require(
             _balancerToken.totalSupply().sub(_initialMintAllowance).add(amount) <=
                 _availableSupply(),
@@ -303,6 +304,7 @@ contract BalancerTokenAdmin is IBalancerTokenAdmin, SingletonAuthentication, Ree
 
     function _updateMiningParameters() internal {
         uint256 inflationRate = _rate;
+        // Will take care of _availableSupply() checks then
         uint256 startEpochSupply = _startEpochSupply.sub(_initialMintAllowance).add(
             inflationRate.mul(RATE_REDUCTION_TIME)
         );
