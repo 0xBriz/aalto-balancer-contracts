@@ -1,5 +1,5 @@
 import { sub } from "date-fns";
-import * as moment from "moment";
+import moment from "moment";
 
 export const ONE_SECOND_MS = 1000;
 
@@ -11,6 +11,7 @@ export const ONE_WEEK = ONE_DAY * 7;
 export const ONE_DAY_SECONDS = 86400;
 export const ONE_WEEK_SECONDS = ONE_DAY_SECONDS * 7;
 export const ONE_MONTH_SECONDS = ONE_DAY_SECONDS * 30;
+export const THREE_MONTHS_SECONDS = ONE_DAY_SECONDS * 90;
 
 export const BSC_BLOCKS_PER_DAY = 28800;
 
@@ -75,4 +76,8 @@ export function getPreviousEpochUnix(weeksToGoBack = 0): number {
   daysSinceThursday = daysSinceThursday + weeksToGoBack * 7;
 
   return todayAtMidnightUTC.subtract(daysSinceThursday, "days").unix();
+}
+
+export function secondsToDate(seconds: number) {
+  return new Date(seconds * 1000).toLocaleString();
 }

@@ -44,9 +44,9 @@ contract BalancerTokenAdmin is IBalancerTokenAdmin, SingletonAuthentication, Ree
     // uint256 public constant override RATE_DENOMINATOR = 1e18;
 
     uint256 public constant override INITIAL_RATE = (210000 * 1e18) / uint256(1 weeks); // BAL has 18 decimals
-    uint256 public constant override RATE_REDUCTION_TIME = 7 days;
+    uint256 public constant override RATE_REDUCTION_TIME = 90 days;
     uint256 public constant override RATE_REDUCTION_COEFFICIENT = 1139207115002721024;
-    // uint256 public constant override RATE_REDUCTION_COEFFICIENT = 2378414230005442048;  // 2 ** (1/2) * 1e18
+    //uint256 public constant override RATE_REDUCTION_COEFFICIENT = 1; // 1%
     uint256 public constant override RATE_DENOMINATOR = 1e18;
 
     IBalancerToken private immutable _balancerToken;
@@ -305,9 +305,16 @@ contract BalancerTokenAdmin is IBalancerTokenAdmin, SingletonAuthentication, Ree
     function _updateMiningParameters() internal {
         uint256 inflationRate = _rate;
         // Will take care of _availableSupply() checks then
-        uint256 startEpochSupply = _startEpochSupply.sub(_initialMintAllowance).add(
-            inflationRate.mul(RATE_REDUCTION_TIME)
-        );
+        uint256 startEpochSupply;
+        if (_miningEpoch > 0) {
+            // avoid underflow for first epoch
+            startEpochSupply = _startEpochSupply.sub(_initialMintAllowance).add(
+                inflationRate.mul(RATE_REDUCTION_TIME)
+            );
+        } else {
+            startEpochSupply = _startEpochSupply.add(inflationRate.mul(RATE_REDUCTION_TIME));
+        }
+
         inflationRate = inflationRate.mul(RATE_DENOMINATOR).divDown(RATE_REDUCTION_COEFFICIENT);
 
         _miningEpoch = _miningEpoch.add(1);

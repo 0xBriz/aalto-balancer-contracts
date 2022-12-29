@@ -41,7 +41,7 @@ export class AuthAdapterEntryPoint extends BaseContract {
       targetContractAddress
     );
     if (!canDo) {
-      await this.vaulthAuthorizer.grantFunctionPermisionsForContract([actionId], grantedAddress, [
+      await this.vaulthAuthorizer.grantPermissions([actionId], grantedAddress, [
         targetContractAddress,
       ]);
     }

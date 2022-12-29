@@ -1,4 +1,3 @@
-import { Contract } from "ethers";
 import { doTransaction } from "../tx-utils";
 import timeAuth from "../../artifacts/contracts/authorizer/TimelockAuthorizer.sol/TimelockAuthorizer.json";
 import { BaseContract } from "./base-contract";
@@ -11,11 +10,7 @@ export class VaultAuthorizationService extends BaseContract {
   /**
    * Grant dev(or any) account access to call permissioned vault functions.
    */
-  async grantFunctionPermisionsForContract(
-    actionIds: string[],
-    accountToGrant: string,
-    contractToAccess: string[]
-  ) {
+  async grantPermissions(actionIds: string[], accountToGrant: string, contractToAccess: string[]) {
     try {
       return doTransaction(
         await this.contract.grantPermissions(actionIds, accountToGrant, contractToAccess)
