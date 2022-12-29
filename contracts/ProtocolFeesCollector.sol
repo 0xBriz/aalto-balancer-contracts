@@ -34,7 +34,7 @@ contract ProtocolFeesCollector is IProtocolFeesCollector, Authentication, Reentr
     using SafeERC20 for IERC20;
 
     // Absolute maximum fee percentages (1e18 = 100%, 1e16 = 1%).
-    uint256 private constant _MAX_PROTOCOL_SWAP_FEE_PERCENTAGE = 1e18; // 100%
+    uint256 private constant _MAX_PROTOCOL_SWAP_FEE_PERCENTAGE = 50e16; // 50%
     uint256 private constant _MAX_PROTOCOL_FLASH_LOAN_FEE_PERCENTAGE = 1e16; // 1%
 
     IVault public immutable override vault;
@@ -55,7 +55,7 @@ contract ProtocolFeesCollector is IProtocolFeesCollector, Authentication, Reentr
     {
         vault = _vault;
 
-        _swapFeePercentage = _MAX_PROTOCOL_SWAP_FEE_PERCENTAGE / 2;
+        _swapFeePercentage = _MAX_PROTOCOL_SWAP_FEE_PERCENTAGE;
         _flashLoanFeePercentage = _MAX_PROTOCOL_FLASH_LOAN_FEE_PERCENTAGE;
     }
 
