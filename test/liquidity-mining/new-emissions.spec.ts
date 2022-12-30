@@ -4,8 +4,8 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-wit
 import { BigNumber, Contract } from "ethers";
 import { deployTokenAdmin } from "../../scripts/utils/lp-mining/deploy-token-admin";
 import { commify, formatEther, parseEther } from "ethers/lib/utils";
-import { deployGovernanceToken } from "../../scripts/general/deploy-governance-token";
-import { deployVault } from "../../scripts/v2/vault/deploy-vault";
+import { deployGovernanceToken } from "../../utils/deployers/liquidity-mining/governance/deploy-governance-token";
+import { deployVault } from "../../utils/deployers/vault/deploy-vault";
 import { ONE_WEEK_SECONDS } from "../../scripts/utils/time";
 import { secondsToDate, THREE_MONTHS_SECONDS } from "../../utils/time";
 import { OPERATOR } from "../../utils/addresses";

@@ -1,17 +1,19 @@
 import { ethers } from "hardhat";
-import { deployAuthAdapter } from "../../utils/lp-mining/deploy-auth-adapter";
-import { saveDeplomentData } from "../../utils/save-deploy-data";
-import { DAY, ONE_MONTH_SECONDS } from "../../utils/time";
+import { deployAuthAdapter } from "../liquidity-mining/deploy-auth-adapter";
+import { saveDeplomentData } from "../../../scripts/utils/save-deploy-data";
+import { DAY, ONE_MONTH_SECONDS } from "../../../scripts/utils/time";
+import { TOKENS } from "../../token-map";
 
-export async function deployVault(WETH: string) {
+export async function deployVault() {
   try {
+    await ethers.provider.ready;
     const admin = (await ethers.getSigners())[0];
     const chainId = ethers.provider.network.chainId;
 
     // This sequence breaks the circular dependency between authorizer, vault, adaptor and entrypoint.
     // First we deploy the vault, adaptor and entrypoint with a basic authorizer.
 
-    const { vault, basicAuthorizer } = await doVault(chainId, WETH); // Will deploy a dummy authorizer to start
+    const { vault, basicAuthorizer } = await doVault(TOKENS.NATIVE_TOKEN[chainId]); // Will deploy a dummy authorizer to start
     const authAdapter = await deployAuthAdapter(vault.address);
     const entryAdapter = await deployAuthEntry(authAdapter.address);
 
@@ -34,10 +36,12 @@ export async function deployVault(WETH: string) {
   }
 }
 
-async function doVault(chainId: number, weth: string) {
+async function doVault(weth: string) {
   const MockBasicAuthorizer = await ethers.getContractFactory("MockBasicAuthorizer");
   let basicAuthorizer = await MockBasicAuthorizer.deploy();
   basicAuthorizer = await basicAuthorizer.deployed();
+
+  await saveDeplomentData("MockBasicAuthorizer", basicAuthorizer);
 
   // Set to max values
   const pauseWindowDuration = ONE_MONTH_SECONDS * 6;
@@ -55,16 +59,14 @@ async function doVault(chainId: number, weth: string) {
   console.log("Vault deployed to: ", vault.address);
 
   const vaultArgs = {
-    chainId,
-    authorizer: basicAuthorizer.address, //  use original value
+    authorizer: basicAuthorizer.address, //  use original value for verification
     WETH: weth,
     pauseWindowDuration,
     bufferPeriodDuration,
   };
-  // console.log("vaultArgs:");
-  // console.log(vaultArgs);
 
-  // await saveDeplomentData("Vault", vaultArgs, chainId);
+  await saveDeplomentData("Vault", vault, vaultArgs);
+
   return {
     vault,
     basicAuthorizer,
@@ -79,6 +81,12 @@ export async function deployTimelock(admin: string, entryAdapter: string) {
   await authorizer.deployed();
   console.log("TimelockAuthorizer deployed to: ", authorizer.address);
 
+  await saveDeplomentData("TimelockAuthorizer", authorizer, {
+    admin,
+    entryAdapter,
+    rootTransferDelay,
+  });
+
   return authorizer;
 }
 
@@ -87,10 +95,15 @@ export async function deployAuthEntry(authAdapter: string) {
     const AuthorizerAdaptorEntrypoint = await ethers.getContractFactory(
       "AuthorizerAdaptorEntrypoint"
     );
-    const ct = await AuthorizerAdaptorEntrypoint.deploy(authAdapter);
-    await ct.deployed();
-    console.log("AuthorizerAdaptorEntrypoint deployed to: ", ct.address);
-    return ct;
+    const authorizer = await AuthorizerAdaptorEntrypoint.deploy(authAdapter);
+    await authorizer.deployed();
+    console.log("AuthorizerAdaptorEntrypoint deployed to: ", authorizer.address);
+
+    await saveDeplomentData("AuthorizerAdaptorEntrypoint", authorizer, {
+      authAdapter,
+    });
+
+    return authorizer;
   } catch (error) {
     console.error(error);
     process.exitCode = 1;

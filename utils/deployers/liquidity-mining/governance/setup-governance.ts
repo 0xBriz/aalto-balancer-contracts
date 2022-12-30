@@ -1,13 +1,18 @@
 import { Interface } from "@ethersproject/abi/lib/interface";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
-import { AequinoxToken, TimelockAuthorizer } from "../typechain";
-import { BalancerTokenAdmin } from "../typechain/BalancerTokenAdmin";
-import Timelock from "../artifacts/contracts/authorizer/TimelockAuthorizer.sol/TimelockAuthorizer.json";
-import BalTokenAdmin from "../artifacts/contracts/liquidity-mining/BalancerTokenAdmin.sol/BalancerTokenAdmin.json";
-import GovToken from "../artifacts/contracts/liquidity-mining/governance/AequinoxToken.sol/AequinoxToken.json";
+import { GovernanceToken, TimelockAuthorizer } from "../../../../typechain";
+import { BalancerTokenAdmin } from "../../../../typechain/BalancerTokenAdmin";
+import Timelock from "../../../../artifacts/contracts/authorizer/TimelockAuthorizer.sol/TimelockAuthorizer.json";
+import BalTokenAdmin from "../../../../artifacts/contracts/liquidity-mining/BalancerTokenAdmin.sol/BalancerTokenAdmin.json";
+import GovToken from "../../../../artifacts/contracts/liquidity-mining/governance/GovernanceToken.sol/GovernanceToken.json";
+import { OPERATOR } from "../../../addresses";
 
-export async function setupGovernance(balAdminAddress: string, auth: string, aeqAdress: string) {
+export async function setupGovernance(
+  balAdminAddress: string,
+  auth: string,
+  govTokenAdress: string
+) {
   try {
     /**
      * Need to grant the deployer dev account permissions on the vault authorizer in order
@@ -39,16 +44,16 @@ export async function setupGovernance(balAdminAddress: string, auth: string, aeq
       throw "Adding token admin permissions failed";
     }
 
-    const AEQ: AequinoxToken = new Contract(
-      aeqAdress,
+    const AEQ: GovernanceToken = new Contract(
+      govTokenAdress,
       GovToken.abi,
       signer
-    ) as unknown as AequinoxToken;
+    ) as unknown as GovernanceToken;
 
     // BalAdmin will take over all roles for the token after initial mints
     await AEQ.grantRole(await AEQ.DEFAULT_ADMIN_ROLE(), balAdminAddress);
 
-    await balAdmin.activate();
+    await balAdmin.activate(OPERATOR);
   } catch (error) {
     console.log(error);
     process.exit(1);

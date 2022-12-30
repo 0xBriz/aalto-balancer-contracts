@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { MAINNET_VAULT } from "../../data/addresses";
+import { MAINNET_VAULT } from "../../../data/addresses";
 
 async function main() {
   const BalancerHelpers = await ethers.getContractFactory("BalancerHelpers");

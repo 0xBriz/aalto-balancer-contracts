@@ -1,4 +1,9 @@
 export const TOKENS = {
+  NATIVE_TOKEN: {
+    // same as WBNB for now, but in the event we do other things
+    [5]: "0xe4E96Cf369D4d604Bedc4d7962F94D53E4B5e3C6",
+    [56]: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+  },
   AEQ: {
     [5]: "0x875cf904E113470F039c5C5f1B85DD17837AD254",
     [56]: "0x0dDef12012eD645f12AEb1B845Cb5ad61C7423F5",

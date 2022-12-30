@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import factABI from "../../../artifacts/contracts/liquidity-mining/gauges/SingleRecipientGaugeFactory.sol/SingleRecipientGaugeFactory.json";
+import factABI from "../../../../artifacts/contracts/liquidity-mining/gauges/SingleRecipientGaugeFactory.sol/SingleRecipientGaugeFactory.json";
 
 export async function deploySingleRecipientGauge(factoryAddress: string, tokenHolder: string) {
   try {

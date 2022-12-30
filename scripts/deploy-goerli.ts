@@ -1,31 +1,31 @@
 import { parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import { deployERC4626Factory } from "./utils/factories/deploy-erc4626-factory";
-import { deployGovernanceToken } from "./general/deploy-governance-token";
-import { deployMulticall, deployMulticallV1 } from "./general/deploy-multicall";
-import { setupGovernance } from "./setup-governance";
-import { deployTestERC20 } from "./utils/deploy-test-erc20";
-import { deployBootstrapPoolFactory } from "./utils/factories/lbp-factory";
-import { deployStablePoolFactory } from "./utils/factories/stable-factory";
-import { deployWeightedFactory } from "./utils/factories/weighted-factory";
-import { deployWeightedNoAssetManagersFactory } from "./utils/factories/weighted-nomanagers";
-import { deployAuthAdapter } from "./utils/lp-mining/deploy-auth-adapter";
-import { deployBalancerMinter } from "./utils/lp-mining/deploy-bal-minter";
-import { deployFeeDistributor } from "./utils/lp-mining/deploy-fee-distributor";
-import { deployGaugeController } from "./utils/lp-mining/deploy-gauge-controller";
+import { deployERC4626Factory } from "../utils/deployers/pools/factories/deploy-erc4626-factory";
+import { deployGovernanceToken } from "../utils/deployers/liquidity-mining/governance/deploy-governance-token";
+import { deployMulticall, deployMulticallV1 } from "../utils/deployers/general/deploy-multicall";
+import { setupGovernance } from "../utils/deployers/liquidity-mining/governance/setup-governance";
+import { deployTestERC20 } from "../utils/deploy-test-erc20";
+import { deployBootstrapPoolFactory } from "../utils/deployers/pools/factories/lbp-factory";
+import { deployStablePoolFactory } from "../utils/deployers/pools/factories/stable-factory";
+import { deployWeightedFactory } from "../utils/deployers/pools/factories/weighted-factory";
+import { deployWeightedNoAssetManagersFactory } from "../utils/deployers/pools/factories/weighted-nomanagers";
+import { deployAuthAdapter } from "../utils/deployers/liquidity-mining/deploy-auth-adapter";
+import { deployGaugeController } from "../utils/deployers/liquidity-mining/gauges/deploy-gauge-controller";
 import {
   deployLiquidityGaugeFactory,
   deployLiquidityGaugeFactoryNoAdmin,
-} from "./utils/lp-mining/deploy-liquidity-gauge-factory";
-import { deployRewardOnlyGaugeFactory } from "./utils/lp-mining/deploy-reward-gauge-factory";
-import { deploySingleRecipientGaugeFactory } from "./utils/lp-mining/deploy-single-recipient-factory";
-import { deployTokenAdmin } from "./utils/lp-mining/deploy-token-admin";
-import { deployBalTokenHolder } from "./utils/lp-mining/deploy-token-holder";
-import { deployVeBalHelper } from "./utils/lp-mining/deploy-ve-bal-helper";
-import { deployVeBoost } from "./utils/lp-mining/deploy-ve-boost";
-import { deployVotingEscrow } from "./utils/lp-mining/deploy-voting-escrow";
+} from "../utils/deployers/liquidity-mining/factories/deploy-liquidity-gauge-factory";
+import { deployRewardOnlyGaugeFactory } from "../utils/deployers/liquidity-mining/factories/deploy-reward-gauge-factory";
+import { deployBalTokenHolder } from "../utils/deployers/liquidity-mining/voting-escrow/deploy-token-holder";
+import { deployVeBalHelper } from "../utils/deployers/liquidity-mining/voting-escrow/deploy-ve-bal-helper";
+import { deployVeBoost } from "../utils/deployers/liquidity-mining/voting-escrow/deploy-ve-boost";
+import { deployVotingEscrow } from "../utils/deployers/liquidity-mining/voting-escrow/deploy-voting-escrow";
 import { ONE_DAY_SECONDS, ONE_WEEK_SECONDS } from "./utils/time";
-import { deployAuthEntry, deployTimelock, deployVault } from "./v2/vault/deploy-vault";
+import {
+  deployAuthEntry,
+  deployTimelock,
+  deployVault,
+} from "../utils/deployers/vault/deploy-vault";
 
 const VAULT = "0x84259CbD70aA17EB282Cb40666d2687Cd8E100AA";
 const TIME_AUTH = "0xe775Ce316d91c8A40487338Bc14c745Ba52D8C7a";
