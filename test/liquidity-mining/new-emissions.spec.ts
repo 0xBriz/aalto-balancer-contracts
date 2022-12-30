@@ -113,11 +113,6 @@ describe("Token Emissions", () => {
 
   it("should follow the correct emissions curve", async () => {
     await giveTokenAdminOwnership();
-    // console.log((await balTokenAdmin.getStartEpochTime()).toNumber());
-    // console.log(formatEther(await balTokenAdmin.getStartEpochSupply()));
-    // console.log(formatEther(await balTokenAdmin.getAvailableSupply()));
-    // await helpers.time.increase(DROP_TIME);
-    // console.log(formatEther(await balTokenAdmin.getAvailableSupply()));
     await runTimeLoop(5);
     // await logEmissionsInfo();
   });
