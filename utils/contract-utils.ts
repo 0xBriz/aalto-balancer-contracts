@@ -1,5 +1,3 @@
-import liqV5 from "../artifacts/contracts/liquidity-mining/gauges/LiquidityGaugeV5.vy/LiquidityGaugeV5.json";
-import AuthAdapter from "../artifacts/contracts/liquidity-mining/admin/AuthorizerAdaptor.sol/AuthorizerAdaptor.json";
 import BPT from "../artifacts/contracts/pool-utils/BalancerPoolToken.sol/BalancerPoolToken.json";
 import WeightedPoolAbi from "../artifacts/contracts/pool-utils/BalancerPoolToken.sol/BalancerPoolToken.json";
 import { Contract } from "ethers";

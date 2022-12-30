@@ -5,7 +5,7 @@ import { deployERC4626Factory } from "../utils/deployers/pools/factories/deploy-
 import { deployGovernanceToken } from "../utils/deployers/liquidity-mining/governance/deploy-governance-token";
 import { deployMulticall, deployMulticallV1 } from "../utils/deployers/general/deploy-multicall";
 import { deployRelayer } from "../utils/deployers/general/deploy-relayer";
-import { deployTestERC20 } from "../utils/deploy-test-erc20";
+import { deployTestERC20 } from "../utils/deployers/general/deploy-test-erc20";
 import { deployBootstrapPoolFactory } from "../utils/deployers/pools/factories/lbp-factory";
 import { deployStablePoolFactory } from "../utils/deployers/pools/factories/stable-factory";
 import { deployWeightedFactory } from "../utils/deployers/pools/factories/weighted-factory";

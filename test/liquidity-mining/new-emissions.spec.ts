@@ -8,7 +8,7 @@ import { deployGovernanceToken } from "../../utils/deployers/liquidity-mining/go
 import { deployVault } from "../../utils/deployers/vault/deploy-vault";
 import { ONE_WEEK_SECONDS } from "../../scripts/utils/time";
 import { secondsToDate, THREE_MONTHS_SECONDS } from "../../utils/time";
-import { OPERATOR } from "../../utils/addresses";
+import { OPERATOR } from "../../utils/data/addresses";
 
 const WETH = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
 

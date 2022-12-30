@@ -6,7 +6,7 @@ import { BalancerTokenAdmin } from "../../../../typechain/BalancerTokenAdmin";
 import Timelock from "../../../../artifacts/contracts/authorizer/TimelockAuthorizer.sol/TimelockAuthorizer.json";
 import BalTokenAdmin from "../../../../artifacts/contracts/liquidity-mining/BalancerTokenAdmin.sol/BalancerTokenAdmin.json";
 import GovToken from "../../../../artifacts/contracts/liquidity-mining/governance/GovernanceToken.sol/GovernanceToken.json";
-import { OPERATOR } from "../../../addresses";
+import { OPERATOR } from "../../../data/addresses";
 
 export async function setupGovernance(
   balAdminAddress: string,
