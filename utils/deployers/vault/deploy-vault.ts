@@ -4,6 +4,7 @@ import { saveDeplomentData } from "../../save-deploy-data";
 import { DAY, ONE_MONTH_SECONDS } from "../../../scripts/utils/time";
 import { TOKENS } from "../../data/token-map";
 import { Contract } from "ethers";
+import { logger } from "../logger";
 
 export async function deployVault() {
   try {
@@ -38,6 +39,8 @@ export async function deployVault() {
 }
 
 async function doVault(weth: string) {
+  logger.info("Deploying Vault");
+
   const MockBasicAuthorizer = await ethers.getContractFactory("MockBasicAuthorizer");
   let basicAuthorizer = await MockBasicAuthorizer.deploy();
   basicAuthorizer = await basicAuthorizer.deployed();

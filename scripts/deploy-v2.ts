@@ -1,5 +1,6 @@
 import { ethers } from "hardhat";
 import { getDeployedContractAddress } from "../utils/data/utils";
+import { createPools } from "../utils/deployers/pools/create-pools";
 import { deployPoolFactories } from "../utils/deployers/pools/deploy-factories";
 import { deployVault } from "../utils/deployers/vault/deploy-vault";
 
@@ -16,6 +17,7 @@ async function main() {
     const { vault } = await deployVault();
     // const vaultAddress = await getDeployedContractAddress(chainId, "Vault");
     await deployPoolFactories(vault.address);
+    await createPools();
   } catch (error) {
     console.error(error);
     process.exitCode = 1;
