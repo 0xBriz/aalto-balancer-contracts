@@ -1,6 +1,6 @@
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
-import { saveDeplomentData } from "../scripts/utils/save-deploy-data";
+import { saveDeplomentData } from "./save-deploy-data";
 
 export async function deployTestERC20(
   name: string,

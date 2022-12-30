@@ -7,8 +7,7 @@ async function main() {
     // setup liquidity mining
     // do any auth items along the way
     // save all deployment data (TODO: setup auto verification step)
-
-    await deployVault();
+    // await deployVault();
   } catch (error) {
     console.error(error);
     process.exitCode = 1;

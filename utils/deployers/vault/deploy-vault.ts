@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 import { deployAuthAdapter } from "../liquidity-mining/deploy-auth-adapter";
-import { saveDeplomentData } from "../../../scripts/utils/save-deploy-data";
+import { saveDeplomentData } from "../../save-deploy-data";
 import { DAY, ONE_MONTH_SECONDS } from "../../../scripts/utils/time";
 import { TOKENS } from "../../token-map";
 
