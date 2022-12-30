@@ -14,8 +14,8 @@ async function main() {
     // do any auth items along the way
     // save all deployment data (TODO: setup auto verification step)
     // const vaultData = await deployVault();
-    const vaultAddress = await getDeployedContractAddress(chainId, "Vault");
-    await deployPoolFactories(vaultAddress);
+    // const vaultAddress = await getDeployedContractAddress(chainId, "Vault");
+    // await deployPoolFactories(vaultAddress);
   } catch (error) {
     console.error(error);
     process.exitCode = 1;
