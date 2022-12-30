@@ -78,6 +78,9 @@ contract FeeDistributor is IFeeDistributor, ReentrancyGuard {
     constructor(IVotingEscrow votingEscrow, uint256 startTime) {
         _votingEscrow = votingEscrow;
 
+        // require(startTime >= block.timestamp, "Start time in the past");
+        // require(votingEscrow.totalSupply() > 0, "Zero total supply results in lost tokens");
+
         startTime = _roundDownTimestamp(startTime);
         uint256 currentWeek = _roundDownTimestamp(block.timestamp);
         require(startTime >= currentWeek, "Cannot start before current week");
@@ -90,6 +93,7 @@ contract FeeDistributor is IFeeDistributor, ReentrancyGuard {
                 "Zero total supply results in lost tokens"
             );
         }
+
         _startTime = startTime;
         _timeCursor = startTime;
     }

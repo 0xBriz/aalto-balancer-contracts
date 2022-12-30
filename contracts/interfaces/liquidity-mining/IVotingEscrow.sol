@@ -31,13 +31,18 @@ interface IVotingEscrow {
 
     function epoch() external view returns (uint256);
 
+    function totalSupply() external view returns (uint256);
+
     function totalSupply(uint256 timestamp) external view returns (uint256);
 
     function user_point_epoch(address user) external view returns (uint256);
 
     function point_history(uint256 timestamp) external view returns (Point memory);
 
-    function user_point_history(address user, uint256 timestamp) external view returns (Point memory);
+    function user_point_history(address user, uint256 timestamp)
+        external
+        view
+        returns (Point memory);
 
     function checkpoint() external;
 
