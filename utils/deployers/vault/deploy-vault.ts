@@ -2,7 +2,8 @@ import { ethers } from "hardhat";
 import { deployAuthAdapter } from "../liquidity-mining/deploy-auth-adapter";
 import { saveDeplomentData } from "../../save-deploy-data";
 import { DAY, ONE_MONTH_SECONDS } from "../../../scripts/utils/time";
-import { TOKENS } from "../../token-map";
+import { TOKENS } from "../../data/token-map";
+import { Contract } from "ethers";
 
 export async function deployVault() {
   try {
