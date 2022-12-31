@@ -10,7 +10,7 @@ export async function deployAuthAdapter(vault: string) {
     return {
       authAdapter,
       deployment: {
-        name: "",
+        name: "AuthorizerAdaptor",
         contract: authAdapter,
         args: {
           vault,

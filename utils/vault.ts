@@ -12,15 +12,13 @@ import { JoinPoolRequest } from "./types";
  * @param tokens
  * @param initialBalances
  * @param recipient
- * @param signer
  * @returns
  */
 export async function initWeightedJoin(
   poolId: string,
   tokens: string[],
   initialBalances: string[],
-  recipient: string,
-  signer
+  recipient: string
 ) {
   try {
     logger.info("Starting INIT_JOIN for pool id: " + poolId);

@@ -40,21 +40,14 @@ class PoolCreationService {
     );
 
     console.log(args);
-    return;
 
     // Create the pool through the factory
     const poolInfo = await poolFactoryService.createManagedPool(args);
 
-    logger.success("createManagedWeightedPool: pool creation complete");
+    logger.success(`createManagedWeightedPool: pool "${name}" creation complete`);
 
     // Fire off the init join so pool has initial liquidity
-    await initWeightedJoin(
-      poolInfo.poolId,
-      args.tokens,
-      args.initialBalances,
-      args.owner,
-      await getVault()
-    );
+    await initWeightedJoin(poolInfo.poolId, args.tokens, args.initialBalances, args.owner);
 
     logger.info("createManagedWeightedPool: Adding pool to DexTokenManager");
 

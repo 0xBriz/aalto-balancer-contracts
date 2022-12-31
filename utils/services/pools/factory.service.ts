@@ -5,7 +5,6 @@ import { Contract, ContractReceipt } from "ethers";
 import { getSigner } from "../../deployers/signers";
 import { doTransaction } from "../../tx-utils";
 import { getDeployedContractAddress } from "../../data/utils";
-import { getChainId } from "../../deployers/network";
 import { getWeightedPoolInstance } from "../../contract-utils";
 import { logger } from "../../deployers/logger";
 import { parseUnits } from "ethers/lib/utils";

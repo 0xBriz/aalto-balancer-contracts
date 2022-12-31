@@ -6,7 +6,7 @@ export async function deployFactory(vault: string, contractName: string) {
   const factory = await Factory.deploy(vault);
   await factory.deployed();
 
-  logger.info(`${contractName} deployed to: ${factory.address}`);
+  logger.success(`${contractName} deployed to: ${factory.address}`);
 
   return {
     factory,

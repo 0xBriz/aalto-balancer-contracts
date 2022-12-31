@@ -87,7 +87,7 @@ async function doVault(weth: string) {
 }
 
 export async function deployTimelock(admin: string, entryAdapter: string) {
-  // AUTH
+  logger.info("Deploying TimelockAuthorizer");
   const rootTransferDelay = 0; // Timelock until root(admin/boss) status can be transferred
   const TimelockAuthorizer = await ethers.getContractFactory("TimelockAuthorizer");
   const authorizer = await TimelockAuthorizer.deploy(admin, entryAdapter, rootTransferDelay);
@@ -106,12 +106,14 @@ export async function deployTimelock(admin: string, entryAdapter: string) {
 
 export async function deployAuthEntry(authAdapter: string) {
   try {
+    logger.info("Deploying AuthorizerAdaptorEntrypoint");
+
     const AuthorizerAdaptorEntrypoint = await ethers.getContractFactory(
       "AuthorizerAdaptorEntrypoint"
     );
     const authEntryPoint = await AuthorizerAdaptorEntrypoint.deploy(authAdapter);
     await authEntryPoint.deployed();
-    console.log("AuthorizerAdaptorEntrypoint deployed to: ", authEntryPoint.address);
+    logger.success(`AuthorizerAdaptorEntrypoint deployed to: ${authEntryPoint.address}`);
 
     return {
       authEntryPoint,
