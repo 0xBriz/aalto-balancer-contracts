@@ -131,6 +131,7 @@ export interface PoolCreationBaseData {
 
 export interface PoolCreationConfig {
   created: boolean;
+  isVePool?: boolean;
   txHash: string;
   chainId: number;
   name: string;

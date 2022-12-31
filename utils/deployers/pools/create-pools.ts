@@ -1,4 +1,4 @@
-import { getAddress, parseUnits } from "ethers/lib/utils";
+import { getAddress } from "ethers/lib/utils";
 import * as fs from "fs-extra";
 import { ethers } from "hardhat";
 import { join } from "path";
@@ -55,11 +55,18 @@ export async function createPools(): Promise<{
         };
       });
 
-      // Map its type to its factory
-      const createdPool = await handlePoolByType(pool);
-      // Write back to update the pool
-      poolInfo = poolInfo.filter((p) => p.name !== createdPool.name);
-      poolInfo.push(createdPool);
+      try {
+        // Map its type to its factory
+        const createdPool = await handlePoolByType(pool);
+        // Write back to update the pool
+        poolInfo = poolInfo.filter((p) => p.name !== createdPool.name);
+        // In case there is a startingWeight set for the initial pools
+        createdPool.gauge = pool.gauge;
+        createdPool.isVePool = pool.isVePool || false;
+        poolInfo.push(createdPool);
+      } catch (error) {
+        logger.error(`Pool creation failed for pool "${pool.name}"`);
+      }
     }
 
     logger.success("createPools: Pool creation complete");

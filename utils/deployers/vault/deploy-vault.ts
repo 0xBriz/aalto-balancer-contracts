@@ -43,7 +43,7 @@ export async function deployVault() {
 }
 
 async function doVault(weth: string) {
-  logger.info("Deploying Vault..");
+  logger.info("Deploying MockBasicAuthorizer..");
 
   const MockBasicAuthorizer = await ethers.getContractFactory("MockBasicAuthorizer");
   let basicAuthorizer = await MockBasicAuthorizer.deploy();
@@ -52,6 +52,9 @@ async function doVault(weth: string) {
   // Set to max values
   const pauseWindowDuration = ONE_MONTH_SECONDS * 6;
   const bufferPeriodDuration = DAY * 90;
+  logger.success(`MockBasicAuthorizer deployed to: ${basicAuthorizer.address}`);
+
+  logger.info("Deploying Vault..");
 
   const Vault = await ethers.getContractFactory("Vault");
   // Use mock authorizer at first

@@ -1,59 +1,76 @@
-import { Interface } from "@ethersproject/abi/lib/interface";
-import { Contract } from "ethers";
-import { ethers } from "hardhat";
-import { GovernanceToken, TimelockAuthorizer } from "../../../../typechain";
-import { BalancerTokenAdmin } from "../../../../typechain/BalancerTokenAdmin";
-import Timelock from "../../../../artifacts/contracts/authorizer/TimelockAuthorizer.sol/TimelockAuthorizer.json";
-import BalTokenAdmin from "../../../../artifacts/contracts/liquidity-mining/BalancerTokenAdmin.sol/BalancerTokenAdmin.json";
-import GovToken from "../../../../artifacts/contracts/liquidity-mining/governance/GovernanceToken.sol/GovernanceToken.json";
-import { OPERATOR } from "../../../data/addresses";
+import { deployContractUtil } from "../../deploy-util";
+import { parseEther } from "ethers/lib/utils";
+import { getDeployedContractAddress, getTimelockAuth } from "../../../contract-utils";
+import { getSigner } from "../../signers";
+import { ADMIN } from "../../../data/addresses";
+import { getChainId } from "../../network";
+import { logger } from "../../logger";
+import { awaitTransactionComplete } from "../../../tx-utils";
 
-export async function setupGovernance(
-  balAdminAddress: string,
-  auth: string,
-  govTokenAdress: string
-) {
+export async function setupGovernance() {
   try {
+    logger.info("setupGovernance: initializing governance items");
+    const govTokenData = await deployContractUtil("GovernanceToken", {
+      name: "Vertek",
+      symbol: "VRTK",
+    });
+
+    const tokenAdminData = await deployContractUtil("BalancerTokenAdmin", {
+      vault: await getDeployedContractAddress("Vault"),
+      balancerToken: govTokenData.contract.address,
+      initialMintAllowance: parseEther("1250000"),
+    });
+
+    const authorizer = await getTimelockAuth();
+
     /**
      * Need to grant the deployer dev account permissions on the vault authorizer in order
      * to call the activate function on the BalTokenAdmin contract.(After initial mints)
      */
-    const signer = (await ethers.getSigners())[0];
+    const signer = await getSigner();
+    const selector = tokenAdminData.contract.interface.getSighash("activate");
+    const actionId = await tokenAdminData.contract.getActionId(selector);
 
-    const balAdmin: BalancerTokenAdmin = new Contract(
-      balAdminAddress,
-      BalTokenAdmin.abi,
-      signer
-    ) as unknown as BalancerTokenAdmin;
+    logger.info("setupGovernance: granting token admin activate permission");
+    awaitTransactionComplete(
+      await authorizer.grantPermissions([actionId], signer.address, [
+        tokenAdminData.contract.address,
+      ]),
+      5
+    );
+    const authorized = await authorizer.canPerform(
+      actionId,
+      signer.address,
+      tokenAdminData.contract.address
+    );
 
-    // Set vault permissions for dev account to call `active` on the bal admin contract
-    const authorizer: TimelockAuthorizer = new Contract(
-      auth,
-      Timelock.abi,
-      signer
-    ) as unknown as TimelockAuthorizer;
-
-    const iface = new Interface(["function activate() external"]);
-    const selector = iface.getSighash("activate()");
-
-    const actionId = await balAdmin.getActionId(selector);
-    await authorizer.grantPermissions([actionId], signer.address, [balAdminAddress]);
-    const canDo = await authorizer.canPerform(actionId, signer.address, balAdminAddress);
-
-    if (!canDo) {
-      throw "Adding token admin permissions failed";
+    // Tx could fail but maybe we missed or jacked something up along the way
+    if (!authorized) {
+      throw new Error('"Adding token admin permissions failed"');
     }
 
-    const AEQ: GovernanceToken = new Contract(
-      govTokenAdress,
-      GovToken.abi,
-      signer
-    ) as unknown as GovernanceToken;
+    logger.success("setupGovernance: permission granted");
+    logger.info("setupGovernance: granting token admin default admin role");
+    // BalAdmin will take over all roles for the token
+    awaitTransactionComplete(
+      await govTokenData.contract.grantRole(
+        await govTokenData.contract.DEFAULT_ADMIN_ROLE(),
+        tokenAdminData.contract.address
+      ),
+      5
+    );
 
-    // BalAdmin will take over all roles for the token after initial mints
-    await AEQ.grantRole(await AEQ.DEFAULT_ADMIN_ROLE(), balAdminAddress);
+    logger.success("setupGovernance: role granted");
 
-    await balAdmin.activate(OPERATOR);
+    logger.info("setupGovernance: activating token admin");
+    awaitTransactionComplete(await tokenAdminData.contract.activate(ADMIN[await getChainId()]));
+
+    logger.success("setupGovernance: governance setup complete");
+
+    return {
+      govTokenData,
+      tokenAdminData,
+    };
   } catch (error) {
     console.log(error);
     process.exit(1);

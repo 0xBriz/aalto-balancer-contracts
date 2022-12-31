@@ -1,5 +1,4 @@
-import { getDexAssetManager, getVault } from "../../contract-utils";
-import { getDeployedContractAddress } from "../../data/utils";
+import { getDeployedContractAddress } from "../../contract-utils";
 import { logger } from "../../deployers/logger";
 import { PoolTokenInfo, CreateWeightedPoolArgs, PoolCreationConfig, PoolType } from "../../types";
 import { initWeightedJoin } from "../../vault";

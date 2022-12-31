@@ -1,7 +1,5 @@
-import { BigNumber, Contract } from "ethers";
 import { defaultAbiCoder, parseUnits } from "ethers/lib/utils";
 import { getVault } from "./contract-utils";
-import { getDeployedContractAddress } from "./data/utils";
 import { logger } from "./deployers/logger";
 import { approveTokensIfNeeded } from "./token";
 import { JoinPoolRequest } from "./types";
@@ -42,9 +40,6 @@ export async function initWeightedJoin(
     };
 
     const vault = await getVault();
-
-    // 0x87E70c62595191F2cBa52b025173a621b424907e
-    console.log("Using vault address: " + vault.address);
 
     // Vault needs approval to pull the tokens in
     await approveTokensIfNeeded(tokens, recipient, vault.address);

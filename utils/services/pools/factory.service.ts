@@ -4,8 +4,7 @@ import * as LBP from "../../../artifacts/contracts/pool-weighted/smart/Liquidity
 import { Contract, ContractReceipt } from "ethers";
 import { getSigner } from "../../deployers/signers";
 import { doTransaction } from "../../tx-utils";
-import { getDeployedContractAddress } from "../../data/utils";
-import { getWeightedPoolInstance } from "../../contract-utils";
+import { getDeployedContractAddress, getWeightedPoolInstance } from "../../contract-utils";
 import { logger } from "../../deployers/logger";
 import { parseUnits } from "ethers/lib/utils";
 
