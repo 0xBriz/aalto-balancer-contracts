@@ -1,4 +1,5 @@
 {
+  "AssetManager": "0x69be5730C9042784Bbd0a46D08D0076c4fd7B84c",
   "AuthorizerAdaptorEntrypoint": "0x7b8B02FF48C1f25a498F0e2db49309848daa5321",
   "MockBasicAuthorizer": "0x67c70A212f51BcfbBDE91DA143B78f1E6de95F1a",
   "TimelockAuthorizer": "0x130d387f4e8f1e71Ec6274aC46f8fEf4f14066a5",

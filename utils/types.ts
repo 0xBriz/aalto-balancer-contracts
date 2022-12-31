@@ -19,6 +19,13 @@ export enum GaugeType {
   Ethereum,
 }
 
+export enum PoolType {
+  Weighted = "Weighted",
+  Stable = "Stable",
+  ComposableStable = "ComposableStable",
+  LiquidityBootstrappingPool = "LiquidityBootstrappingPool",
+}
+
 export const JOIN_KIND_INIT = 0; // Can only be called once for most pools
 
 export interface ExitPoolRequest {
@@ -120,4 +127,35 @@ export interface PoolCreationBaseData {
   poolAddress: string;
   txHash: string;
   date: string;
+}
+
+export interface PoolCreationConfig {
+  created: boolean;
+  txHash: string;
+  chainId: number;
+  name: string;
+  type: PoolType;
+  poolId: string;
+  poolAddress: string;
+  date: string;
+  tokens: string[];
+  initialBalances: string;
+  assetManager: string;
+  weights?: string[];
+  amp?: string;
+  deploymentArgs: {
+    name: string;
+    symbol: string;
+    owner: string;
+    swapFeePercentage: string;
+    assetManagers: string[];
+    weights?: string[];
+    amp?: string;
+    // other things
+  };
+  gauge: {
+    address: string;
+    startingWeight: string;
+    added: Boolean;
+  };
 }

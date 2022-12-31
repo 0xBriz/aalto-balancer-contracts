@@ -2,8 +2,8 @@ import { ethers } from "hardhat";
 import * as fs from "fs-extra";
 import { join } from "path";
 import { Contract } from "ethers";
-import { CHAIN_KEYS } from "./data/chains";
-import { logger } from "./deployers/logger";
+import { CHAIN_KEYS } from "../data/chains";
+import { logger } from "./logger";
 
 export async function saveDeplomentData(filename: string, contract: Contract, deploymentArgs = {}) {
   try {

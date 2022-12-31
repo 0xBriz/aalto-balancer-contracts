@@ -14,9 +14,9 @@ async function main() {
     // setup liquidity mining system components
     // do any auth items along the way
     // save all deployment data (TODO: setup auto verification step)
-    const { vault } = await deployVault();
+    // const { vault } = await deployVault();
     // const vaultAddress = await getDeployedContractAddress(chainId, "Vault");
-    await deployPoolFactories(vault.address);
+    //await deployPoolFactories(vault.address);
     await createPools();
   } catch (error) {
     console.error(error);

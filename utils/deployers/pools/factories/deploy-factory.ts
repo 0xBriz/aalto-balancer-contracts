@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { saveDeplomentData } from "../../../save-deploy-data";
+import { saveDeplomentData } from "../../save-deploy-data";
 import { logger } from "../../logger";
 
 export async function deployFactory(vault: string, contractName: string) {

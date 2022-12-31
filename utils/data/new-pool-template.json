@@ -1,0 +1,22 @@
+{
+  "created": false,
+  "name": "",
+  "txHash": "",
+  "poolId": "",
+  "poolAddress": "",
+  "date": "",
+  "args": {
+    "name": "",
+    "symbol": "",
+    "owner": "",
+    "swapFeePercentage": "",
+    "weights": ["", ""],
+    "assetManager": "",
+    "initialBalances": ["", ""]
+  },
+  "gauge": {
+    "address": "",
+    "weight": "0",
+    "added": false
+  }
+}

@@ -1,5 +1,6 @@
 import { BigNumber, Contract } from "ethers";
 import { defaultAbiCoder } from "ethers/lib/utils";
+import { logger } from "./deployers/logger";
 import { approveTokensIfNeeded } from "./token";
 import { JoinPoolRequest } from "./types";
 
@@ -12,6 +13,8 @@ export async function initWeightedJoin(
   signer
 ) {
   try {
+    logger.info("Starting INIT_JOIN for pool id: " + poolId);
+
     const JOIN_KIND_INIT = 0; // Can only be called once for most pools
     // Must be encoded
     const initUserData = defaultAbiCoder.encode(
@@ -31,7 +34,11 @@ export async function initWeightedJoin(
 
     // Joins are done on the Vault instead of pools
     const tx = await vault.joinPool(poolId, recipient, recipient, joinPoolRequest);
-    return await tx.wait();
+    const rx = await tx.wait(1);
+
+    logger.success("INIT_JOIN complete");
+
+    return rx;
   } catch (error) {
     console.log(error);
     throw error;
