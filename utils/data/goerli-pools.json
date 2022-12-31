@@ -6,6 +6,18 @@
     "poolId": "",
     "poolAddress": "",
     "date": "",
+    "tokenInfo": [
+      {
+        "address": "",
+        "weight": "0.5",
+        "initialBalance": ""
+      },
+      {
+        "address": "",
+        "weight": "0.5",
+        "initialBalance": ""
+      }
+    ],
     "deploymentArgs": {
       "name": "Pegging Enthusiasts",
       "symbol": "AMES-BUSD",

@@ -5,6 +5,18 @@
   "poolId": "",
   "poolAddress": "",
   "date": "",
+  "tokenInfo": [
+    {
+      "address": "",
+      "weight": "",
+      "initialBalance": ""
+    },
+    {
+      "address": "",
+      "weight": "",
+      "initialBalance": ""
+    }
+  ],
   "args": {
     "name": "",
     "symbol": "",

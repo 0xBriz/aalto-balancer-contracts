@@ -1,5 +1,5 @@
 import { BigNumber } from "ethers";
-import { formatEther } from "ethers/lib/utils";
+import { formatEther, parseUnits } from "ethers/lib/utils";
 import { getDexAssetManager, getVault } from "../../contract-utils";
 import { getDeployedContractAddress } from "../../data/utils";
 import { logger } from "../../deployers/logger";
@@ -20,7 +20,7 @@ class PoolCreationService {
     chainId: number,
     name: string,
     symbol: string,
-    swapFeePercentage: BigNumber,
+    swapFeePercentage: string,
     owner: string,
     tokenInfo: TokenWithManagerInfo[]
   ) {
@@ -71,6 +71,7 @@ class PoolCreationService {
       poolAddress: poolInfo.poolAddress,
       date: poolInfo.date,
       initialBalances: args.initialBalances.map((ib) => formatEther(ib)),
+      tokenInfo,
       deploymentArgs: {
         name,
         symbol,

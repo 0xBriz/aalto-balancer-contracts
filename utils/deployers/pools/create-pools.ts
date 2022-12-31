@@ -42,15 +42,6 @@ export async function createPools() {
 
       validateConfig(pool);
 
-      // const tokenInfo: TokenWithManagerInfo[] = pool.tokenInfo.map((info) => {
-      //   return {
-      //     address: getAddress(info.address),
-      //     manager: getAddress(info.manager),
-      //     weight: parseUnits(info.weight),
-      //     initialBalance: parseUnits(info.initialBalance),
-      //   };
-      // });
-
       // Map its type to its factory
       const createdPool = await handlePoolByType(pool);
 
@@ -73,11 +64,13 @@ function validateConfig(pool: PoolCreationConfig) {
 
   // Could just do some object keys/deep check to make this simpler
   _require(pool.initialBalances.length === tokenCount, "!tokenInfo");
-  _require(!!pool.tokenInfo && Object.keys(pool.tokenInfo).length > 0, "!initialBalances.length");
+  // _require(!!pool.tokenInfo && Object.keys(pool.tokenInfo).length > 0, "!initialBalances.length");
   if (pool.type === PoolType.Weighted) {
     _require(pool.deploymentArgs.weights.length === tokenCount, "!weights");
     _require(pool.deploymentArgs.assetManagers.length === tokenCount, "!assetManagers");
   }
+
+  // initial balances, etc
 }
 
 function checkConfigProp(prop: string, pool: PoolCreationConfig) {
@@ -99,7 +92,7 @@ async function handleWeightedPool(pool: PoolCreationConfig) {
     pool.chainId,
     pool.name,
     pool.symbol,
-    parseUnits(pool.deploymentArgs.swapFeePercentage),
+    pool.deploymentArgs.swapFeePercentage,
     POOL_ADMIN[pool.chainId],
     pool.tokenInfo
   );

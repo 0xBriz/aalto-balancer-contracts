@@ -1,5 +1,5 @@
 import { BigNumber, Contract } from "ethers";
-import { defaultAbiCoder } from "ethers/lib/utils";
+import { defaultAbiCoder, parseUnits } from "ethers/lib/utils";
 import { getVault } from "./contract-utils";
 import { getDeployedContractAddress } from "./data/utils";
 import { logger } from "./deployers/logger";
@@ -9,7 +9,7 @@ import { JoinPoolRequest } from "./types";
 export async function initWeightedJoin(
   poolId: string,
   tokens: string[],
-  initialBalances: BigNumber[],
+  initialBalances: string[],
   recipient: string,
   signer
 ) {
@@ -25,7 +25,7 @@ export async function initWeightedJoin(
 
     const joinPoolRequest: JoinPoolRequest = {
       assets: tokens,
-      maxAmountsIn: initialBalances,
+      maxAmountsIn: initialBalances.map((a) => parseUnits(a)),
       userData: initUserData,
       fromInternalBalance: false,
     };

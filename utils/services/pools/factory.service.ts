@@ -8,6 +8,7 @@ import { getDeployedContractAddress } from "../../data/utils";
 import { getChainId } from "../../deployers/network";
 import { getWeightedPoolInstance } from "../../contract-utils";
 import { logger } from "../../deployers/logger";
+import { parseUnits } from "ethers/lib/utils";
 
 export type FactoryType =
   | "WeightedPoolFactory"
@@ -51,9 +52,9 @@ class PoolFactoryService {
           args.name,
           args.symbol,
           args.tokens,
-          args.weights,
+          args.weights.map((w) => parseUnits(w)),
           assetManagers,
-          args.swapFeePercentage,
+          parseUnits(args.swapFeePercentage),
           args.owner
         )
       );

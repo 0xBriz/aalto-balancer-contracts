@@ -1,5 +1,5 @@
 import { BigNumber } from "ethers";
-import { getAddress } from "ethers/lib/utils";
+import { getAddress, parseUnits } from "ethers/lib/utils";
 import { CreateWeightedPoolArgs, PoolCreationConfig, TokenWithManagerInfo } from "../../types";
 
 export function sortTokensWithManagers(tokens: TokenWithManagerInfo[]): TokenWithManagerInfo[] {
@@ -12,7 +12,7 @@ export function sortTokensWithManagers(tokens: TokenWithManagerInfo[]): TokenWit
 export function getWeightedPoolCreationArgs(
   name: string,
   symbol: string,
-  swapFeePercentage: BigNumber,
+  swapFeePercentage: string,
   owner: string,
   tokenInfo: TokenWithManagerInfo[],
   assetManager: string
@@ -28,6 +28,13 @@ export function getWeightedPoolCreationArgs(
     owner,
     assetManagers: sortedInfo.map((_) => assetManager),
     initialBalances: sortedInfo.map((info) => info.initialBalance),
+    tokenInfo: sortedInfo.map((info) => {
+      return {
+        address: getAddress(info.address),
+        weight: info.weight,
+        initialBalance: info.initialBalance,
+      };
+    }),
   };
 }
 
