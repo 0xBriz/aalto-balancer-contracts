@@ -4,27 +4,31 @@ import { ethers } from "hardhat";
 import { join } from "path";
 import { OPERATOR } from "../../data/addresses";
 import { CHAIN_KEYS } from "../../data/chains";
-import { getDeployedContractAddress } from "../../data/utils";
 import { poolCreationService } from "../../services/pools/pool-creation.service";
-import { PoolCreationConfig, PoolType, TokenWithManagerInfo } from "../../types";
+import { PoolCreationConfig, PoolType } from "../../types";
+import { logger } from "../logger";
 import { _require } from "../utils";
 
-const POOL_TYPE_TO_FACTORY = {
-  ["Weighted"]: "WeightedPoolFactory",
-  ["Stable"]: "StablePoolFactory",
-  ["ComposableStable"]: "",
-  ["LBP"]: "LiquidityBootstrappingPoolFactory",
-};
+// const POOL_TYPE_TO_FACTORY = {
+//   ["Weighted"]: "WeightedPoolFactory",
+//   ["Stable"]: "StablePoolFactory",
+//   ["ComposableStable"]: "",
+//   ["LBP"]: "LiquidityBootstrappingPoolFactory",
+// };
 
 const POOL_ADMIN = {
   5: OPERATOR,
   56: OPERATOR,
 };
 
-export async function createPools() {
+export async function createPools(): Promise<{
+  poolDataPath: string;
+  poolInfo: PoolCreationConfig[];
+}> {
   try {
     await ethers.provider.ready;
     const chainId = ethers.provider.network.chainId;
+    logger.info("Starting pool creation");
 
     const poolDataPath = join(
       process.cwd(),
@@ -32,25 +36,36 @@ export async function createPools() {
       "data",
       `${CHAIN_KEYS[ethers.provider.network.chainId]}-pools.json`
     );
-    const poolInfo: PoolCreationConfig[] = await fs.readJSON(poolDataPath);
+    let poolInfo: PoolCreationConfig[] = await fs.readJSON(poolDataPath);
+
     for (const pool of poolInfo) {
       if (pool.created) {
         continue;
       }
 
-      pool.chainId = chainId;
-
       validateConfig(pool);
+
+      // set the chain id on the pool to save looking it up later
+      pool.chainId = chainId;
+      // set proper address if needed
+      pool.tokenInfo = pool.tokenInfo.map((info) => {
+        return {
+          ...info,
+          address: getAddress(info.address),
+        };
+      });
 
       // Map its type to its factory
       const createdPool = await handlePoolByType(pool);
-
       // Write back to update the pool
-      pool.created = true;
-      await fs.writeJSON(poolDataPath, poolInfo);
-
-      // await saveDeplomentData()
+      // poolInfo = poolInfo.filter((p) => p.name !== createdPool.name);
+      // poolInfo.push(createdPool);
     }
+
+    return {
+      poolDataPath,
+      poolInfo,
+    };
   } catch (error) {
     console.error(error);
     process.exitCode = 1;
@@ -58,23 +73,29 @@ export async function createPools() {
 }
 
 function validateConfig(pool: PoolCreationConfig) {
-  ["name", "symbol", "swapFeePercentage"].forEach((prop) => this.checkConfigProp(prop, pool));
+  logger.info(`validateConfig: Validating pool config`);
 
-  const tokenCount = pool.deploymentArgs.tokens.length;
+  _require(!!pool.type, "!pool type");
+  _require(pool.type in PoolType, "!invalid pool type");
 
-  // Could just do some object keys/deep check to make this simpler
-  _require(pool.initialBalances.length === tokenCount, "!tokenInfo");
-  // _require(!!pool.tokenInfo && Object.keys(pool.tokenInfo).length > 0, "!initialBalances.length");
-  if (pool.type === PoolType.Weighted) {
-    _require(pool.deploymentArgs.weights.length === tokenCount, "!weights");
-    _require(pool.deploymentArgs.assetManagers.length === tokenCount, "!assetManagers");
-  }
+  pool.tokenInfo.forEach((info) => {
+    if (pool.type === PoolType.Weighted) {
+      _require(!!info.weight, "!token info weight");
+    }
 
-  // initial balances, etc
-}
+    _require(!!info.address, "!token info address");
+    _require(!!info.initialBalance?.length, "!token info init balance");
+  });
 
-function checkConfigProp(prop: string, pool: PoolCreationConfig) {
-  _require(pool[prop], `!pool ${prop}`);
+  _require(!!pool.deploymentArgs.swapFeePercentage, `!swapFeePercentage`);
+  _require(!!pool.deploymentArgs.name, `!name`);
+  _require(!!pool.deploymentArgs.symbol, `!symbol`);
+  // owner will be auto attached to deploy args later
+
+  _require(!!pool.gauge, "!gauge info");
+  _require(!!pool.gauge.startingWeight, "!gauge startingWeight");
+
+  logger.success(`validateConfig: Validation all good`);
 }
 
 async function handlePoolByType(pool: PoolCreationConfig) {
@@ -90,8 +111,8 @@ async function handlePoolByType(pool: PoolCreationConfig) {
 async function handleWeightedPool(pool: PoolCreationConfig) {
   return await poolCreationService.createManagedWeightedPool(
     pool.chainId,
-    pool.name,
-    pool.symbol,
+    pool.deploymentArgs.name,
+    pool.deploymentArgs.symbol,
     pool.deploymentArgs.swapFeePercentage,
     POOL_ADMIN[pool.chainId],
     pool.tokenInfo

@@ -1,14 +1,7 @@
-import { BigNumber } from "ethers";
-import { formatEther, parseUnits } from "ethers/lib/utils";
 import { getDexAssetManager, getVault } from "../../contract-utils";
 import { getDeployedContractAddress } from "../../data/utils";
 import { logger } from "../../deployers/logger";
-import {
-  TokenWithManagerInfo,
-  CreateWeightedPoolArgs,
-  PoolCreationConfig,
-  PoolType,
-} from "../../types";
+import { PoolTokenInfo, CreateWeightedPoolArgs, PoolCreationConfig, PoolType } from "../../types";
 import { initWeightedJoin } from "../../vault";
 import { poolFactoryService } from "./factory.service";
 import { getWeightedPoolCreationArgs } from "./pool-utils";
@@ -16,26 +9,38 @@ import { getWeightedPoolCreationArgs } from "./pool-utils";
 class PoolCreationService {
   constructor() {}
 
+  /**
+   * Packages a few operations needed to create a pool into one function.
+   * Parses the input params into the structure needed for pool creation.
+   * @param chainId
+   * @param name
+   * @param symbol
+   * @param swapFeePercentage
+   * @param owner
+   * @param tokenInfo
+   * @returns
+   */
   async createManagedWeightedPool(
     chainId: number,
     name: string,
     symbol: string,
     swapFeePercentage: string,
     owner: string,
-    tokenInfo: TokenWithManagerInfo[]
+    tokenInfo: PoolTokenInfo[]
   ) {
     logger.info("createManagedWeightedPool: starting pool creation");
 
-    const assetManager = await getDeployedContractAddress("AssetManager");
     // Use util to get the need pool creation args for the factory
     const args: CreateWeightedPoolArgs = getWeightedPoolCreationArgs(
       name,
       symbol,
       swapFeePercentage,
       owner,
-      tokenInfo,
-      assetManager
+      tokenInfo
     );
+
+    console.log(args);
+    return;
 
     // Create the pool through the factory
     const poolInfo = await poolFactoryService.createManagedPool(args);
@@ -48,16 +53,17 @@ class PoolCreationService {
       args.tokens,
       args.initialBalances,
       args.owner,
-      await getVault(await getDeployedContractAddress("Vault"))
+      await getVault()
     );
 
-    logger.success("createManagedWeightedPool: adding pool to DexTokenManager");
+    logger.info("createManagedWeightedPool: Adding pool to DexTokenManager");
 
+    const assetManager = await getDeployedContractAddress("AssetManager");
     // Set pool id for asset managers once pool is created
     const manager = await getDexAssetManager(assetManager);
     await manager.addPool(poolInfo.poolId);
 
-    logger.success("createManagedWeightedPool: asset managers pool ids set complete");
+    logger.success("createManagedWeightedPool: DexTokenManager pool id set");
 
     const data: PoolCreationConfig = {
       created: true,
@@ -70,15 +76,15 @@ class PoolCreationService {
       poolId: poolInfo.poolId,
       poolAddress: poolInfo.poolAddress,
       date: poolInfo.date,
-      initialBalances: args.initialBalances.map((ib) => formatEther(ib)),
+      initialBalances: args.initialBalances,
       tokenInfo,
       deploymentArgs: {
         name,
         symbol,
         owner: args.owner,
         tokens: args.tokens,
-        swapFeePercentage: formatEther(args.swapFeePercentage),
-        weights: args.weights.map((w) => formatEther(w)),
+        swapFeePercentage: args.swapFeePercentage,
+        weights: args.weights,
         assetManagers: args.assetManagers,
       },
       gauge: {

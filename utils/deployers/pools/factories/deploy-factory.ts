@@ -1,5 +1,4 @@
 import { ethers } from "hardhat";
-import { saveDeplomentData } from "../../save-deploy-data";
 import { logger } from "../../logger";
 
 export async function deployFactory(vault: string, contractName: string) {
@@ -9,9 +8,14 @@ export async function deployFactory(vault: string, contractName: string) {
 
   logger.info(`${contractName} deployed to: ${factory.address}`);
 
-  await saveDeplomentData(contractName, factory, {
-    vault,
-  });
-
-  return factory;
+  return {
+    factory,
+    deployment: {
+      name: contractName,
+      contract: factory,
+      args: {
+        vault,
+      },
+    },
+  };
 }

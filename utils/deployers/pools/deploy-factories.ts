@@ -1,3 +1,4 @@
+import { logger } from "../logger";
 import { deployFactory } from "./factories/deploy-factory";
 
 const FACTORY_TYPES = [
@@ -9,11 +10,17 @@ const FACTORY_TYPES = [
 
 export async function deployPoolFactories(vault: string) {
   try {
-    console.log("Deploying factories.");
+    logger.info("Deploying factories");
+
+    const factoryDeployments = [];
     for (const factory of FACTORY_TYPES) {
-      console.log(`Deploying ${factory}`);
-      await deployFactory(vault, factory);
+      logger.info(`Deploying ${factory}`);
+      const info = await deployFactory(vault, factory);
+      factoryDeployments.push(info);
     }
+    logger.success("Factories deployment complete");
+
+    return factoryDeployments;
   } catch (error) {
     throw error;
   }

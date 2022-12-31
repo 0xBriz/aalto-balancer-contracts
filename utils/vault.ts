@@ -6,6 +6,15 @@ import { logger } from "./deployers/logger";
 import { approveTokensIfNeeded } from "./token";
 import { JoinPoolRequest } from "./types";
 
+/**
+ * Utility to perform the INIT_JOIN operation on a weight pool
+ * @param poolId
+ * @param tokens
+ * @param initialBalances
+ * @param recipient
+ * @param signer
+ * @returns
+ */
 export async function initWeightedJoin(
   poolId: string,
   tokens: string[],
@@ -30,10 +39,10 @@ export async function initWeightedJoin(
       fromInternalBalance: false,
     };
 
-    const vault = await getVault(await getDeployedContractAddress("Vault"));
+    const vault = await getVault();
 
     // Vault needs approval to pull the tokens in
-    await approveTokensIfNeeded(tokens, recipient, vault.address, signer);
+    await approveTokensIfNeeded(tokens, recipient, vault.address);
 
     // Joins are done on the Vault instead of pools
     const tx = await vault.joinPool(poolId, recipient, recipient, joinPoolRequest);

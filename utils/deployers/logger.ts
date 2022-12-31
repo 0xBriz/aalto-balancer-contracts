@@ -1,8 +1,8 @@
 import chalk from "chalk";
 
 const DEFAULTS = {
-  verbose: false,
-  silent: true,
+  verbose: true,
+  silent: false,
 };
 
 export class Logger {
@@ -21,7 +21,7 @@ export class Logger {
 
   info(msg: string): void {
     if (!DEFAULTS.verbose) return;
-    this.log(msg, "️  ", "white");
+    this.log(msg, "️  ", "orange");
   }
 
   success(msg: string): void {

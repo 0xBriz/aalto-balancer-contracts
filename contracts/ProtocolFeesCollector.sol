@@ -55,7 +55,7 @@ contract ProtocolFeesCollector is IProtocolFeesCollector, Authentication, Reentr
     {
         vault = _vault;
 
-        _swapFeePercentage = _MAX_PROTOCOL_SWAP_FEE_PERCENTAGE;
+        _swapFeePercentage = _MAX_PROTOCOL_SWAP_FEE_PERCENTAGE / 2;
         _flashLoanFeePercentage = _MAX_PROTOCOL_FLASH_LOAN_FEE_PERCENTAGE;
     }
 

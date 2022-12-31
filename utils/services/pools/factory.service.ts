@@ -33,12 +33,18 @@ class PoolFactoryService {
     }
   }
 
+  /**
+   * Creates a "managed"(with asset manager) pool that assigns the asset manager to each pool token.
+   * Attaches the asset manager(s) on here at the end as a utility/helper.
+   * @param args
+   * @returns
+   */
   async createManagedPool(args: CreateWeightedPoolArgs): Promise<PoolCreationBaseData> {
     try {
       // These calls throw if the address hasn't been set for the chain
       const [managerAddress, factoryAddress] = await Promise.all([
         getDeployedContractAddress("AssetManager"),
-        getDeployedContractAddress("WeightPoolFactory"),
+        getDeployedContractAddress("WeightedPoolFactory"),
       ]);
 
       // Assigning asset manager to our own core pools
@@ -65,6 +71,11 @@ class PoolFactoryService {
     }
   }
 
+  /**
+   * Gets base information about a pool after it is created, including the new pool id.
+   * @param receipt
+   * @returns
+   */
   async getPoolCreationData(receipt: ContractReceipt): Promise<PoolCreationBaseData> {
     logger.info("Getting new pool creation data");
     // We need to get the new pool address out of the PoolCreated event

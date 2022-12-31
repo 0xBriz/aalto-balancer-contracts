@@ -5,6 +5,7 @@
   "poolId": "",
   "poolAddress": "",
   "date": "",
+  "assetManager": "",
   "tokenInfo": [
     {
       "address": "",
@@ -23,12 +24,11 @@
     "owner": "",
     "swapFeePercentage": "",
     "weights": ["", ""],
-    "assetManager": "",
-    "initialBalances": ["", ""]
+    "assetManagers": []
   },
   "gauge": {
     "address": "",
-    "weight": "0",
+    "startingWeight": "0",
     "added": false
   }
 }

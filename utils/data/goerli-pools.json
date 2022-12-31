@@ -1,6 +1,7 @@
 [
   {
     "created": false,
+    "type": "Weighted",
     "name": "AMES-BUSD",
     "txHash": "",
     "poolId": "",
@@ -8,14 +9,14 @@
     "date": "",
     "tokenInfo": [
       {
-        "address": "",
+        "address": "0x7faA8158FaA037CC7516eF1f6864af44d75654AE",
         "weight": "0.5",
-        "initialBalance": ""
+        "initialBalance": "20000"
       },
       {
-        "address": "",
+        "address": "0xd71114b3AD1Ec657B4194E0B3b7C9fC71C7bdbEF",
         "weight": "0.5",
-        "initialBalance": ""
+        "initialBalance": "10000"
       }
     ],
     "deploymentArgs": {
@@ -23,14 +24,10 @@
       "symbol": "AMES-BUSD",
       "owner": "",
       "swapFeePercentage": "0.01",
-      "weights": ["0.5", "0.5"],
-      "assetManager": "",
-      "initialBalances": ["", ""]
+      "weights": [],
+      "assetManagers": []
     },
-    "gauge": {
-      "address": "",
-      "weight": "0",
-      "added": false
-    }
+    "gauge": { "address": "", "startingWeight": "0", "added": false },
+    "chainId": 5
   }
 ]

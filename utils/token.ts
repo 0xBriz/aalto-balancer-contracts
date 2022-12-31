@@ -2,24 +2,20 @@ import { BigNumber, ethers } from "ethers";
 import { hexlify } from "ethers/lib/utils";
 import { MAX_UINT256 } from "./big-number";
 import { getERC20 } from "./contract-utils";
+import { logger } from "./deployers/logger";
 
 export function sortTokens(tokens: string[]) {
   return tokens.sort((t1, t2) => (t1 > t2 ? 1 : -1));
 }
 
-export async function approveTokensIfNeeded(
-  tokens: string[],
-  owner: string,
-  spender: string,
-  signer
-) {
+export async function approveTokensIfNeeded(tokens: string[], owner: string, spender: string) {
   try {
-    //  console.log(`Checking allowances..`);
+    logger.info(`Checking token allowances..`);
     for (const address of tokens) {
-      const token = getERC20(address, signer);
+      const token = await getERC20(address);
       const allowance: BigNumber = await token.allowance(owner, spender);
       if (allowance.isZero()) {
-        //  console.log(`Approving token: ${address} - for spender ${spender}`);
+        logger.info(`Approving token: ${address} - for spender ${spender}`);
         const tx = await token.approve(spender, MAX_UINT256);
         await tx.wait();
       }

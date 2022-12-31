@@ -1,4 +1,4 @@
-import { BigNumber, ContractTransaction, ethers } from "ethers";
+import { BigNumber, Contract, ContractTransaction, ethers } from "ethers";
 
 export enum ExitKindWeighted {
   EXACT_BPT_IN_FOR_ONE_TOKEN_OUT,
@@ -73,7 +73,7 @@ export interface BasePoolArgs {
   swapFeePercentage: string;
   owner: string;
   assetManagers?: string[];
-  tokenInfo: TokenWithManagerInfo[];
+  // tokenInfo: TokenWithManagerInfo[];
 }
 
 export interface CreateWeightedPoolArgs extends BasePoolArgs {
@@ -110,7 +110,7 @@ export interface RewardPoolArgs {
   admin: string;
 }
 
-export interface TokenWithManagerInfo {
+export interface PoolTokenInfo {
   address: string;
   weight: string;
   initialBalance: string;
@@ -141,7 +141,7 @@ export interface PoolCreationConfig {
   date: string;
   initialBalances: string[];
   assetManager: string;
-  tokenInfo: TokenWithManagerInfo[];
+  tokenInfo: PoolTokenInfo[];
   weights?: string[];
   amp?: string;
   deploymentArgs: {
@@ -160,4 +160,10 @@ export interface PoolCreationConfig {
     startingWeight: string;
     added: Boolean;
   };
+}
+
+export interface DeploymentData {
+  name: string;
+  contract: Contract;
+  args: {};
 }
