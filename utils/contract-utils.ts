@@ -5,25 +5,40 @@ import * as AM from "./abi/DexTokenManager.json";
 import { Contract } from "ethers";
 import { ERC20_ABI } from "./abi/ERC20ABI";
 import { PoolType } from "./types";
+import { getSigner } from "./deployers/signers";
+
+const contractCache: { [contractAddress: string]: Contract } = {};
 
 // TODO: Use the typechain types for these things
+// And just setup something that links the artifacts to the new address
 
-export function getVault(address: string, signer) {
-  return new Contract(address, Vault.abi, signer);
+export async function getVault(address: string) {
+  return getCacheOrNew(address, Vault.abi);
 }
 
-export function getBalancerPoolToken(address: string, signer) {
-  return new Contract(address, BPT.abi, signer);
+export async function getBalancerPoolToken(address: string) {
+  return new Contract(address, BPT.abi);
 }
 
-export function getWeightedPoolInstance(address: string, signer) {
-  return new Contract(address, WeightedPoolAbi.abi, signer);
+export async function getWeightedPoolInstance(address: string) {
+  return new Contract(address, WeightedPoolAbi.abi);
 }
 
-export function getERC20(address: string, signer) {
+export async function getERC20(address: string, signer) {
   return new Contract(address, ERC20_ABI, signer);
 }
 
-export function getDexAssetManager(address: string, signer) {
-  return new Contract(address, AM.abi, signer);
+export async function getDexAssetManager(address: string) {
+  return new Contract(address, AM.abi);
+}
+
+async function getCacheOrNew(address, abi) {
+  if (contractCache[address]) {
+    return contractCache[address];
+  }
+
+  const contract = new Contract(address, abi, await getSigner());
+  contractCache[address] = contract;
+
+  return contract;
 }

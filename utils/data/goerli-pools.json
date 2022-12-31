@@ -6,7 +6,7 @@
     "poolId": "",
     "poolAddress": "",
     "date": "",
-    "args": {
+    "deploymentArgs": {
       "name": "Pegging Enthusiasts",
       "symbol": "AMES-BUSD",
       "owner": "",

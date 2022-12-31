@@ -34,11 +34,10 @@ class PoolFactoryService {
 
   async createManagedPool(args: CreateWeightedPoolArgs): Promise<PoolCreationBaseData> {
     try {
-      const chainId = await getChainId();
-
+      // These calls throw if the address hasn't been set for the chain
       const [managerAddress, factoryAddress] = await Promise.all([
-        getDeployedContractAddress(chainId, "AssetManager"),
-        getDeployedContractAddress(chainId, "WeightPoolFactory"),
+        getDeployedContractAddress("AssetManager"),
+        getDeployedContractAddress("WeightPoolFactory"),
       ]);
 
       // Assigning asset manager to our own core pools
@@ -70,7 +69,7 @@ class PoolFactoryService {
     // We need to get the new pool address out of the PoolCreated event
     const events = receipt.events.filter((e) => e.event === "PoolCreated");
     const poolAddress = events[0].args.pool;
-    const pool = getWeightedPoolInstance(poolAddress, await getSigner());
+    const pool = await getWeightedPoolInstance(poolAddress);
     const data = {
       poolId: await pool.getPoolId(),
       poolAddress,

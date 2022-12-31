@@ -1,5 +1,7 @@
 import { BigNumber, Contract } from "ethers";
 import { defaultAbiCoder } from "ethers/lib/utils";
+import { getVault } from "./contract-utils";
+import { getDeployedContractAddress } from "./data/utils";
 import { logger } from "./deployers/logger";
 import { approveTokensIfNeeded } from "./token";
 import { JoinPoolRequest } from "./types";
@@ -9,7 +11,6 @@ export async function initWeightedJoin(
   tokens: string[],
   initialBalances: BigNumber[],
   recipient: string,
-  vault: Contract,
   signer
 ) {
   try {
@@ -28,6 +29,8 @@ export async function initWeightedJoin(
       userData: initUserData,
       fromInternalBalance: false,
     };
+
+    const vault = await getVault(await getDeployedContractAddress("Vault"));
 
     // Vault needs approval to pull the tokens in
     await approveTokensIfNeeded(tokens, recipient, vault.address, signer);

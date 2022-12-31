@@ -4,7 +4,6 @@ import { getDexAssetManager, getVault } from "../../contract-utils";
 import { getDeployedContractAddress } from "../../data/utils";
 import { logger } from "../../deployers/logger";
 import { getSigner } from "../../deployers/signers";
-import { doTransaction } from "../../tx-utils";
 import {
   TokenWithManagerInfo,
   CreateWeightedPoolArgs,
@@ -15,7 +14,7 @@ import { initWeightedJoin } from "../../vault";
 import { poolFactoryService } from "./factory.service";
 import { getWeightedPoolCreationArgs } from "./pool-utils";
 
-export class PoolCreationService {
+class PoolCreationService {
   constructor() {}
 
   async createManagedWeightedPool(
@@ -28,7 +27,7 @@ export class PoolCreationService {
   ) {
     logger.info("createManagedWeightedPool: starting pool creation");
 
-    const assetManager = await getDeployedContractAddress(chainId, "AssetManager");
+    const assetManager = await getDeployedContractAddress("AssetManager");
     // Use util to get the need pool creation args for the factory
     const args: CreateWeightedPoolArgs = getWeightedPoolCreationArgs(
       name,
@@ -41,7 +40,7 @@ export class PoolCreationService {
 
     const [signer, vaultAddress] = await Promise.all([
       getSigner(),
-      getDeployedContractAddress(chainId, "Vault"),
+      getDeployedContractAddress("Vault"),
     ]);
 
     // Create the pool through the factory
@@ -55,14 +54,13 @@ export class PoolCreationService {
       args.tokens,
       args.initialBalances,
       args.owner,
-      getVault(vaultAddress, signer),
-      signer
+      await getVault(vaultAddress)
     );
 
     logger.success("createManagedWeightedPool: adding pool to DexTokenManager");
 
     // Set pool id for asset managers once pool is created
-    const manager = getDexAssetManager(assetManager, signer);
+    const manager = await getDexAssetManager(assetManager);
     await manager.addPool(poolInfo.poolId);
 
     logger.success("createManagedWeightedPool: asset managers pool ids set complete");
@@ -71,6 +69,7 @@ export class PoolCreationService {
       created: true,
       chainId,
       name,
+      symbol,
       assetManager,
       type: PoolType.Weighted,
       txHash: poolInfo.txHash,
@@ -88,6 +87,7 @@ export class PoolCreationService {
         assetManagers: args.assetManagers,
       },
       gauge: {
+        // These are set later
         address: "",
         startingWeight: "",
         added: false,
@@ -104,3 +104,5 @@ export class PoolCreationService {
     return data;
   }
 }
+
+export const poolCreationService = new PoolCreationService();

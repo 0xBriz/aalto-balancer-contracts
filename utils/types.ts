@@ -134,13 +134,14 @@ export interface PoolCreationConfig {
   txHash: string;
   chainId: number;
   name: string;
+  symbol: string;
   type: PoolType;
   poolId: string;
   poolAddress: string;
   date: string;
-
   initialBalances: string[];
   assetManager: string;
+  tokenInfo?: TokenWithManagerInfo[];
   weights?: string[];
   amp?: string;
   deploymentArgs: {
