@@ -10,9 +10,9 @@ export type DeployedContract = "WeightedPoolFactory" | "AssetManager" | "Vault";
 const contractCache: { [contractName: string]: string } = {};
 
 export async function getDeployedContractAddress(contractName: DeployedContract): Promise<string> {
-  if (contractCache[contractName]) {
-    return contractCache[contractName];
-  }
+  // if (contractCache[contractName]) {
+  //   return contractCache[contractName];
+  // }
 
   const addresses = await fs.readJSON(
     join(process.cwd(), "deployments", `${CHAIN_KEYS[await getChainId()]}`, "addresses.json")

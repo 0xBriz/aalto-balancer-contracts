@@ -39,8 +39,6 @@ class PoolCreationService {
       tokenInfo
     );
 
-    console.log(args);
-
     // Create the pool through the factory
     const poolInfo = await poolFactoryService.createManagedPool(args);
 
@@ -52,11 +50,10 @@ class PoolCreationService {
     logger.info("createManagedWeightedPool: Adding pool to DexTokenManager");
 
     const assetManager = await getDeployedContractAddress("AssetManager");
-    // Set pool id for asset managers once pool is created
-    const manager = await getDexAssetManager(assetManager);
-    await manager.addPool(poolInfo.poolId);
-
-    logger.success("createManagedWeightedPool: DexTokenManager pool id set");
+    // // Set pool id for asset managers once pool is created
+    // const manager = await getDexAssetManager(assetManager);
+    // await manager.addPool(poolInfo.poolId);
+    // logger.success("createManagedWeightedPool: DexTokenManager pool id set");
 
     const data: PoolCreationConfig = {
       created: true,
@@ -78,7 +75,7 @@ class PoolCreationService {
         tokens: args.tokens,
         swapFeePercentage: args.swapFeePercentage,
         weights: args.weights,
-        assetManagers: args.assetManagers,
+        assetManagers: args.tokens.map((t) => assetManager),
       },
       gauge: {
         // These are set later

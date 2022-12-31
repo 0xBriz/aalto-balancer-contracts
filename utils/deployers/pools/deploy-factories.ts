@@ -10,15 +10,15 @@ const FACTORY_TYPES = [
 
 export async function deployPoolFactories(vault: string) {
   try {
-    logger.info("Deploying factories");
+    logger.info("deployPoolFactories: Deploying factories");
 
     const factoryDeployments = [];
     for (const factory of FACTORY_TYPES) {
-      logger.info(`Deploying ${factory}`);
+      logger.info(`Deploying ${factory}..`);
       const info = await deployFactory(vault, factory);
       factoryDeployments.push(info);
     }
-    logger.success("Factories deployment complete");
+    logger.success("deployPoolFactories: Factories deployment complete");
 
     return factoryDeployments;
   } catch (error) {

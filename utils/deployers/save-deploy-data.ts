@@ -13,7 +13,7 @@ export async function saveDeplomentData(deployment: DeploymentData) {
       CHAIN_KEYS[ethers.provider.network.chainId]
     );
 
-    logger.info(`Saving deployment data for ${deployment.name}`);
+    logger.info(`saveDeplomentData: Saving deployment data for ${deployment.name}`);
 
     const txData = deployment.contract.deployTransaction;
     const receipt = await txData.wait(1);
@@ -34,9 +34,8 @@ export async function saveDeplomentData(deployment: DeploymentData) {
     addresses[deployment.name] = receipt.contractAddress;
     await fs.writeJSON(addressPath, addresses);
 
-    logger.success("Save completed");
-    // console.log(data);
-    logger.warn("VERIFY CONTRACT!!");
+    logger.success(`saveDeplomentData: Deployment data save completed for ${deployment.name}`);
+    // logger.warn("VERIFY CONTRACT!!");
   } catch (error) {
     throw error;
   }

@@ -33,9 +33,9 @@ export async function getDexAssetManager(address: string) {
 }
 
 async function getCacheOrNew(address, abi) {
-  if (contractCache[address]) {
-    return contractCache[address];
-  }
+  // if (contractCache[address]) {
+  //   return contractCache[address];
+  // }
 
   const contract = new Contract(address, abi, await getSigner());
   contractCache[address] = contract;

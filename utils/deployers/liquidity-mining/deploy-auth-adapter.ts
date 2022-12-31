@@ -3,6 +3,7 @@ import { logger } from "../logger";
 
 export async function deployAuthAdapter(vault: string) {
   try {
+    logger.info(`Deploying AuthorizerAdaptor..`);
     const AuthorizerAdaptor = await ethers.getContractFactory("AuthorizerAdaptor");
     const authAdapter = await AuthorizerAdaptor.deploy(vault);
     await authAdapter.deployed();

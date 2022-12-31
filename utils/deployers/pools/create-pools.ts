@@ -28,7 +28,7 @@ export async function createPools(): Promise<{
   try {
     await ethers.provider.ready;
     const chainId = ethers.provider.network.chainId;
-    logger.info("Starting pool creation");
+    logger.info("createPools: Starting pool creation");
 
     const poolDataPath = join(
       process.cwd(),
@@ -43,7 +43,7 @@ export async function createPools(): Promise<{
         continue;
       }
 
-      validateConfig(pool);
+      validatePoolConfig(pool);
 
       // set the chain id on the pool to save looking it up later
       pool.chainId = chainId;
@@ -58,9 +58,11 @@ export async function createPools(): Promise<{
       // Map its type to its factory
       const createdPool = await handlePoolByType(pool);
       // Write back to update the pool
-      // poolInfo = poolInfo.filter((p) => p.name !== createdPool.name);
-      // poolInfo.push(createdPool);
+      poolInfo = poolInfo.filter((p) => p.name !== createdPool.name);
+      poolInfo.push(createdPool);
     }
+
+    logger.success("createPools: Pool creation complete");
 
     return {
       poolDataPath,
@@ -72,8 +74,8 @@ export async function createPools(): Promise<{
   }
 }
 
-function validateConfig(pool: PoolCreationConfig) {
-  logger.info(`validateConfig: Validating pool config`);
+function validatePoolConfig(pool: PoolCreationConfig) {
+  logger.info(`validatePoolConfig: Validating pool config`);
 
   _require(!!pool.type, "!pool type");
   _require(pool.type in PoolType, "!invalid pool type");
@@ -95,7 +97,7 @@ function validateConfig(pool: PoolCreationConfig) {
   _require(!!pool.gauge, "!gauge info");
   _require(!!pool.gauge.startingWeight, "!gauge startingWeight");
 
-  logger.success(`validateConfig: Validation all good`);
+  logger.success(`validatePoolConfig: Validation all good`);
 }
 
 async function handlePoolByType(pool: PoolCreationConfig) {
