@@ -3,7 +3,6 @@ import { formatEther } from "ethers/lib/utils";
 import { getDexAssetManager, getVault } from "../../contract-utils";
 import { getDeployedContractAddress } from "../../data/utils";
 import { logger } from "../../deployers/logger";
-import { getSigner } from "../../deployers/signers";
 import {
   TokenWithManagerInfo,
   CreateWeightedPoolArgs,
@@ -38,11 +37,6 @@ class PoolCreationService {
       assetManager
     );
 
-    const [signer, vaultAddress] = await Promise.all([
-      getSigner(),
-      getDeployedContractAddress("Vault"),
-    ]);
-
     // Create the pool through the factory
     const poolInfo = await poolFactoryService.createManagedPool(args);
 
@@ -54,7 +48,7 @@ class PoolCreationService {
       args.tokens,
       args.initialBalances,
       args.owner,
-      await getVault(vaultAddress)
+      await getVault(await getDeployedContractAddress("Vault"))
     );
 
     logger.success("createManagedWeightedPool: adding pool to DexTokenManager");

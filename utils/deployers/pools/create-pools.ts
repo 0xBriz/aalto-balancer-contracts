@@ -33,8 +33,6 @@ export async function createPools() {
       `${CHAIN_KEYS[ethers.provider.network.chainId]}-pools.json`
     );
     const poolInfo: PoolCreationConfig[] = await fs.readJSON(poolDataPath);
-    const assetManager = await getDeployedContractAddress("AssetManager");
-
     for (const pool of poolInfo) {
       if (pool.created) {
         continue;
@@ -74,7 +72,8 @@ function validateConfig(pool: PoolCreationConfig) {
   const tokenCount = pool.deploymentArgs.tokens.length;
 
   // Could just do some object keys/deep check to make this simpler
-  _require(pool.initialBalances.length === tokenCount, "!initialBalances.length");
+  _require(pool.initialBalances.length === tokenCount, "!tokenInfo");
+  _require(!!pool.tokenInfo && Object.keys(pool.tokenInfo).length > 0, "!initialBalances.length");
   if (pool.type === PoolType.Weighted) {
     _require(pool.deploymentArgs.weights.length === tokenCount, "!weights");
     _require(pool.deploymentArgs.assetManagers.length === tokenCount, "!assetManagers");
