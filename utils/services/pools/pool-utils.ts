@@ -1,6 +1,6 @@
 import { BigNumber } from "ethers";
 import { getAddress } from "ethers/lib/utils";
-import { CreateWeightedPoolArgs, TokenWithManagerInfo } from "../../types";
+import { CreateWeightedPoolArgs, PoolCreationConfig, TokenWithManagerInfo } from "../../types";
 
 export function sortTokensWithManagers(tokens: TokenWithManagerInfo[]): TokenWithManagerInfo[] {
   return tokens.sort((t1, t2) => (getAddress(t1.address) < getAddress(t2.address) ? -1 : 1));
@@ -14,7 +14,8 @@ export function getWeightedPoolCreationArgs(
   symbol: string,
   swapFeePercentage: BigNumber,
   owner: string,
-  tokenInfo: TokenWithManagerInfo[]
+  tokenInfo: TokenWithManagerInfo[],
+  assetManager: string
 ): CreateWeightedPoolArgs {
   const sortedInfo = sortTokensWithManagers(tokenInfo);
 
@@ -25,12 +26,12 @@ export function getWeightedPoolCreationArgs(
     weights: sortedInfo.map((info) => info.weight),
     swapFeePercentage,
     owner,
-    assetManagers: sortedInfo.map((info) => info.manager),
+    assetManagers: sortedInfo.map((_) => assetManager),
     initialBalances: sortedInfo.map((info) => info.initialBalance),
   };
 }
 
-export async function savePoolCreationInfo(pool: {}, deploymentArgs = {}) {
+export async function savePoolCreationInfo(pool: PoolCreationConfig) {
   // const path = join(
   //   process.cwd(),
   //   'src/deployments',

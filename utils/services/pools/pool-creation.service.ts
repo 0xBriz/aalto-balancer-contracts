@@ -5,7 +5,12 @@ import { getDeployedContractAddress } from "../../data/utils";
 import { logger } from "../../deployers/logger";
 import { getSigner } from "../../deployers/signers";
 import { doTransaction } from "../../tx-utils";
-import { TokenWithManagerInfo, CreateWeightedPoolArgs } from "../../types";
+import {
+  TokenWithManagerInfo,
+  CreateWeightedPoolArgs,
+  PoolCreationConfig,
+  PoolType,
+} from "../../types";
 import { initWeightedJoin } from "../../vault";
 import { poolFactoryService } from "./factory.service";
 import { getWeightedPoolCreationArgs } from "./pool-utils";
@@ -21,14 +26,17 @@ export class PoolCreationService {
     owner: string,
     tokenInfo: TokenWithManagerInfo[]
   ) {
-    console.log("createManagedWeightedPool: starting pool creation");
+    logger.info("createManagedWeightedPool: starting pool creation");
+
+    const assetManager = await getDeployedContractAddress(chainId, "AssetManager");
     // Use util to get the need pool creation args for the factory
     const args: CreateWeightedPoolArgs = getWeightedPoolCreationArgs(
       name,
       symbol,
       swapFeePercentage,
       owner,
-      tokenInfo
+      tokenInfo,
+      assetManager
     );
 
     const [signer, vaultAddress] = await Promise.all([
@@ -54,37 +62,40 @@ export class PoolCreationService {
     logger.success("createManagedWeightedPool: adding pool to DexTokenManager");
 
     // Set pool id for asset managers once pool is created
-    const assetManager = await getDeployedContractAddress(chainId, "AssetManager");
     const manager = getDexAssetManager(assetManager, signer);
     await manager.addPool(poolInfo.poolId);
 
-    console.log("createManagedWeightedPool: asset managers pool ids set complete");
+    logger.success("createManagedWeightedPool: asset managers pool ids set complete");
 
-    const data = {
+    const data: PoolCreationConfig = {
+      created: true,
       chainId,
       name,
+      assetManager,
+      type: PoolType.Weighted,
       txHash: poolInfo.txHash,
       poolId: poolInfo.poolId,
       poolAddress: poolInfo.poolAddress,
       date: poolInfo.date,
       initialBalances: args.initialBalances.map((ib) => formatEther(ib)),
-      args: {
+      deploymentArgs: {
         name,
         symbol,
         owner: args.owner,
+        tokens: args.tokens,
         swapFeePercentage: formatEther(args.swapFeePercentage),
         weights: args.weights.map((w) => formatEther(w)),
         assetManagers: args.assetManagers,
       },
       gauge: {
         address: "",
-        weight: "",
+        startingWeight: "",
         added: false,
       },
     };
 
-    console.log("createManagedWeightedPool: process complete");
-    console.log("createManagedWeightedPool: pool data is:");
+    logger.success("createManagedWeightedPool: process complete");
+    logger.info("createManagedWeightedPool: pool data is:");
     // Logging in case of a file save/create issue
     console.log(data);
 

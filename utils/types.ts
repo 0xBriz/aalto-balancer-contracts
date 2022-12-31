@@ -138,14 +138,15 @@ export interface PoolCreationConfig {
   poolId: string;
   poolAddress: string;
   date: string;
-  tokens: string[];
-  initialBalances: string;
+
+  initialBalances: string[];
   assetManager: string;
   weights?: string[];
   amp?: string;
   deploymentArgs: {
     name: string;
     symbol: string;
+    tokens: string[];
     owner: string;
     swapFeePercentage: string;
     assetManagers: string[];
