@@ -1,6 +1,6 @@
 import { BigNumber } from "ethers";
 
-import { maxUint, maxInt, minInt } from "./numbers";
+import { maxUint, maxInt, minInt } from "../numbers";
 
 export const MAX_UINT256: BigNumber = maxUint(256);
 export const MAX_UINT112: BigNumber = maxUint(112);

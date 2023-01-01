@@ -16,7 +16,6 @@ export enum ExitKindStable {
 export enum GaugeType {
   LiquidityMiningCommittee,
   veBAL,
-  Ethereum,
 }
 
 export enum PoolType {
@@ -160,6 +159,7 @@ export interface PoolCreationConfig {
     address: string;
     startingWeight: string;
     added: Boolean;
+    txHash: string;
   };
 }
 

@@ -6,6 +6,7 @@ import { deployVault } from "../utils/deployers/vault/deploy-vault";
 import * as fs from "fs-extra";
 import { getVault } from "../utils/contract-utils";
 import { deployLiquidityMining } from "../utils/deployers/liquidity-mining/setup-liquidity-mining";
+import { setupVotingEscrow } from "../utils/deployers/liquidity-mining/setup-voting-escrow";
 
 export async function doCoreSystemDeployment() {
   await ethers.provider.ready;
@@ -24,30 +25,20 @@ export async function doCoreSystemDeployment() {
     saveDeplomentData(entryAdapterData.deployment),
   ]);
 
-  // const factoryData = await deployPoolFactories(vaultData.vault.address);
-  // for (const factory of factoryData) {
-  //   await saveDeplomentData(factory.deployment);
-  // }
+  const factoryData = await deployPoolFactories(vaultData.vault.address);
+  for (const factory of factoryData) {
+    await saveDeplomentData(factory.deployment);
+  }
 
-  // const poolsData = await createPools();
-  // await fs.writeJSON(poolsData.poolDataPath, poolsData.poolInfo);
-}
-
-export async function doGovernanceAndGaugeDeploy() {
-  await deployLiquidityMining();
+  const poolsData = await createPools();
+  await fs.writeJSON(poolsData.poolDataPath, poolsData.poolInfo);
 }
 
 async function main() {
   try {
     // await doCoreSystemDeployment();
-    await doGovernanceAndGaugeDeploy();
-
-    // const vault = await getVault();
-    // console.log(
-    //   await vault.getPoolTokens(
-    //     "0x64b9c842085edd4b7b412e02947fe1253b52efdb000200000000000000000000"
-    //   )
-    // );
+    // await deployLiquidityMining();
+    await setupVotingEscrow(true);
   } catch (error) {
     console.error(error);
     process.exitCode = 1;

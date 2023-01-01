@@ -2,6 +2,7 @@ import { defaultAbiCoder, parseUnits } from "ethers/lib/utils";
 import { getVault } from "./contract-utils";
 import { logger } from "./deployers/logger";
 import { approveTokensIfNeeded } from "./token";
+import { awaitTransactionComplete } from "./tx-utils";
 import { JoinPoolRequest } from "./types";
 
 /**
@@ -58,4 +59,14 @@ export async function initWeightedJoin(
     console.log(error);
     throw error;
   }
+}
+
+export async function doPoolJoin(
+  poolId: string,
+  sender: string,
+  recipient: string,
+  request: JoinPoolRequest
+) {
+  const vault = await getVault();
+  awaitTransactionComplete(vault.joinPool(poolId));
 }

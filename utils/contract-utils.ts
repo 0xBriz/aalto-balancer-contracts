@@ -3,11 +3,12 @@ import * as BPT from "../artifacts/contracts/pool-utils/BalancerPoolToken.sol/Ba
 import * as WeightedPoolAbi from "../artifacts/contracts/pool-weighted/WeightedPool.sol/WeightedPool.json";
 import * as Vault from "../artifacts/contracts/Vault.sol/Vault.json";
 import * as Timelock from "../artifacts/contracts/authorizer/TimelockAuthorizer.sol/TimelockAuthorizer.json";
+import * as TokenAdmin from "../artifacts/contracts/liquidity-mining/BalancerTokenAdmin.sol/BalancerTokenAdmin.json";
 import * as AM from "./abi/DexTokenManager.json";
 import { Contract } from "ethers";
 import { ERC20_ABI } from "./abi/ERC20ABI";
 import { getSigner } from "./deployers/signers";
-import { TimelockAuthorizer } from "../typechain";
+import { BalancerTokenAdmin, TimelockAuthorizer } from "../typechain";
 import { CHAIN_KEYS } from "./data/chains";
 import { getChainId } from "./deployers/network";
 import { join } from "path";
@@ -18,9 +19,17 @@ type FactoryContracts =
   | "ERC4626LinearPoolFactory"
   | "StablePoolFactory";
 
-type VaulContracts = "Vault" | "TimelockAuthorizer" | "AuthEntryPointAdapter";
+type VaulContracts = "Vault" | "TimelockAuthorizer" | "AuthorizerAdaptorEntrypoint";
 type GovernanceContracts = "GovernanceToken" | "BalancerTokenAdmin" | "BalancerMinter";
-type GaugeContracts = "VotingEscrow" | "GaugeController";
+type GaugeContracts =
+  | "VotingEscrow"
+  | "GaugeController"
+  | "LiquidityGaugeFactory"
+  | "LiquidityGauge"
+  | "BoostV2"
+  | "SingleRecipientGaugeFactory"
+  | "BALTokenHolder"
+  | "FeeDistributor";
 export type DeployedContract =
   | FactoryContracts
   | VaulContracts
@@ -45,6 +54,13 @@ export async function getTimelockAuth(): Promise<TimelockAuthorizer> {
     await getDeployedContractAddress("TimelockAuthorizer"),
     Timelock.abi
   ) as unknown as TimelockAuthorizer;
+}
+
+export async function getBalTokenAdmin(): Promise<BalancerTokenAdmin> {
+  return getCacheOrNew(
+    await getDeployedContractAddress("BalancerTokenAdmin"),
+    TokenAdmin.abi
+  ) as unknown as BalancerTokenAdmin;
 }
 
 export async function getBalancerPoolToken(address: string) {

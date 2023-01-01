@@ -5,6 +5,7 @@ import { join } from "path";
 import { OPERATOR } from "../../data/addresses";
 import { CHAIN_KEYS } from "../../data/chains";
 import { poolCreationService } from "../../services/pools/pool-creation.service";
+import { getPoolConfigPath } from "../../services/pools/pool-utils";
 import { PoolCreationConfig, PoolType } from "../../types";
 import { logger } from "../logger";
 import { _require } from "../utils";
@@ -30,12 +31,7 @@ export async function createPools(): Promise<{
     const chainId = ethers.provider.network.chainId;
     logger.info("createPools: Starting pool creation");
 
-    const poolDataPath = join(
-      process.cwd(),
-      "utils",
-      "data",
-      `${CHAIN_KEYS[ethers.provider.network.chainId]}-pools.json`
-    );
+    const poolDataPath = await getPoolConfigPath();
     let poolInfo: PoolCreationConfig[] = await fs.readJSON(poolDataPath);
 
     for (const pool of poolInfo) {

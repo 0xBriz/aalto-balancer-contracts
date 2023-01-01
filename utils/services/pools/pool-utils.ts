@@ -1,5 +1,9 @@
+import * as fs from "fs-extra";
 import { getAddress } from "ethers/lib/utils";
-import { CreateWeightedPoolArgs, PoolTokenInfo } from "../../types";
+import { CreateWeightedPoolArgs, PoolCreationConfig, PoolTokenInfo } from "../../types";
+import { join } from "path";
+import { CHAIN_KEYS } from "../../data/chains";
+import { getChainId } from "../../deployers/network";
 
 /**
  * Sorts the tokens for a pool according to address as required by the vault.
@@ -36,4 +40,17 @@ export function getWeightedPoolCreationArgs(
     owner,
     initialBalances: sortedInfo.map((info) => info.initialBalance),
   };
+}
+
+export async function getPoolConfigPath() {
+  return join(process.cwd(), "utils", "data", `${CHAIN_KEYS[await getChainId()]}-pools.json`);
+}
+
+export async function getDeployedPools(): Promise<PoolCreationConfig[]> {
+  const pools: PoolCreationConfig[] = await fs.readJSON(await getPoolConfigPath());
+  return pools.filter((p) => p.created);
+}
+
+export async function savePoolsData(pools: PoolCreationConfig[]) {
+  await fs.writeJSON(await getPoolConfigPath(), pools);
 }

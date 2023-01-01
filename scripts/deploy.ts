@@ -1,6 +1,5 @@
 import { parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import { MAINNET_VAULT } from "../data/addresses";
 import { deployERC4626Factory } from "../utils/deployers/pools/factories/deploy-erc4626-factory";
 import { deployGovernanceToken } from "../utils/deployers/liquidity-mining/governance/deploy-governance-token";
 import { deployMulticall, deployMulticallV1 } from "../utils/deployers/general/deploy-multicall";

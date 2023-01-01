@@ -1,6 +1,6 @@
 import { BigNumber, ethers } from "ethers";
 import { hexlify } from "ethers/lib/utils";
-import { MAX_UINT256 } from "./big-number";
+import { MAX_UINT256 } from "./big-numbers/ethers-big-number";
 import { getERC20 } from "./contract-utils";
 import { logger } from "./deployers/logger";
 

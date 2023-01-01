@@ -81,6 +81,7 @@ class PoolCreationService {
         address: "",
         startingWeight: "",
         added: false,
+        txHash: "",
       },
     };
 
