@@ -3,8 +3,9 @@ import { deployAuthAdapter } from "../liquidity-mining/deploy-auth-adapter";
 import { DAY, ONE_MONTH_SECONDS } from "../../../scripts/utils/time";
 import { TOKENS } from "../../data/token-map";
 import { logger } from "../logger";
+import { saveDeplomentData } from "../save-deploy-data";
 
-export async function deployVault() {
+export async function deployVault(doSave: boolean) {
   try {
     await ethers.provider.ready;
     const admin = (await ethers.getSigners())[0];
@@ -29,6 +30,15 @@ export async function deployVault() {
       entryAdapterData.authEntryPoint.address
     );
     await vaultData.vault.connect(admin).setAuthorizer(authorizerData.authorizer.address);
+
+    if (doSave) {
+      await Promise.all([
+        saveDeplomentData(vaultData.deployment),
+        saveDeplomentData(authorizerData.deployment),
+        saveDeplomentData(authAdapterData.deployment),
+        saveDeplomentData(entryAdapterData.deployment),
+      ]);
+    }
 
     return {
       vaultData,

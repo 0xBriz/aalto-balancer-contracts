@@ -46,11 +46,23 @@ export async function getPoolConfigPath() {
   return join(process.cwd(), "utils", "data", `${CHAIN_KEYS[await getChainId()]}-pools.json`);
 }
 
-export async function getDeployedPools(): Promise<PoolCreationConfig[]> {
+export async function getPoolConfigs(): Promise<PoolCreationConfig[]> {
   const pools: PoolCreationConfig[] = await fs.readJSON(await getPoolConfigPath());
   return pools.filter((p) => p.created);
 }
 
 export async function savePoolsData(pools: PoolCreationConfig[]) {
   await fs.writeJSON(await getPoolConfigPath(), pools);
+}
+
+export async function getMainPoolConfig() {
+  const poolConfigs = await getPoolConfigs();
+  return poolConfigs.filter((p) => p.isVePool)[0];
+}
+
+export async function updatePoolConfig(pool: PoolCreationConfig) {
+  let poolConfigs = await getPoolConfigs();
+  poolConfigs = poolConfigs.filter((p) => p.name !== pool.name);
+  poolConfigs.push(pool);
+  await savePoolsData(poolConfigs);
 }

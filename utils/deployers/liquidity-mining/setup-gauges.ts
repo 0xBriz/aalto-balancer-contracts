@@ -1,4 +1,3 @@
-import { ContractReceipt } from "ethers";
 import { ZERO_ADDRESS } from "../../big-numbers/ethers-big-number";
 import {
   getBalTokenAdmin,
@@ -6,7 +5,7 @@ import {
   getTimelockAuth,
 } from "../../contract-utils";
 import { getChainAdmin } from "../../data/addresses";
-import { getDeployedPools, savePoolsData } from "../../services/pools/pool-utils";
+import { getPoolConfigs, savePoolsData } from "../../services/pools/pool-utils";
 import { awaitTransactionComplete, doTransaction } from "../../tx-utils";
 import { deployContractUtil } from "../deploy-util";
 import { logger } from "../logger";
@@ -23,6 +22,7 @@ export async function setupGaugeSystem(doSave: boolean) {
   });
 
   // TODO: Add gauge types
+  // Added a "staking admin" to the GaugeController previously for simplicity
 
   const { balMinter } = await deployMinterAndSetPermissions(gaugeController.contract.address);
 
@@ -43,33 +43,7 @@ export async function setupGaugeSystem(doSave: boolean) {
 
   logger.info(`Adding liqudity gauges for pools..`);
 
-  const poolConfigs = await getDeployedPools();
-
-  for (const pool of poolConfigs) {
-    if (pool.gauge.added) {
-      continue;
-    }
-
-    try {
-      logger.info(`Creating gauge for pool "${pool.name}"`);
-
-      if (pool.isVePool) {
-        pool.gauge.address = singleRecipientGaugeAddress;
-        pool.gauge.txHash = singleGaugeReceipt.transactionHash;
-      } else {
-        const { gaugeAddress, receipt } = await deployLiquidityGauge(pool.poolAddress);
-        pool.gauge.address = gaugeAddress;
-        pool.gauge.txHash = receipt.transactionHash;
-      }
-
-      pool.gauge.added = true;
-
-      await savePoolsData(poolConfigs);
-    } catch (error) {
-      logger.error(`Error adding pool gauge`);
-      console.error(error);
-    }
-  }
+  await addPoolGauges(singleRecipientGaugeAddress, singleGaugeReceipt.transactionHash);
 
   if (doSave) {
     await Promise.all([
@@ -205,4 +179,39 @@ export async function deployLiquidityGauge(poolAddress: string) {
     receipt,
     gaugeAddress,
   };
+}
+
+export async function addPoolGauges(
+  singleRecipientGaugeAddress: string,
+  singleGaugeReceiptTxHash: string
+) {
+  logger.info(`Adding liqudity gauges for pools..`);
+
+  const poolConfigs = await getPoolConfigs();
+
+  for (const pool of poolConfigs) {
+    if (pool.gauge.added) {
+      continue;
+    }
+
+    try {
+      logger.info(`Creating gauge for pool "${pool.name}"`);
+
+      if (pool.isVePool) {
+        pool.gauge.address = singleRecipientGaugeAddress;
+        pool.gauge.txHash = singleGaugeReceiptTxHash;
+      } else {
+        const { gaugeAddress, receipt } = await deployLiquidityGauge(pool.poolAddress);
+        pool.gauge.address = gaugeAddress;
+        pool.gauge.txHash = receipt.transactionHash;
+      }
+
+      pool.gauge.added = true;
+
+      await savePoolsData(poolConfigs);
+    } catch (error) {
+      logger.error(`Error adding pool gauge`);
+      console.error(error);
+    }
+  }
 }

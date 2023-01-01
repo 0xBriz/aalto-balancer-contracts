@@ -68,5 +68,5 @@ export async function doPoolJoin(
   request: JoinPoolRequest
 ) {
   const vault = await getVault();
-  awaitTransactionComplete(vault.joinPool(poolId));
+  awaitTransactionComplete(vault.joinPool(poolId, sender, recipient, request));
 }

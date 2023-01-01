@@ -113,6 +113,7 @@ export interface PoolTokenInfo {
   address: string;
   weight: string;
   initialBalance: string;
+  symbol?: string;
 }
 
 export interface AssetManagerCreationArgs {

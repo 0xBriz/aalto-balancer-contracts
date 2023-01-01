@@ -102,11 +102,9 @@ time_total: public(uint256)  # last scheduled time
 points_type_weight: public(HashMap[int128, HashMap[uint256, uint256]])  # type_id -> time -> type weight
 time_type_weight: public(uint256[1000000000])  # type_id -> last scheduled time (next week)
 
-stakingAdmin: address
-
 
 @external
-def __init__(_voting_escrow: address, _authorizer_adaptor: address, _stakingAdmin: address):
+def __init__(_voting_escrow: address, _authorizer_adaptor: address):
     """
     @notice Contract constructor
     @param _voting_escrow `VotingEscrow` contract address
@@ -119,7 +117,6 @@ def __init__(_voting_escrow: address, _authorizer_adaptor: address, _stakingAdmi
     VOTING_ESCROW = _voting_escrow
     AUTHORIZER_ADAPTOR = _authorizer_adaptor
     self.time_total = block.timestamp / WEEK * WEEK
-    self.stakingAdmin = _stakingAdmin
 
 @external
 @view
@@ -293,7 +290,7 @@ def add_gauge(addr: address, gauge_type: int128, weight: uint256 = 0):
     @param gauge_type Gauge type
     @param weight Gauge weight
     """
-    assert msg.sender == AUTHORIZER_ADAPTOR or msg.sender == self.stakingAdmin
+    assert msg.sender == AUTHORIZER_ADAPTOR
     assert (gauge_type >= 0) and (gauge_type < self.n_gauge_types)
     assert self.gauge_types_[addr] == 0  # dev: cannot add the same gauge twice
 
@@ -422,7 +419,7 @@ def add_type(_name: String[64], weight: uint256 = 0):
     @param _name Name of gauge type
     @param weight Weight of gauge type
     """
-    assert msg.sender == AUTHORIZER_ADAPTOR or msg.sender == self.stakingAdmin
+    assert msg.sender == AUTHORIZER_ADAPTOR
     type_id: int128 = self.n_gauge_types
     self.gauge_type_names[type_id] = _name
     self.n_gauge_types = type_id + 1
@@ -438,7 +435,7 @@ def change_type_weight(type_id: int128, weight: uint256):
     @param type_id Gauge type id
     @param weight New Gauge weight
     """
-    assert msg.sender == AUTHORIZER_ADAPTOR or msg.sender == self.stakingAdmin
+    assert msg.sender == AUTHORIZER_ADAPTOR
     self._change_type_weight(type_id, weight)
 
 
@@ -474,7 +471,7 @@ def change_gauge_weight(addr: address, weight: uint256):
     @param addr `GaugeController` contract address
     @param weight New Gauge weight
     """
-    assert msg.sender == AUTHORIZER_ADAPTOR or msg.sender == self.stakingAdmin
+    assert msg.sender == AUTHORIZER_ADAPTOR
     self._change_gauge_weight(addr, weight)
 
 @internal
@@ -602,17 +599,3 @@ def get_weights_sum_per_type(type_id: int128) -> uint256:
     """
     return self.points_sum[type_id][self.time_sum[type_id]].bias
 
-@external
-@nonreentrant('lock')
-def set_staking_admin(_addr: address):
-   assert  msg.sender == AUTHORIZER_ADAPTOR or msg.sender == self.stakingAdmin
-   assert _addr != ZERO_ADDRESS, "0x0 staking admin"
-   
-   self.stakingAdmin = _addr
-
-@external
-@nonreentrant('lock')
-def kill_staking_admin(_addr: address):
-   assert  msg.sender == AUTHORIZER_ADAPTOR
-   
-   self.stakingAdmin = ZERO_ADDRESS

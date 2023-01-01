@@ -5,7 +5,7 @@ import { join } from "path";
 import { OPERATOR } from "../../data/addresses";
 import { CHAIN_KEYS } from "../../data/chains";
 import { poolCreationService } from "../../services/pools/pool-creation.service";
-import { getPoolConfigPath } from "../../services/pools/pool-utils";
+import { getPoolConfigPath, getPoolConfigs, savePoolsData } from "../../services/pools/pool-utils";
 import { PoolCreationConfig, PoolType } from "../../types";
 import { logger } from "../logger";
 import { _require } from "../utils";
@@ -22,8 +22,7 @@ const POOL_ADMIN = {
   56: OPERATOR,
 };
 
-export async function createPools(): Promise<{
-  poolDataPath: string;
+export async function createPools(doSave: boolean): Promise<{
   poolInfo: PoolCreationConfig[];
 }> {
   try {
@@ -31,14 +30,14 @@ export async function createPools(): Promise<{
     const chainId = ethers.provider.network.chainId;
     logger.info("createPools: Starting pool creation");
 
-    const poolDataPath = await getPoolConfigPath();
-    let poolInfo: PoolCreationConfig[] = await fs.readJSON(poolDataPath);
+    let poolInfo: PoolCreationConfig[] = await getPoolConfigs();
 
     for (const pool of poolInfo) {
       if (pool.created) {
         continue;
       }
 
+      // TODO: Account for main pool not having the token address set in the config yet and set it
       validatePoolConfig(pool);
 
       // set the chain id on the pool to save looking it up later
@@ -67,8 +66,11 @@ export async function createPools(): Promise<{
 
     logger.success("createPools: Pool creation complete");
 
+    if (doSave) {
+      await savePoolsData(poolInfo);
+    }
+
     return {
-      poolDataPath,
       poolInfo,
     };
   } catch (error) {

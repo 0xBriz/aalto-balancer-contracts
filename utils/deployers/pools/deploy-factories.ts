@@ -1,4 +1,5 @@
 import { logger } from "../logger";
+import { saveDeplomentData } from "../save-deploy-data";
 import { deployFactory } from "./factories/deploy-factory";
 
 const FACTORY_TYPES = [
@@ -8,7 +9,7 @@ const FACTORY_TYPES = [
   "WeightedPoolFactory",
 ];
 
-export async function deployPoolFactories(vault: string) {
+export async function deployPoolFactories(vault: string, doSave: boolean) {
   try {
     logger.info("deployPoolFactories: Deploying factories");
 
@@ -19,6 +20,12 @@ export async function deployPoolFactories(vault: string) {
       factoryDeployments.push(info);
     }
     logger.success("deployPoolFactories: Factories deployment complete");
+
+    if (doSave) {
+      for (const factory of factoryDeployments) {
+        await saveDeplomentData(factory.deployment);
+      }
+    }
 
     return factoryDeployments;
   } catch (error) {

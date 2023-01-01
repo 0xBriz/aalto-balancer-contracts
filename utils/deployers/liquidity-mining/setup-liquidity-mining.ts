@@ -1,8 +1,8 @@
 import { logger } from "../logger";
-import { saveDeplomentData } from "../save-deploy-data";
-import { setupGovernance } from "./governance/setup-governance";
+import { setupGaugeSystem } from "./setup-gauges";
+import { setupVotingEscrow } from "./setup-voting-escrow";
 
-export async function deployLiquidityMining() {
+export async function deployLiquidityMining(doSave: boolean) {
   try {
     logger.info("Starting deployment of Liquidity Mining system");
     /**
@@ -14,11 +14,12 @@ export async function deployLiquidityMining() {
     // minter
     // do auth steps
 
-    const { govTokenData, tokenAdminData } = await setupGovernance();
-    await Promise.all([
-      saveDeplomentData(govTokenData.deployment),
-      saveDeplomentData(tokenAdminData.deployment),
-    ]);
+    try {
+      await setupVotingEscrow(doSave);
+      await setupGaugeSystem(doSave);
+    } catch (error) {
+      console.error(error);
+    }
 
     logger.success("Liquidity Mining setup complete");
   } catch (error) {

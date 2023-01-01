@@ -8,3 +8,11 @@ export async function getChainId() {
   chainId = ethers.provider.network.chainId;
   return chainId;
 }
+
+export async function getCurrentBlock() {
+  return await ethers.provider.getBlock(await ethers.provider.getBlockNumber());
+}
+
+export async function getCurrentBlockTimestamp() {
+  return (await getCurrentBlock()).timestamp;
+}

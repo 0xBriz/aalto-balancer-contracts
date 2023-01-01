@@ -9,7 +9,7 @@ export async function doTransaction(txResponse: ContractTransaction) {
   }
 }
 
-export async function awaitTransactionComplete(txResponse: ContractTransaction, confirmations = 2) {
+export async function awaitTransactionComplete(txResponse: ContractTransaction, confirmations = 5) {
   try {
     logger.info(`- Starting transaction: ${txResponse.hash}`);
     logger.info(`- Awaiting transaction receipt... - ` + new Date().toLocaleString());
