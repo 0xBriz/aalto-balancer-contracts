@@ -32,12 +32,10 @@ export async function deployVault(doSave: boolean) {
     await vaultData.vault.connect(admin).setAuthorizer(authorizerData.authorizer.address);
 
     if (doSave) {
-      await Promise.all([
-        saveDeplomentData(vaultData.deployment),
-        saveDeplomentData(authorizerData.deployment),
-        saveDeplomentData(authAdapterData.deployment),
-        saveDeplomentData(entryAdapterData.deployment),
-      ]);
+      saveDeplomentData(vaultData.deployment);
+      saveDeplomentData(authorizerData.deployment);
+      saveDeplomentData(authAdapterData.deployment);
+      saveDeplomentData(entryAdapterData.deployment);
     }
 
     return {

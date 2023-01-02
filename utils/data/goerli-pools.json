@@ -1,85 +1,57 @@
 [
   {
-    "created": true,
-    "chainId": 5,
-    "name": "Pegging Enthusiasts",
-    "symbol": "AMES-BUSD",
-    "assetManager": "0x69be5730C9042784Bbd0a46D08D0076c4fd7B84c",
+    "created": false,
     "type": "Weighted",
-    "txHash": "0x41ef82bd3cfe8bbd31fcad5d9643dc83b03a99dc94b5a5187f8d5abbc75576d2",
-    "poolId": "0xa4b7d0afe0da46b9ea756f82234da637eb651cab000200000000000000000000",
-    "poolAddress": "0xa4b7d0afe0da46b9eA756F82234Da637eB651cab",
-    "date": "12/31/2022, 1:07:38 PM",
-    "initialBalances": ["20000", "10000"],
+    "name": "Pegging Enthusiast",
+    "txHash": "",
+    "poolId": "",
+    "poolAddress": "",
+    "date": "",
+    "assetManager": "",
     "tokenInfo": [
-      {
-        "address": "0x7faA8158FaA037CC7516eF1f6864af44d75654AE",
-        "weight": "0.5",
-        "initialBalance": "20000",
-        "symbol": "AMES"
-      },
       {
         "address": "0xd71114b3AD1Ec657B4194E0B3b7C9fC71C7bdbEF",
         "weight": "0.5",
-        "initialBalance": "10000",
-        "symbol": "BUSD"
-      }
-    ],
-    "deploymentArgs": {
-      "name": "Pegging Enthusiasts",
-      "symbol": "AMES-BUSD",
-      "owner": "0x891eFc56f5CD6580b2fEA416adC960F2A6156494",
-      "tokens": [
-        "0x7faA8158FaA037CC7516eF1f6864af44d75654AE",
-        "0xd71114b3AD1Ec657B4194E0B3b7C9fC71C7bdbEF"
-      ],
-      "swapFeePercentage": "0.01",
-      "weights": ["0.5", "0.5"]
-    },
-    "gauge": { "address": "", "startingWeight": "", "added": false }
-  },
-  {
-    "created": true,
-    "chainId": 5,
-    "name": "That Main Pool Thing",
-    "symbol": "VRTK-BUSD",
-    "assetManager": "0x69be5730C9042784Bbd0a46D08D0076c4fd7B84c",
-    "type": "Weighted",
-    "txHash": "0x89420a9f9f97afd5131f5ba145022490bb0635c9f11f48e3c55e5d957dfea265",
-    "poolId": "0x477846cd589e2960402823c9f526ecde89ccfa65000200000000000000000001",
-    "poolAddress": "0x477846Cd589e2960402823C9f526ecDe89CCfA65",
-    "date": "1/1/2023, 6:22:52 AM",
-    "initialBalances": ["10800", "100"],
-    "tokenInfo": [
-      {
-        "address": "0xb269A278E427478712e2AF0eBa728021157A2114",
-        "weight": "0.8",
-        "initialBalance": "10800",
-        "symbol": "VRTK"
+        "initialBalance": "20000"
       },
       {
-        "address": "0xe4E96Cf369D4d604Bedc4d7962F94D53E4B5e3C6",
-        "weight": "0.2",
-        "initialBalance": "100",
-        "symbol": "WBNB"
+        "address": "0x7faA8158FaA037CC7516eF1f6864af44d75654AE",
+        "weight": "0.5",
+        "initialBalance": "10000"
       }
     ],
-    "deploymentArgs": {
-      "name": "That Main Pool Thing",
-      "symbol": "VRTK-BUSD",
-      "owner": "0x891eFc56f5CD6580b2fEA416adC960F2A6156494",
-      "tokens": [
-        "0xb269A278E427478712e2AF0eBa728021157A2114",
-        "0xe4E96Cf369D4d604Bedc4d7962F94D53E4B5e3C6"
-      ],
-      "swapFeePercentage": "0.01",
-      "weights": ["0.8", "0.2"],
-      "assetManagers": [
-        "0x69be5730C9042784Bbd0a46D08D0076c4fd7B84c",
-        "0x69be5730C9042784Bbd0a46D08D0076c4fd7B84c"
-      ]
+    "args": {
+      "name": "Pegging Enthusiast",
+      "symbol": "AMES-BUSD",
+      "owner": "",
+      "swapFeePercentage": "0,01",
+      "weights": [],
+      "assetManagers": []
     },
-    "gauge": { "address": "", "startingWeight": "0", "added": false },
-    "isVePool": true
+    "gauge": { "address": "", "startingWeight": "0", "added": false }
+  },
+  {
+    "created": false,
+    "isVePool": true,
+    "type": "Weighted",
+    "name": "That Main Pool Thing",
+    "txHash": "",
+    "poolId": "",
+    "poolAddress": "",
+    "date": "",
+    "assetManager": "",
+    "tokenInfo": [
+      { "address": "", "weight": "0.8", "initialBalance": "10800" },
+      { "address": "", "weight": "0.2", "initialBalance": "100" }
+    ],
+    "args": {
+      "name": "That Main Pool Thing",
+      "symbol": "VRTK-BNB",
+      "owner": "",
+      "swapFeePercentage": "0,01",
+      "weights": [],
+      "assetManagers": []
+    },
+    "gauge": { "address": "", "startingWeight": "0", "added": false }
   }
 ]

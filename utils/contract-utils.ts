@@ -49,11 +49,8 @@ export async function getVault() {
   return getCacheOrNew(await getDeployedContractAddress("Vault"), Vault.abi);
 }
 
-export async function getTimelockAuth(): Promise<TimelockAuthorizer> {
-  return getCacheOrNew(
-    await getDeployedContractAddress("TimelockAuthorizer"),
-    Timelock.abi
-  ) as unknown as TimelockAuthorizer;
+export async function getTimelockAuth(address: string): Promise<TimelockAuthorizer> {
+  return getCacheOrNew(address, Timelock.abi) as unknown as TimelockAuthorizer;
 }
 
 export async function getBalTokenAdmin(): Promise<BalancerTokenAdmin> {

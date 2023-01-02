@@ -3,21 +3,12 @@ import { createPools } from "../utils/deployers/pools/create-pools";
 import { deployPoolFactories } from "../utils/deployers/pools/deploy-factories";
 import { deployVault } from "../utils/deployers/vault/deploy-vault";
 import { deployLiquidityMining } from "../utils/deployers/liquidity-mining/setup-liquidity-mining";
-import { deployContractUtil } from "../utils/deployers/deploy-util";
 import { getVault } from "../utils/contract-utils";
 import { setupGovernance } from "../utils/deployers/liquidity-mining/governance/setup-governance";
-import { getPoolConfigs, savePoolsData } from "../utils/services/pools/pool-utils";
+import { getAllPoolConfigs, savePoolsData } from "../utils/services/pools/pool-utils";
 
 export async function doCoreSystemDeployment(doSave: boolean) {
-  await ethers.provider.ready;
-  const chainId = ethers.provider.network.chainId;
-  // deploy vault system
-  // deploy factories
-  // create pools
-  // setup liquidity mining system components
-  // do any auth items along the way
-
-  const { vaultData } = await deployVault(doSave);
+  await deployVault(doSave);
 }
 
 export async function handlePoolSetup(doSave: boolean) {
@@ -26,7 +17,7 @@ export async function handlePoolSetup(doSave: boolean) {
 }
 
 async function resetAllPoolConfigs() {
-  const pools = (await getPoolConfigs()).map((p) => {
+  const pools = (await getAllPoolConfigs()).map((p) => {
     return {
       ...p,
       created: false,
@@ -38,9 +29,11 @@ async function resetAllPoolConfigs() {
 
 async function main() {
   try {
+    await ethers.provider.ready;
+
     const saving = true;
 
-    await resetAllPoolConfigs();
+    // await resetAllPoolConfigs();
     // await doCoreSystemDeployment(saving);
     await setupGovernance(saving);
     // Has to come after token is deployed for main pool creation

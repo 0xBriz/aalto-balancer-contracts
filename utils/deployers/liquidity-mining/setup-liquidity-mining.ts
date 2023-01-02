@@ -16,7 +16,7 @@ export async function deployLiquidityMining(doSave: boolean) {
 
     try {
       await setupVotingEscrow(doSave);
-      await setupGaugeSystem(doSave);
+      // await setupGaugeSystem(doSave);
     } catch (error) {
       console.error(error);
     }

@@ -49,18 +49,18 @@ const config: HardhatUserConfig = {
     compilers: [{ version: "0.3.1" }, { version: "0.3.3" }],
   },
   networks: {
-    // hardhat: {
-    //   allowUnlimitedContractSize: true,
-    //   forking: {
-    //     url: process.env.BSC_ARCHIVE_NODE || "",
-    //     blockNumber: 23108471,
-    //   },
-    //   // loggingEnabled: true,
-    //   // mining: {
-    //   //   auto: false,
-    //   //   interval: 2000,
-    //   // },
-    // },
+    hardhat: {
+      allowUnlimitedContractSize: true,
+      // forking: {
+      //   url: process.env.BSC_ARCHIVE_NODE || "",
+      //   blockNumber: 23108471,
+      // },
+      // loggingEnabled: true,
+      mining: {
+        auto: false,
+        interval: 1000,
+      },
+    },
     bsc: {
       url: process.env.BSC_MAINNET_URL || "",
       accounts: process.env.DEV_KEY !== undefined ? [process.env.DEV_KEY] : [],

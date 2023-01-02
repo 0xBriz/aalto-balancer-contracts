@@ -1,6 +1,6 @@
 {
   "created": false,
-  "isVePool": true,
+  "isVePool": false,
   "type": "Weighted",
   "name": "",
   "txHash": "",

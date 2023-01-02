@@ -1,21 +1,11 @@
 import { getAddress } from "ethers/lib/utils";
-import * as fs from "fs-extra";
 import { ethers } from "hardhat";
-import { join } from "path";
-import { OPERATOR } from "../../data/addresses";
-import { CHAIN_KEYS } from "../../data/chains";
+import { getChainAdmin, OPERATOR } from "../../data/addresses";
 import { poolCreationService } from "../../services/pools/pool-creation.service";
-import { getPoolConfigPath, getPoolConfigs, savePoolsData } from "../../services/pools/pool-utils";
+import { savePoolsData, getAllPoolConfigs } from "../../services/pools/pool-utils";
 import { PoolCreationConfig, PoolType } from "../../types";
 import { logger } from "../logger";
 import { _require } from "../utils";
-
-// const POOL_TYPE_TO_FACTORY = {
-//   ["Weighted"]: "WeightedPoolFactory",
-//   ["Stable"]: "StablePoolFactory",
-//   ["ComposableStable"]: "",
-//   ["LBP"]: "LiquidityBootstrappingPoolFactory",
-// };
 
 const POOL_ADMIN = {
   5: OPERATOR,
@@ -30,14 +20,13 @@ export async function createPools(doSave: boolean): Promise<{
     const chainId = ethers.provider.network.chainId;
     logger.info("createPools: Starting pool creation");
 
-    let poolInfo: PoolCreationConfig[] = await getPoolConfigs();
+    let poolInfo: PoolCreationConfig[] = await getAllPoolConfigs();
 
     for (const pool of poolInfo) {
       if (pool.created) {
         continue;
       }
 
-      // TODO: Account for main pool not having the token address set in the config yet and set it
       validatePoolConfig(pool);
 
       // set the chain id on the pool to save looking it up later
@@ -49,6 +38,7 @@ export async function createPools(doSave: boolean): Promise<{
           address: getAddress(info.address),
         };
       });
+      pool.deploymentArgs.owner = await getChainAdmin();
 
       try {
         // Map its type to its factory
@@ -90,7 +80,11 @@ function validatePoolConfig(pool: PoolCreationConfig) {
       _require(!!info.weight, "!token info weight");
     }
 
-    _require(!!info.address, "!token info address");
+    // Gov token gets auto added later
+    if (!pool.isVePool) {
+      _require(!!info.address, "!token info address");
+    }
+
     _require(!!info.initialBalance?.length, "!token info init balance");
   });
 
