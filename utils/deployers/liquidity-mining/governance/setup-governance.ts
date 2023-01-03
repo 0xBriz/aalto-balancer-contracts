@@ -14,60 +14,18 @@ export async function setupGovernance(doSave: boolean, vault: string, timelockAu
   try {
     logger.info("setupGovernance: initializing governance items");
 
-    const govTokenData = await deployContractUtil("GovernanceToken", {
-      name: "Vertek",
-      symbol: "VRTK",
-    });
+    const { govTokenData } = await createGovernanceToken();
 
-    // Set the new token address for use in pool creation and such later
-    const vePool = await getMainPoolConfig();
-    let hadSymbol = false;
-    vePool.tokenInfo = vePool.tokenInfo.map((ti) => {
-      if (ti.symbol === "VRTK") {
-        hadSymbol = true;
-        return {
-          ...ti,
-          address: govTokenData.contract.address,
-        };
-      }
-
-      return ti;
-    });
-
-    if (!hadSymbol) {
-      throw new Error("Missing VRTK symbol for ve pool");
-    }
-
-    await updatePoolConfig(vePool);
-
-    const tokenAdminData = await deployContractUtil("BalancerTokenAdmin", {
-      vault,
-      balancerToken: govTokenData.contract.address,
-      initialMintAllowance: parseEther("1250000"),
-    });
-
-    logger.info("setupGovernance: giving token admin default admin role");
-
-    // BalAdmin will take over all roles for the token
-    awaitTransactionComplete(
-      await govTokenData.contract.grantRole(
-        await govTokenData.contract.DEFAULT_ADMIN_ROLE(),
-        tokenAdminData.contract.address
-      )
-    );
-
-    logger.success("setupGovernance: role granted");
-
-    /**
-     * Need to grant the deployer dev account permissions on the vault authorizer in order
-     * to call the activate function on the BalTokenAdmin contract
-     */
+    const { tokenAdminData } = await createTokenAdmin(vault, govTokenData.contract.address);
 
     await activateTokenAdmin(tokenAdminData.contract, timelockAuth);
 
-    if (doSave) {
-      saveDeplomentData(govTokenData.deployment);
-      saveDeplomentData(tokenAdminData.deployment);
+    // BalAdmin will take over all roles for the token
+    await giveTokenAdminControl(govTokenData.contract, tokenAdminData.contract.address);
+
+    if (doSave === true) {
+      await saveDeplomentData(govTokenData.deployment);
+      await saveDeplomentData(tokenAdminData.deployment);
     }
 
     logger.success("setupGovernance: governance setup complete");
@@ -82,22 +40,74 @@ export async function setupGovernance(doSave: boolean, vault: string, timelockAu
   }
 }
 
-async function activateTokenAdmin(tokenAdmin: Contract, timelockAuth: string) {
-  /**
-   * Need to grant the deployer dev account permissions on the vault authorizer in order
-   * to call the activate function on the BalTokenAdmin contract
-   */
+export async function createGovernanceToken() {
+  logger.info("setupGovernance: creating governance token");
 
-  const authService = new AuthService(timelockAuth);
-  await authService.giveVaultAuthorization(
-    tokenAdmin,
-    "activate",
-    (
-      await getSigner()
-    ).address,
-    false
-  );
+  const govTokenData = await deployContractUtil("GovernanceToken", {
+    name: "Vertek",
+    symbol: "VRTK",
+  });
+
+  // Set the new token address for use in pool creation and such later
+  const vePool = await getMainPoolConfig();
+  let hadSymbol = false;
+  vePool.tokenInfo = vePool.tokenInfo.map((ti) => {
+    if (ti.symbol === "VRTK") {
+      hadSymbol = true;
+      return {
+        ...ti,
+        address: govTokenData.contract.address,
+      };
+    }
+
+    return ti;
+  });
+
+  if (!hadSymbol) {
+    throw new Error("Missing VRTK symbol for ve pool");
+  }
+
+  await updatePoolConfig(vePool);
+
+  logger.success("setupGovernance: governance token created");
+
+  return { govTokenData };
+}
+
+export async function createTokenAdmin(vault: string, govToken: string) {
+  const tokenAdminData = await deployContractUtil("BalancerTokenAdmin", {
+    vault,
+    balancerToken: govToken,
+    initialMintAllowance: parseEther("1250000"),
+  });
+
+  return {
+    tokenAdminData,
+  };
+}
+
+export async function activateTokenAdmin(tokenAdmin: Contract, timelockAuth: string) {
+  const address = (await getSigner()).address;
+  // const authService = new AuthService(timelockAuth);
+  // await authService.giveVaultAuthorization(
+  //   tokenAdmin,
+  //   "activate",
+  //   (
+  //     await getSigner()
+  //   ).address,
+  //   false
+  // );
+  // Has to happen before activate
+  //  await giveTokenAdminControl()
   logger.info("setupGovernance: activating token admin");
-  awaitTransactionComplete(await tokenAdmin.activate(ADMIN[await getChainId()]), 10);
+  await awaitTransactionComplete(await tokenAdmin.activate(address), 10);
   logger.success("setupGovernance: token admin activated");
+}
+
+export async function giveTokenAdminControl(govToken: Contract, tokenAdminAddress: string) {
+  logger.info("setupGovernance: giving token admin default admin role");
+  await awaitTransactionComplete(
+    await govToken.grantRole(await govToken.DEFAULT_ADMIN_ROLE(), tokenAdminAddress)
+  );
+  logger.success("setupGovernance: role granted");
 }

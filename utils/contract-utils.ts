@@ -4,6 +4,7 @@ import * as WeightedPoolAbi from "../artifacts/contracts/pool-weighted/WeightedP
 import * as Vault from "../artifacts/contracts/Vault.sol/Vault.json";
 import * as Timelock from "../artifacts/contracts/authorizer/TimelockAuthorizer.sol/TimelockAuthorizer.json";
 import * as TokenAdmin from "../artifacts/contracts/liquidity-mining/BalancerTokenAdmin.sol/BalancerTokenAdmin.json";
+import * as GovenToken from "../artifacts/contracts/liquidity-mining/governance/GovernanceToken.sol/GovernanceToken.json";
 import * as AM from "./abi/DexTokenManager.json";
 import { Contract } from "ethers";
 import { ERC20_ABI } from "./abi/ERC20ABI";
@@ -53,11 +54,12 @@ export async function getTimelockAuth(address: string): Promise<TimelockAuthoriz
   return getCacheOrNew(address, Timelock.abi) as unknown as TimelockAuthorizer;
 }
 
-export async function getBalTokenAdmin(): Promise<BalancerTokenAdmin> {
-  return getCacheOrNew(
-    await getDeployedContractAddress("BalancerTokenAdmin"),
-    TokenAdmin.abi
-  ) as unknown as BalancerTokenAdmin;
+export async function getBalTokenAdmin() {
+  return getCacheOrNew(await getDeployedContractAddress("BalancerTokenAdmin"), TokenAdmin.abi);
+}
+
+export async function getGovernanceToken() {
+  return getCacheOrNew(await getDeployedContractAddress("GovernanceToken"), GovenToken.abi);
 }
 
 export async function getBalancerPoolToken(address: string) {
@@ -87,14 +89,23 @@ async function getCacheOrNew(address, abi) {
   return contract;
 }
 
+export async function updateContractAddress(contract: DeployedContract, address: string) {
+  const addresses = await getContractAddresses();
+  addresses[contract] = address;
+}
+
+export async function getContractAddresses() {
+  return await fs.readJSON(
+    join(process.cwd(), "deployments", `${CHAIN_KEYS[await getChainId()]}`, "addresses.json")
+  );
+}
+
 export async function getDeployedContractAddress(contractName: DeployedContract): Promise<string> {
   if (addressCache[contractName]) {
     return addressCache[contractName];
   }
 
-  const addresses = await fs.readJSON(
-    join(process.cwd(), "deployments", `${CHAIN_KEYS[await getChainId()]}`, "addresses.json")
-  );
+  const addresses = await getContractAddresses();
 
   const addy = addresses[contractName];
   if (!addy) {

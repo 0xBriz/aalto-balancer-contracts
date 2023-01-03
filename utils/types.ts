@@ -1,4 +1,5 @@
 import { BigNumber, Contract, ContractTransaction, ethers } from "ethers";
+import { DeployedContract } from "./contract-utils";
 
 export enum ExitKindWeighted {
   EXACT_BPT_IN_FOR_ONE_TOKEN_OUT,
@@ -163,6 +164,18 @@ export interface PoolCreationConfig {
     txHash: string;
   };
 }
+
+export interface PoolFactoryInfo {
+  type: FactoryType | DeployedContract;
+  address: string;
+}
+
+export type FactoryType =
+  | "ERC4626LinearPoolFactory"
+  | "LiquidityBootstrappingPoolFactory"
+  | "StablePoolFactory"
+  | "WeightedPoolFactory"
+  | "ComposableStablePoolFactory";
 
 export interface DeploymentData {
   name: string;

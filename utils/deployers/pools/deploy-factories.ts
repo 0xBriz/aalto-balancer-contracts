@@ -1,24 +1,38 @@
+import { DeployedContract } from "../../contract-utils";
+import { PoolFactoryInfo } from "../../types";
+import { deployContractUtil } from "../deploy-util";
 import { logger } from "../logger";
 import { saveDeplomentData } from "../save-deploy-data";
-import { deployFactory } from "./factories/deploy-factory";
 
-const FACTORY_TYPES = [
-  "ERC4626LinearPoolFactory",
-  "LiquidityBootstrappingPoolFactory",
-  "StablePoolFactory",
+const FACTORY_TYPES: DeployedContract[] = [
+  // "ERC4626LinearPoolFactory",
+  // "LiquidityBootstrappingPoolFactory",
+  // "StablePoolFactory",
   "WeightedPoolFactory",
 ];
 
-export async function deployPoolFactories(vault: string, doSave: boolean) {
+export async function deployPoolFactories(
+  doSave: boolean,
+  vault: string
+): Promise<PoolFactoryInfo[]> {
   try {
     logger.info("deployPoolFactories: Deploying factories");
 
+    const factories: PoolFactoryInfo[] = [];
     const factoryDeployments = [];
+
     for (const factory of FACTORY_TYPES) {
-      logger.info(`Deploying ${factory}..`);
-      const info = await deployFactory(vault, factory);
+      const info = await deployContractUtil(factory, {
+        vault,
+      });
+
       factoryDeployments.push(info);
+      factories.push({
+        type: factory,
+        address: info.contract.address,
+      });
     }
+
     logger.success("deployPoolFactories: Factories deployment complete");
 
     if (doSave) {
@@ -27,7 +41,7 @@ export async function deployPoolFactories(vault: string, doSave: boolean) {
       }
     }
 
-    return factoryDeployments;
+    return factories;
   } catch (error) {
     throw error;
   }

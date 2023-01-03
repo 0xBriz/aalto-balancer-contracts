@@ -31,11 +31,11 @@ export async function deployVault(doSave: boolean) {
     );
     await vaultData.vault.connect(admin).setAuthorizer(authorizerData.authorizer.address);
 
-    if (doSave) {
-      saveDeplomentData(vaultData.deployment);
-      saveDeplomentData(authorizerData.deployment);
-      saveDeplomentData(authAdapterData.deployment);
-      saveDeplomentData(entryAdapterData.deployment);
+    if (doSave === true) {
+      await saveDeplomentData(vaultData.deployment);
+      await saveDeplomentData(authorizerData.deployment);
+      await saveDeplomentData(authAdapterData.deployment);
+      await saveDeplomentData(entryAdapterData.deployment);
     }
 
     return {

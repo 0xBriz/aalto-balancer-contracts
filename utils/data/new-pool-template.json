@@ -12,15 +12,17 @@
     {
       "address": "",
       "weight": "",
-      "initialBalance": ""
+      "initialBalance": "",
+      "symbol": ""
     },
     {
       "address": "",
       "weight": "",
-      "initialBalance": ""
+      "initialBalance": "",
+      "symbol": ""
     }
   ],
-  "args": {
+  "deploymentArgs": {
     "name": "",
     "symbol": "",
     "owner": "",

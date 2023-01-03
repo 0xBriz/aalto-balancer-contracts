@@ -1,9 +1,15 @@
 import * as fs from "fs-extra";
 import { getAddress } from "ethers/lib/utils";
-import { CreateWeightedPoolArgs, PoolCreationConfig, PoolTokenInfo } from "../../types";
+import {
+  CreateWeightedPoolArgs,
+  PoolCreationConfig,
+  PoolFactoryInfo,
+  PoolTokenInfo,
+} from "../../types";
 import { join } from "path";
 import { CHAIN_KEYS } from "../../data/chains";
 import { getChainId } from "../../deployers/network";
+import { getDeployedContractAddress } from "../../contract-utils";
 
 /**
  * Sorts the tokens for a pool according to address as required by the vault.
@@ -62,6 +68,21 @@ export async function savePoolsData(pools: PoolCreationConfig[]) {
 export async function getMainPoolConfig() {
   const poolConfigs = await getAllPoolConfigs();
   return poolConfigs.find((p) => p.isVePool);
+}
+
+export async function getPoolFactories(): Promise<PoolFactoryInfo[]> {
+  const [weightedAddress] = await Promise.all([
+    getDeployedContractAddress("WeightedPoolFactory"),
+    // getDeployedContractAddress('WeightedPoolFactory'),
+    // getDeployedContractAddress('WeightedPoolFactory')
+  ]);
+
+  return [
+    {
+      type: "WeightedPoolFactory",
+      address: weightedAddress,
+    },
+  ];
 }
 
 export async function updatePoolConfig(pool: PoolCreationConfig) {
