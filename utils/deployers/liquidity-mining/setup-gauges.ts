@@ -11,6 +11,7 @@ import { getChainAdmin } from "../../data/addresses";
 import { AuthService } from "../../services/auth.service";
 import {
   getCreatedPoolConfigs,
+  getLiquidityGaugeFactory,
   getMainPoolConfig,
   savePoolsData,
   updatePoolConfig,
@@ -208,7 +209,8 @@ export async function addGaugeToPool(
 
 export async function deployLiquidityGauge(poolAddress: string) {
   logger.info("deployLiquidityGauge: Adding LiqudityGauge for pool address: " + poolAddress);
-  const receipt = await doTransaction(await this.liquidityGaugeFactory.create(poolAddress));
+  const factory = await getLiquidityGaugeFactory();
+  const receipt = await doTransaction(await factory.create(poolAddress));
   const events = receipt.events.filter((e) => e.event === "GaugeCreated");
   const gaugeAddress = events[0].args.gauge;
   logger.success("deployLiquidityGauge: Gauge created " + gaugeAddress);
@@ -218,10 +220,7 @@ export async function deployLiquidityGauge(poolAddress: string) {
   };
 }
 
-export async function addPoolGauges(
-  singleRecipientGaugeAddress: string,
-  singleGaugeReceiptTxHash: string
-) {
+export async function addPoolGauges() {
   logger.info(`Adding liqudity gauges for pools..`);
 
   const poolConfigs = await getCreatedPoolConfigs();
@@ -232,17 +231,16 @@ export async function addPoolGauges(
     }
 
     try {
-      logger.info(`Creating gauge for pool "${pool.name}"`);
-
-      if (pool.isVePool) {
-        pool.gauge.address = singleRecipientGaugeAddress;
-        pool.gauge.txHash = singleGaugeReceiptTxHash;
-      } else {
-        const { gaugeAddress, receipt } = await deployLiquidityGauge(pool.poolAddress);
-        pool.gauge.address = gaugeAddress;
-        pool.gauge.txHash = receipt.transactionHash;
+      // already taken care of
+      if (pool.isVePool || pool.gauge.added) {
+        continue;
       }
 
+      logger.info(`Creating gauge for pool "${pool.name}"`);
+
+      const { gaugeAddress, receipt } = await deployLiquidityGauge(pool.poolAddress);
+      pool.gauge.address = gaugeAddress;
+      pool.gauge.txHash = receipt.transactionHash;
       pool.gauge.added = true;
 
       await savePoolsData(poolConfigs);

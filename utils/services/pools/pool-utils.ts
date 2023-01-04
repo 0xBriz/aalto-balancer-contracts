@@ -10,6 +10,9 @@ import { join } from "path";
 import { CHAIN_KEYS } from "../../data/chains";
 import { getChainId } from "../../deployers/network";
 import { getDeployedContractAddress } from "../../contract-utils";
+import { Contract } from "ethers";
+import { getSigner } from "../../deployers/signers";
+import * as LGF from "../../../artifacts/contracts/liquidity-mining/gauges/LiquidityGaugeFactory.sol/LiquidityGaugeFactory.json";
 
 /**
  * Sorts the tokens for a pool according to address as required by the vault.
@@ -68,6 +71,14 @@ export async function savePoolsData(pools: PoolCreationConfig[]) {
 export async function getMainPoolConfig() {
   const poolConfigs = await getAllPoolConfigs();
   return poolConfigs.find((p) => p.isVePool);
+}
+
+export async function getLiquidityGaugeFactory() {
+  return await new Contract(
+    await getDeployedContractAddress("LiquidityGaugeFactory"),
+    LGF.abi,
+    await getSigner()
+  );
 }
 
 export async function getPoolFactories(): Promise<PoolFactoryInfo[]> {

@@ -36,6 +36,7 @@ import {
   addGaugeController,
   addGaugeTypes,
   addMainPoolGauge,
+  addPoolGauges,
   deployLiquidityGaugeFactorySetup,
   deployMinter,
   giveMinterPermissions,
@@ -108,7 +109,8 @@ async function main() {
     // await deployMinter();
     // await giveMinterPermissions();
     // await deployLiquidityGaugeFactorySetup();
-    await addMainPoolGauge();
+    // await addMainPoolGauge();
+    // await addPoolGauges();
   } catch (error) {
     console.error(error);
     process.exitCode = 1;
