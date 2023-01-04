@@ -128,8 +128,8 @@ export async function giveMinterPermissions() {
   logger.success("setupGaugeSystem: permission granted");
 }
 
-export async function deployLiquidityGaugeFactorySetup() {
-  logger.info("deployLiquidityGaugeFactorySetup: Deploying gauge factory setup");
+export async function setupBoostProxy() {
+  logger.info("setupBoostProxy: Deploying boost setup");
 
   const veBoost = await deployContractUtil("BoostV2", {
     boostV1: ZERO_ADDRESS,
@@ -138,9 +138,21 @@ export async function deployLiquidityGaugeFactorySetup() {
 
   await saveDeplomentData(veBoost.deployment);
 
+  const boostProxy = await deployContractUtil("VotingEscrowDelegationProxy", {
+    vault: await getDeployedContractAddress("Vault"),
+    votingEscrow: await getDeployedContractAddress("VotingEscrow"),
+    delegationImpl: await getDeployedContractAddress("BoostV2"),
+  });
+
+  await saveDeplomentData(boostProxy.deployment);
+}
+
+export async function deployLiquidityGaugeFactorySetup() {
+  logger.info("deployLiquidityGaugeFactorySetup: Deploying gauge factory setup");
+
   const gaugeTemplate = await deployContractUtil("LiquidityGaugeV5", {
     minter: await getDeployedContractAddress("BalancerMinter"),
-    boostProxy: await getDeployedContractAddress("BoostV2"),
+    boostProxy: await getDeployedContractAddress("VotingEscrowDelegationProxy"),
     adapter: await getDeployedContractAddress("AuthorizerAdaptorEntrypoint"),
   });
 
@@ -161,7 +173,7 @@ export async function deployLiquidityGaugeFactorySetup() {
   // };
 }
 
-export async function addMainPoolGauge() {
+export async function addMainPoolGaugeSetup() {
   logger.info("addMainPoolGauge: Starting setup for SingleGauge");
 
   const tokenHolder = await deployContractUtil("BALTokenHolder", {
@@ -190,7 +202,11 @@ export async function addMainPoolGauge() {
 
   const pool = await getMainPoolConfig();
   pool.gauge.address = gaugeAddress;
+  pool.gauge.txHash = receipt.transactionHash;
+
   await updatePoolConfig(pool);
+
+  await addGaugeToController(pool);
 
   return {
     tokenHolder,
@@ -200,21 +216,21 @@ export async function addMainPoolGauge() {
   };
 }
 
-export async function deployLiquidityGauge(poolAddress: string) {
-  logger.info("deployLiquidityGauge: Adding LiqudityGauge for pool address: " + poolAddress);
+export async function createLiquidityGaugeForPool(poolAddress: string) {
+  logger.info("createLiquidityGaugeForPool: Adding LiqudityGauge for pool address: " + poolAddress);
   const factory = await getLiquidityGaugeFactory();
   const receipt = await doTransaction(await factory.create(poolAddress));
   const events = receipt.events.filter((e) => e.event === "GaugeCreated");
   const gaugeAddress = events[0].args.gauge;
-  logger.success("deployLiquidityGauge: Gauge created " + gaugeAddress);
+  logger.success("createLiquidityGaugeForPool: Gauge created " + gaugeAddress);
   return {
     receipt,
     gaugeAddress,
   };
 }
 
-export async function addPoolGauges() {
-  logger.info(`Adding liqudity gauges for pools..`);
+export async function createPoolGaugesAndAddToController() {
+  logger.info(`Adding liquidity gauges for pools..`);
 
   const poolConfigs = await getCreatedPoolConfigs();
 
@@ -224,18 +240,20 @@ export async function addPoolGauges() {
     }
 
     try {
-      // already taken care of
+      // handled in addMainPoolGaugeSetup
       if (pool.isVePool) {
         continue;
       }
 
       logger.info(`Creating gauge for pool "${pool.name}"`);
 
-      const { gaugeAddress, receipt } = await deployLiquidityGauge(pool.poolAddress);
+      const { gaugeAddress, receipt } = await createLiquidityGaugeForPool(pool.poolAddress);
       pool.gauge.address = gaugeAddress;
       pool.gauge.txHash = receipt.transactionHash;
 
-      await savePoolsData(poolConfigs);
+      await updatePoolConfig(pool);
+
+      await addGaugeToController(pool);
     } catch (error) {
       logger.error(`Error adding pool gauge`);
       console.error(error);
@@ -243,34 +261,41 @@ export async function addPoolGauges() {
   }
 }
 
-export async function addGaugesToController() {
-  const poolConfigs = await getCreatedPoolConfigs();
+export async function addGaugeToController(pool: PoolCreationConfig) {
+  logger.info(`addGaugeToController: for pool id ${pool.poolId}`);
+  // avoiding the weird vyper generated abi from default param values causing two functions to be created
+  const controller = new Contract(
+    await getDeployedContractAddress("GaugeController"),
+    ["function add_gauge(address, int128, uint256) external"],
+    await getSigner()
+  );
 
-  for (const pool of poolConfigs) {
-    if (pool.gauge.added) {
-      continue;
-    }
+  const weight = pool.gauge.startingWeight.length ? parseUnits(pool.gauge.startingWeight) : 0;
+  const gaugeType = pool.isVePool ? 0 : 1;
+  const receipt = await awaitTransactionComplete(
+    await controller.add_gauge(pool.gauge.address, gaugeType, weight)
+  );
 
-    try {
-      // avoiding the weird vyper generated abi from default param values causing two functions to be created
-      const controller = new Contract(
-        await getDeployedContractAddress("GaugeController"),
-        ["function add_gauge(address, int128, uint256) external"],
-        await getSigner()
-      );
+  pool.gauge.added = true;
+  pool.gauge.controllerTxHash = receipt.transactionHash;
+  await updatePoolConfig(pool);
 
-      const weight = pool.gauge.startingWeight.length ? parseUnits(pool.gauge.startingWeight) : 0;
-      const gaugeType = pool.isVePool ? 0 : 1;
-      const receipt = await awaitTransactionComplete(
-        await controller.add_gauge(pool.gauge.address, gaugeType, weight)
-      );
-
-      pool.gauge.added = true;
-      pool.gauge.controllerTxHash = receipt.transactionHash;
-      await savePoolsData(poolConfigs);
-    } catch (error) {
-      console.error(error);
-      logger.error("Error adding gauge to controller");
-    }
-  }
+  logger.success(`addGaugeToController: gauge added to controller`);
 }
+
+// export async function addPoolGaugesToController() {
+//   const poolConfigs = await getCreatedPoolConfigs();
+
+//   for (const pool of poolConfigs) {
+//     if (pool.gauge.added) {
+//       continue;
+//     }
+
+//     try {
+//       await addGaugeToController(pool);
+//     } catch (error) {
+//       console.error(error);
+//       logger.error("Error adding gauge to controller");
+//     }
+//   }
+// }

@@ -34,13 +34,14 @@ import { formatEther } from "ethers/lib/utils";
 import { saveDeplomentData } from "../utils/deployers/save-deploy-data";
 import {
   addGaugeController,
-  addGaugesToController,
+  // addPoolGaugesToController,
   addGaugeTypes,
-  addMainPoolGauge,
-  addPoolGauges,
+  addMainPoolGaugeSetup,
+  createPoolGaugesAndAddToController,
   deployLiquidityGaugeFactorySetup,
   deployMinter,
   giveMinterPermissions,
+  setupBoostProxy,
 } from "../utils/deployers/liquidity-mining/setup-gauges";
 
 // For testing/dev env
@@ -102,17 +103,16 @@ async function main() {
 
     // await setupVotingEscrow(saving);
     // await doVeDeposit();
-
     // await addFeeDistributor();
     // await addGaugeController();
-    //  await addGaugeTypes();
-
+    // await addGaugeTypes();
     // await deployMinter();
     // await giveMinterPermissions();
+    // await setupBoostProxy();
     // await deployLiquidityGaugeFactorySetup();
-    // await addMainPoolGauge();
-    // await addPoolGauges();
-    await addGaugesToController();
+    //
+    // await addMainPoolGaugeSetup();
+    // await createPoolGaugesAndAddToController();
   } catch (error) {
     console.error(error);
     process.exitCode = 1;

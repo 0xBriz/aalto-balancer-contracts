@@ -31,6 +31,7 @@ type GaugeContracts =
   | "LiquidityGaugeFactory"
   | "LiquidityGaugeV5"
   | "BoostV2"
+  | "VotingEscrowDelegationProxy"
   | "SingleRecipientGaugeFactory"
   | "BALTokenHolder"
   | "FeeDistributor";
