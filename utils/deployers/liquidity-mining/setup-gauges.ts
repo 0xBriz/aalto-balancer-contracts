@@ -1,4 +1,5 @@
 import { Contract } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { ZERO_ADDRESS } from "../../big-numbers/ethers-big-number";
 import {
   getAutEntryAdapter,
@@ -94,7 +95,7 @@ export async function addGaugeTypes() {
     ["function add_type(string, uint256) external"],
     await getSigner()
   );
-  // await awaitTransactionComplete(await gc.add_type(GaugeType.veBAL, 1));
+  await awaitTransactionComplete(await gc.add_type(GaugeType.veBAL, 1));
   await awaitTransactionComplete(await gc.add_type(GaugeType.LiquidityMiningCommittee, 1));
 }
 
@@ -199,14 +200,6 @@ export async function addMainPoolGauge() {
   };
 }
 
-export async function addGaugeToPool(
-  pool: PoolCreationConfig,
-  gaugeAddress: string,
-  txHash: string
-) {
-  //
-}
-
 export async function deployLiquidityGauge(poolAddress: string) {
   logger.info("deployLiquidityGauge: Adding LiqudityGauge for pool address: " + poolAddress);
   const factory = await getLiquidityGaugeFactory();
@@ -232,7 +225,7 @@ export async function addPoolGauges() {
 
     try {
       // already taken care of
-      if (pool.isVePool || pool.gauge.added) {
+      if (pool.isVePool) {
         continue;
       }
 
@@ -241,12 +234,43 @@ export async function addPoolGauges() {
       const { gaugeAddress, receipt } = await deployLiquidityGauge(pool.poolAddress);
       pool.gauge.address = gaugeAddress;
       pool.gauge.txHash = receipt.transactionHash;
-      pool.gauge.added = true;
 
       await savePoolsData(poolConfigs);
     } catch (error) {
       logger.error(`Error adding pool gauge`);
       console.error(error);
+    }
+  }
+}
+
+export async function addGaugesToController() {
+  const poolConfigs = await getCreatedPoolConfigs();
+
+  for (const pool of poolConfigs) {
+    if (pool.gauge.added) {
+      continue;
+    }
+
+    try {
+      // avoiding the weird vyper generated abi from default param values causing two functions to be created
+      const controller = new Contract(
+        await getDeployedContractAddress("GaugeController"),
+        ["function add_gauge(address, int128, uint256) external"],
+        await getSigner()
+      );
+
+      const weight = pool.gauge.startingWeight.length ? parseUnits(pool.gauge.startingWeight) : 0;
+      const gaugeType = pool.isVePool ? 0 : 1;
+      const receipt = await awaitTransactionComplete(
+        await controller.add_gauge(pool.gauge.address, gaugeType, weight)
+      );
+
+      pool.gauge.added = true;
+      pool.gauge.controllerTxHash = receipt.transactionHash;
+      await savePoolsData(poolConfigs);
+    } catch (error) {
+      console.error(error);
+      logger.error("Error adding gauge to controller");
     }
   }
 }

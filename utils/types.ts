@@ -162,6 +162,7 @@ export interface PoolCreationConfig {
     startingWeight: string;
     added: Boolean;
     txHash: string;
+    controllerTxHash?: string;
   };
 }
 

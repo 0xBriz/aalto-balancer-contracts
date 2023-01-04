@@ -34,6 +34,7 @@ import { formatEther } from "ethers/lib/utils";
 import { saveDeplomentData } from "../utils/deployers/save-deploy-data";
 import {
   addGaugeController,
+  addGaugesToController,
   addGaugeTypes,
   addMainPoolGauge,
   addPoolGauges,
@@ -111,6 +112,7 @@ async function main() {
     // await deployLiquidityGaugeFactorySetup();
     // await addMainPoolGauge();
     // await addPoolGauges();
+    await addGaugesToController();
   } catch (error) {
     console.error(error);
     process.exitCode = 1;
