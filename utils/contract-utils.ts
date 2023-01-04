@@ -5,11 +5,14 @@ import * as Vault from "../artifacts/contracts/Vault.sol/Vault.json";
 import * as Timelock from "../artifacts/contracts/authorizer/TimelockAuthorizer.sol/TimelockAuthorizer.json";
 import * as TokenAdmin from "../artifacts/contracts/liquidity-mining/BalancerTokenAdmin.sol/BalancerTokenAdmin.json";
 import * as GovenToken from "../artifacts/contracts/liquidity-mining/governance/GovernanceToken.sol/GovernanceToken.json";
+import * as AuthEntry from "../artifacts/contracts/liquidity-mining/admin/AuthorizerAdapterEntrypoint.sol/AuthorizerAdaptorEntrypoint.json";
+import * as GC from "../artifacts/contracts/liquidity-mininG/GaugeController.vy/GaugeController.json";
+import * as VE from "../artifacts/contracts/liquidity-mining/VotingEscrow.vy/VotingEscrow.json";
 import * as AM from "./abi/DexTokenManager.json";
 import { Contract } from "ethers";
 import { ERC20_ABI } from "./abi/ERC20ABI";
 import { getSigner } from "./deployers/signers";
-import { BalancerTokenAdmin, TimelockAuthorizer } from "../typechain";
+import { TimelockAuthorizer } from "../typechain";
 import { CHAIN_KEYS } from "./data/chains";
 import { getChainId } from "./deployers/network";
 import { join } from "path";
@@ -26,7 +29,7 @@ type GaugeContracts =
   | "VotingEscrow"
   | "GaugeController"
   | "LiquidityGaugeFactory"
-  | "LiquidityGauge"
+  | "LiquidityGaugeV5"
   | "BoostV2"
   | "SingleRecipientGaugeFactory"
   | "BALTokenHolder"
@@ -62,8 +65,23 @@ export async function getGovernanceToken() {
   return getCacheOrNew(await getDeployedContractAddress("GovernanceToken"), GovenToken.abi);
 }
 
+export async function getVotingEscrow() {
+  return getCacheOrNew(await getDeployedContractAddress("VotingEscrow"), VE.abi);
+}
+
 export async function getBalancerPoolToken(address: string) {
   return getCacheOrNew(address, BPT.abi);
+}
+
+export async function getAutEntryAdapter() {
+  return await getCacheOrNew(
+    await getDeployedContractAddress("AuthorizerAdaptorEntrypoint"),
+    AuthEntry.abi
+  );
+}
+
+export async function getGaugeController() {
+  return await getCacheOrNew(await getDeployedContractAddress("GaugeController"), GC.abi);
 }
 
 export async function getWeightedPoolInstance(address: string) {

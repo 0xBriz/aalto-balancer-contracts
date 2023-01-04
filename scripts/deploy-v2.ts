@@ -23,11 +23,23 @@ import {
 } from "../utils/services/pools/pool-utils";
 import { PoolCreationService } from "../utils/services/pools/pool-creation.service";
 import { ZERO_ADDRESS } from "./utils/constants";
-import { setupVotingEscrow } from "../utils/deployers/liquidity-mining/setup-voting-escrow";
+import {
+  addFeeDistributor,
+  doVeDeposit,
+  setupVotingEscrow,
+} from "../utils/deployers/liquidity-mining/setup-voting-escrow";
 import { initWeightedJoin } from "../utils/vault";
 import { getChainAdmin } from "../utils/data/addresses";
 import { formatEther } from "ethers/lib/utils";
 import { saveDeplomentData } from "../utils/deployers/save-deploy-data";
+import {
+  addGaugeController,
+  addGaugeTypes,
+  addMainPoolGauge,
+  deployLiquidityGaugeFactorySetup,
+  deployMinter,
+  giveMinterPermissions,
+} from "../utils/deployers/liquidity-mining/setup-gauges";
 
 // For testing/dev env
 export async function resetAllPoolConfigs() {
@@ -76,19 +88,27 @@ async function main() {
     // const poolCreator = new PoolCreationService(ZERO_ADDRESS, await getPoolFactories());
     // poolCreator.createPools(saving);
 
-    // const pools = await getAllPoolConfigs()
+    // const pools = await getAllPoolConfigs();
     // for (const pool of pools) {
-    //   await initWeightedJoin(poolInfo.poolId, args.tokens, args.initialBalances, await getChainAdmin());
+    //   await initWeightedJoin(
+    //     pool.poolId,
+    //     pool.deploymentArgs.tokens,
+    //     pool.initialBalances,
+    //     await getChainAdmin()
+    //   );
     // }
 
-    const vrtk = await getERC20(await getDeployedContractAddress("GovernanceToken"));
-    console.log(formatEther(await vrtk.balanceOf("0x891eFc56f5CD6580b2fEA416adC960F2A6156494")));
-    console.log(formatEther(await vrtk.totalSupply()));
-
-    // const admin = await getBalTokenAdmin();
-    // console.log(await getDeployedContractAddress("GovernanceToken"));
-
     // await setupVotingEscrow(saving);
+    // await doVeDeposit();
+
+    // await addFeeDistributor();
+    // await addGaugeController();
+    //  await addGaugeTypes();
+
+    // await deployMinter();
+    // await giveMinterPermissions();
+    // await deployLiquidityGaugeFactorySetup();
+    await addMainPoolGauge();
   } catch (error) {
     console.error(error);
     process.exitCode = 1;

@@ -15,8 +15,8 @@ export enum ExitKindStable {
 }
 
 export enum GaugeType {
-  LiquidityMiningCommittee,
-  veBAL,
+  LiquidityMiningCommittee = "LiquidityMiningCommittee",
+  veBAL = "veBAL",
 }
 
 export enum PoolType {

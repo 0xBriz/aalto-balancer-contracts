@@ -128,7 +128,6 @@ export class PoolCreationService {
       },
     };
 
-    logger.success("createManagedWeightedPool: process complete");
     logger.info("createManagedWeightedPool: pool data is:");
     // Logging in case of a file save/create issue
     console.log(data);

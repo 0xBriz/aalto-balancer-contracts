@@ -13,7 +13,7 @@ export async function approveTokensIfNeeded(tokens: string[], owner: string, spe
       if (allowance.isZero()) {
         logger.info(`Approving token: ${address} - for spender ${spender}`);
         const tx = await token.approve(spender, MAX_UINT256);
-        await tx.wait();
+        await tx.wait(2);
         logger.success("Token approval complete");
       }
     }

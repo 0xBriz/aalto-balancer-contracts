@@ -1,3 +1,4 @@
+import { getAddress } from "ethers/lib/utils";
 import { getChainId } from "../deployers/network";
 
 export const OPERATOR = "0x891eFc56f5CD6580b2fEA416adC960F2A6156494";
@@ -9,5 +10,5 @@ export const ADMIN = {
 };
 
 export async function getChainAdmin() {
-  return ADMIN[await getChainId()];
+  return getAddress(ADMIN[await getChainId()]);
 }

@@ -1,6 +1,8 @@
 import { Contract } from "ethers";
-import { getTimelockAuth } from "../contract-utils";
+import { getAutEntryAdapter, getDeployedContractAddress, getTimelockAuth } from "../contract-utils";
+import { getChainAdmin } from "../data/addresses";
 import { logger } from "../deployers/logger";
+import { getSigner } from "../deployers/signers";
 import { awaitTransactionComplete } from "../tx-utils";
 
 export class AuthService {
@@ -44,5 +46,56 @@ export class AuthService {
     }
 
     logger.success("giveVaultAuthorization: permission granted");
+  }
+
+  async performAdapterAction(
+    contractPerformingOn: Contract,
+    functionName: string,
+    paramValuesToEncode: any[]
+  ) {
+    const adapter = new Contract(
+      await getDeployedContractAddress("AuthorizerAdaptorEntrypoint"),
+      [
+        "function getActionId(bytes4) external view returns(bytes32)",
+        "function performAction(address, bytes) external  returns (bytes)",
+      ],
+      await getSigner()
+    );
+    const funcHash = contractPerformingOn.interface.getSighash(functionName);
+    logger.info("Getting action id..");
+    const actionId: string = await adapter.getActionId(funcHash);
+    logger.success("action id: " + actionId);
+
+    const authorizer = await getTimelockAuth(this.timelockAuthAddress);
+    // Skip a tx if already approved
+    const canDo = await authorizer.hasPermission(
+      actionId,
+      await getChainAdmin(),
+      contractPerformingOn.address
+    );
+    if (!canDo) {
+      await awaitTransactionComplete(
+        await authorizer.grantPermissions([actionId], await getChainAdmin(), [
+          contractPerformingOn.address,
+        ]),
+        10
+      );
+    } else {
+      logger.info("Alreaday approved for action id");
+    }
+
+    logger.info(`Performing ${functionName} action through adapter..`);
+
+    const callData = contractPerformingOn.interface.encodeFunctionData(
+      functionName,
+      paramValuesToEncode
+    );
+
+    await awaitTransactionComplete(
+      await adapter.performAction(contractPerformingOn.address, callData),
+      10
+    );
+
+    logger.success("Successfully performed adapter action");
   }
 }

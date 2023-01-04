@@ -1,11 +1,26 @@
+import { Contract } from "ethers";
 import { ZERO_ADDRESS } from "../../big-numbers/ethers-big-number";
-import { getBalTokenAdmin, getTimelockAuth } from "../../contract-utils";
+import {
+  getAutEntryAdapter,
+  getBalTokenAdmin,
+  getDeployedContractAddress,
+  getGaugeController,
+  getTimelockAuth,
+} from "../../contract-utils";
 import { getChainAdmin } from "../../data/addresses";
-import { getCreatedPoolConfigs, savePoolsData } from "../../services/pools/pool-utils";
+import { AuthService } from "../../services/auth.service";
+import {
+  getCreatedPoolConfigs,
+  getMainPoolConfig,
+  savePoolsData,
+  updatePoolConfig,
+} from "../../services/pools/pool-utils";
 import { awaitTransactionComplete, doTransaction } from "../../tx-utils";
+import { GaugeType, PoolCreationConfig } from "../../types";
 import { deployContractUtil } from "../deploy-util";
 import { logger } from "../logger";
 import { saveDeplomentData } from "../save-deploy-data";
+import { getSigner } from "../signers";
 
 export async function setupGaugeSystem(
   doSave: boolean,
@@ -17,146 +32,149 @@ export async function setupGaugeSystem(
 ) {
   // const authEntryAdapterAddress = await getDeployedContractAddress("AuthorizerAdaptorEntrypoint");
   // const votingEscrowAddress = await getDeployedContractAddress("VotingEscrow");
-
-  const gaugeController = await deployContractUtil("GaugeController", {
-    votingEscrow: votingEscrowAddress,
-    authEntryAdapterAddress,
-    stakingAdmin: await getChainAdmin(),
-  });
-
-  // TODO: Add gauge types
-  // Added a "staking admin" to the GaugeController previously for simplicity
-
-  const { balMinter } = await deployMinterAndSetPermissions(
-    gaugeController.contract.address,
-    timelockAuth,
-    vault
-  );
-
-  const {
-    tokenHolder,
-    singleGaugeFactory,
-    singleRecipientGaugeAddress,
-    receipt: singleGaugeReceipt,
-  } = await addMainPoolGauge(balMinter.contract.address, govToken, vault);
-
-  const { veBoost, gaugeTemplate, gaugeFactory } = await deployLiquidityGaugeFactorySetup(
-    votingEscrowAddress,
-    balMinter.contract.address,
-    authEntryAdapterAddress
-  );
-
-  // add pool gauges
-
-  logger.info(`Adding liqudity gauges for pools..`);
-
-  await addPoolGauges(singleRecipientGaugeAddress, singleGaugeReceipt.transactionHash);
-
-  if (doSave) {
-    saveDeplomentData(gaugeController.deployment);
-    saveDeplomentData(balMinter.deployment);
-    saveDeplomentData(veBoost.deployment);
-    saveDeplomentData(gaugeTemplate.deployment);
-    saveDeplomentData(gaugeFactory.deployment);
-    saveDeplomentData(tokenHolder.deployment);
-    saveDeplomentData(singleGaugeFactory.deployment);
-  }
-
-  return {
-    gaugeController,
-    balMinter,
-    veBoost,
-    gaugeTemplate,
-    gaugeFactory,
-    tokenHolder,
-    singleGaugeFactory,
-  };
+  // const gaugeController = await deployContractUtil("GaugeController", {
+  //   votingEscrow: votingEscrowAddress,
+  //   authEntryAdapterAddress,
+  //   stakingAdmin: await getChainAdmin(),
+  // });
+  // // TODO: Add gauge types
+  // // Added a "staking admin" to the GaugeController previously for simplicity
+  // const { balMinter } = await deployMinterAndSetPermissions(
+  //   gaugeController.contract.address,
+  //   timelockAuth,
+  //   vault
+  // );
+  // const {
+  //   tokenHolder,
+  //   singleGaugeFactory,
+  //   singleRecipientGaugeAddress,
+  //   receipt: singleGaugeReceipt,
+  // } = await addMainPoolGauge(balMinter.contract.address, govToken, vault);
+  // const { veBoost, gaugeTemplate, gaugeFactory } = await deployLiquidityGaugeFactorySetup(
+  //   votingEscrowAddress,
+  //   balMinter.contract.address,
+  //   authEntryAdapterAddress
+  // );
+  // // add pool gauges
+  // logger.info(`Adding liqudity gauges for pools..`);
+  // await addPoolGauges(singleRecipientGaugeAddress, singleGaugeReceipt.transactionHash);
+  // if (doSave) {
+  //   await saveDeplomentData(gaugeController.deployment);
+  //   await saveDeplomentData(balMinter.deployment);
+  //   await saveDeplomentData(veBoost.deployment);
+  //   await saveDeplomentData(gaugeTemplate.deployment);
+  //   await saveDeplomentData(gaugeFactory.deployment);
+  //   await saveDeplomentData(tokenHolder.deployment);
+  //   await saveDeplomentData(singleGaugeFactory.deployment);
+  // }
+  // return {
+  //   gaugeController,
+  //   balMinter,
+  //   veBoost,
+  //   gaugeTemplate,
+  //   gaugeFactory,
+  //   tokenHolder,
+  //   singleGaugeFactory,
+  // };
 }
 
-export async function deployMinterAndSetPermissions(
-  gaugeController: string,
-  authAddress: string,
-  tokenAdminAddress: string
-) {
-  const balMinter = await deployContractUtil("BalancerMinter", {
-    tokenAdmin: tokenAdminAddress,
-    gaugeController: gaugeController,
+export async function addGaugeController() {
+  const gaugeController = await deployContractUtil("GaugeController", {
+    votingEscrow: await getDeployedContractAddress("VotingEscrow"),
+    authEntryAdapterAddress: await getDeployedContractAddress("AuthorizerAdaptorEntrypoint"),
+    stakingAdmin: await getChainAdmin(),
   });
+  await saveDeplomentData(gaugeController.deployment);
+}
 
-  // Give bal minter auth to call mint on admin
+export async function addGaugeTypes() {
+  const gc = new Contract(
+    await getDeployedContractAddress("GaugeController"),
+    ["function add_type(string, uint256) external"],
+    await getSigner()
+  );
+  // await awaitTransactionComplete(await gc.add_type(GaugeType.veBAL, 1));
+  await awaitTransactionComplete(await gc.add_type(GaugeType.LiquidityMiningCommittee, 1));
+}
 
+export async function deployMinter() {
+  const balMinter = await deployContractUtil("BalancerMinter", {
+    tokenAdmin: await getDeployedContractAddress("BalancerTokenAdmin"),
+    gaugeController: await getDeployedContractAddress("GaugeController"),
+  });
+  await saveDeplomentData(balMinter.deployment);
+}
+
+export async function giveMinterPermissions() {
   logger.info("setupGaugeSystem: giving BalMinter mint permission..");
-
-  const timelockAuth = await getTimelockAuth(authAddress);
+  const tokenAdminAddress = await getDeployedContractAddress("BalancerTokenAdmin");
+  const minterAddress = await getDeployedContractAddress("BalancerMinter");
+  const timelockAuth = await getTimelockAuth(
+    await getDeployedContractAddress("TimelockAuthorizer")
+  );
   const tokenAdmin = await getBalTokenAdmin();
   const actionId = await tokenAdmin.getActionId(tokenAdmin.interface.getSighash("mint"));
   await awaitTransactionComplete(
-    await timelockAuth.grantPermissions([actionId], balMinter.contract.address, [
-      tokenAdminAddress,
-    ]),
-    5
+    await timelockAuth.grantPermissions([actionId], minterAddress, [tokenAdminAddress]),
+    10
   );
 
-  const granted = await timelockAuth.hasPermission(
-    actionId,
-    balMinter.contract.address,
-    tokenAdminAddress
-  );
+  const granted = await timelockAuth.hasPermission(actionId, minterAddress, tokenAdminAddress);
 
-  if (!granted) {
-    throw new Error("Setting BalMinter permission failed");
-  }
+  console.log("Permission granted?:" + granted);
 
   logger.success("setupGaugeSystem: permission granted");
-
-  return {
-    balMinter,
-  };
 }
 
-export async function deployLiquidityGaugeFactorySetup(
-  votingEscrow: string,
-  minter: string,
-  authEntryAdapterAddress: string
-) {
+export async function deployLiquidityGaugeFactorySetup() {
   logger.info("deployLiquidityGaugeFactorySetup: Deploying gauge factory setup");
 
   const veBoost = await deployContractUtil("BoostV2", {
     boostV1: ZERO_ADDRESS,
-    votingEscrow,
+    adapter: await getDeployedContractAddress("AuthorizerAdaptorEntrypoint"),
   });
 
-  const gaugeTemplate = await deployContractUtil("LiquidityGauge", {
-    minter,
-    boostProxy: veBoost.contract.address,
-    authEntryAdapterAddress,
+  await saveDeplomentData(veBoost.deployment);
+
+  const gaugeTemplate = await deployContractUtil("LiquidityGaugeV5", {
+    minter: await getDeployedContractAddress("BalancerMinter"),
+    boostProxy: await getDeployedContractAddress("BoostV2"),
+    adapter: await getDeployedContractAddress("AuthorizerAdaptorEntrypoint"),
   });
+
+  await saveDeplomentData(gaugeTemplate.deployment);
 
   const gaugeFactory = await deployContractUtil("LiquidityGaugeFactory", {
     template: gaugeTemplate.contract.address,
   });
 
+  await saveDeplomentData(gaugeFactory.deployment);
+
   logger.success("deployLiquidityGaugeFactorySetup: Complete");
 
-  return {
-    veBoost,
-    gaugeTemplate,
-    gaugeFactory,
-  };
+  // return {
+  //   veBoost,
+  //   gaugeTemplate,
+  //   gaugeFactory,
+  // };
 }
 
-export async function addMainPoolGauge(minter: string, balToken: string, vault: string) {
+export async function addMainPoolGauge() {
   logger.info("addMainPoolGauge: Starting setup for SingleGauge");
 
   const tokenHolder = await deployContractUtil("BALTokenHolder", {
-    balToken,
-    vault,
+    balToken: await getDeployedContractAddress("GovernanceToken"),
+    vault: await getDeployedContractAddress("Vault"),
     name: "BalTokenHolder",
   });
 
+  await saveDeplomentData(tokenHolder.deployment);
+
   const singleGaugeFactory = await deployContractUtil("SingleRecipientGaugeFactory", {
-    minter,
+    minter: await getDeployedContractAddress("BalancerMinter"),
   });
+
+  await saveDeplomentData(singleGaugeFactory.deployment);
 
   const receipt = await doTransaction(
     singleGaugeFactory.contract.create(tokenHolder.contract.address)
@@ -168,12 +186,24 @@ export async function addMainPoolGauge(minter: string, balToken: string, vault: 
 
   logger.success("addMainPoolGauge: Complete");
 
+  const pool = await getMainPoolConfig();
+  pool.gauge.address = gaugeAddress;
+  await updatePoolConfig(pool);
+
   return {
     tokenHolder,
     singleGaugeFactory,
     singleRecipientGaugeAddress: gaugeAddress,
     receipt,
   };
+}
+
+export async function addGaugeToPool(
+  pool: PoolCreationConfig,
+  gaugeAddress: string,
+  txHash: string
+) {
+  //
 }
 
 export async function deployLiquidityGauge(poolAddress: string) {

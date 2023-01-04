@@ -1,7 +1,14 @@
 import { parseEther } from "ethers/lib/utils";
-import { getDeployedContractAddress } from "../../contract-utils";
+import {
+  getBalancerPoolToken,
+  getDeployedContractAddress,
+  getGovernanceToken,
+  getVotingEscrow,
+} from "../../contract-utils";
+import { getChainAdmin } from "../../data/addresses";
 import { getMainPoolConfig } from "../../services/pools/pool-utils";
-import { ONE_YEAR_SECONDS } from "../../time";
+import { ONE_WEEK_SECONDS, ONE_YEAR_SECONDS } from "../../time";
+import { approveTokensIfNeeded } from "../../token";
 import { awaitTransactionComplete } from "../../tx-utils";
 import { deployContractUtil } from "../deploy-util";
 import { logger } from "../logger";
@@ -24,9 +31,9 @@ export async function setupVotingEscrow(doSave: boolean) {
     authEntryAdapterAddress,
   });
 
-  // Do a VE deposit to get total supply started for fee distributor deployment
-  // Fee dist with revert at deployment if there is not a current supply of ve tokens
-  await awaitTransactionComplete(votingEscrow.contract.deposit(parseEther("1"), ONE_YEAR_SECONDS));
+  if (doSave) {
+    await saveDeplomentData(votingEscrow.deployment);
+  }
 
   // Then we can deploy fee distributor
   const feeDistributor = await deployContractUtil("FeeDistributor", {
@@ -37,14 +44,37 @@ export async function setupVotingEscrow(doSave: boolean) {
   logger.success("setupVotingEscrow: complete");
 
   if (doSave) {
-    await Promise.all([
-      saveDeplomentData(votingEscrow.deployment),
-      saveDeplomentData(feeDistributor.deployment),
-    ]);
+    await saveDeplomentData(feeDistributor.deployment);
   }
 
   return {
     votingEscrow,
     feeDistributor,
   };
+}
+
+export async function doVeDeposit() {
+  // Do a VE deposit to get total supply started for fee distributor deployment
+  // Fee dist with revert at deployment if there is not a current supply of ve tokens
+
+  const ve = await getVotingEscrow();
+  // await approveTokensIfNeeded(
+  //   [(await getMainPoolConfig()).poolAddress],
+  //   await getChainAdmin(),
+  //   ve.address
+  // );
+
+  const blockTime = await getCurrentBlockTimestamp();
+  await awaitTransactionComplete(
+    await ve.create_lock(parseEther("1"), blockTime + ONE_YEAR_SECONDS)
+  );
+}
+
+export async function addFeeDistributor() {
+  const feeDistributor = await deployContractUtil("FeeDistributor", {
+    votingEscrow: await getDeployedContractAddress("VotingEscrow"),
+    startTime: (await getCurrentBlockTimestamp()) + ONE_WEEK_SECONDS,
+  });
+
+  await saveDeplomentData(feeDistributor.deployment);
 }
