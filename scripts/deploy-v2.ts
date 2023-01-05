@@ -110,7 +110,6 @@ async function main() {
     // await giveMinterPermissions();
     // await setupBoostProxy();
     // await deployLiquidityGaugeFactorySetup();
-    //
     // await addMainPoolGaugeSetup();
     // await createPoolGaugesAndAddToController();
   } catch (error) {

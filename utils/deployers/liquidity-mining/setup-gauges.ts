@@ -133,7 +133,7 @@ export async function setupBoostProxy() {
 
   const veBoost = await deployContractUtil("BoostV2", {
     boostV1: ZERO_ADDRESS,
-    adapter: await getDeployedContractAddress("AuthorizerAdaptorEntrypoint"),
+    adapter: await getDeployedContractAddress("VotingEscrow"),
   });
 
   await saveDeplomentData(veBoost.deployment);
@@ -141,7 +141,7 @@ export async function setupBoostProxy() {
   const boostProxy = await deployContractUtil("VotingEscrowDelegationProxy", {
     vault: await getDeployedContractAddress("Vault"),
     votingEscrow: await getDeployedContractAddress("VotingEscrow"),
-    delegationImpl: await getDeployedContractAddress("BoostV2"),
+    delegationImpl: veBoost.contract.address,
   });
 
   await saveDeplomentData(boostProxy.deployment);
@@ -282,20 +282,3 @@ export async function addGaugeToController(pool: PoolCreationConfig) {
 
   logger.success(`addGaugeToController: gauge added to controller`);
 }
-
-// export async function addPoolGaugesToController() {
-//   const poolConfigs = await getCreatedPoolConfigs();
-
-//   for (const pool of poolConfigs) {
-//     if (pool.gauge.added) {
-//       continue;
-//     }
-
-//     try {
-//       await addGaugeToController(pool);
-//     } catch (error) {
-//       console.error(error);
-//       logger.error("Error adding gauge to controller");
-//     }
-//   }
-// }
