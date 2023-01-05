@@ -17,5 +17,6 @@
   "LiquidityGaugeFactory": "0x73B40fC31fdABD0A9f69815C2Abf38d84aD94C47",
   "BALTokenHolder": "0xfb3c030cD368591296117f8386b7200db17B19fB",
   "SingleRecipientGaugeFactory": "0x837e383fF251EB370f00720aE554e4D09ef642e7",
-  "VotingEscrowDelegationProxy": "0xaD1426e175a013D23941a7559C3DFeBea2275559"
+  "VotingEscrowDelegationProxy": "0xaD1426e175a013D23941a7559C3DFeBea2275559",
+  "GaugeControllerQuerier": "0x3B0b5C741A11cE8e42411af455490BED08Abd91A"
 }

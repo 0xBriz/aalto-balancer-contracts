@@ -1,1 +1,101 @@
-[{"created":true,"chainId":5,"name":"That Main Pool Thing","symbol":"VRTK-BNB","assetManager":"0x0000000000000000000000000000000000000000","type":"Weighted","txHash":"0xda9b04e25f1789cd28644f471a2f5ee5a5564ae5a74e51d796bedd87cc1b85c3","poolId":"0x3e9f7b85e8ee2107aeca28677b6b416fa60b6200000200000000000000000002","poolAddress":"0x3e9f7B85E8Ee2107aeca28677b6B416fA60b6200","date":"1/3/2023, 12:07:50 PM","initialBalances":["10800","100"],"tokenInfo":[{"address":"0xaFbf7fB9Fa206089041218dF93c8B3A1Bb9F4497","weight":"0.8","initialBalance":"10800","symbol":"VRTK"},{"address":"0xe4E96Cf369D4d604Bedc4d7962F94D53E4B5e3C6","weight":"0.2","initialBalance":"100"}],"deploymentArgs":{"name":"That Main Pool Thing","symbol":"VRTK-BNB","owner":"0x891eFc56f5CD6580b2fEA416adC960F2A6156494","tokens":["0xaFbf7fB9Fa206089041218dF93c8B3A1Bb9F4497","0xe4E96Cf369D4d604Bedc4d7962F94D53E4B5e3C6"],"swapFeePercentage":"0.01","weights":["0.8","0.2"],"assetManagers":["0x0000000000000000000000000000000000000000","0x0000000000000000000000000000000000000000"]},"gauge":{"address":"0xf090783eEE18089916133781c781AbcAD26c73Db","startingWeight":"0.7","added":true,"controllerTxHash":"0x90d69c24ccb70581557df51fd04661165071cb7188fd69bdf6a708e95ea3e42b","txHash":"0x418bece4452c591f11732104a22d15135a9cdd09248b057e3732bfd6df3cf557"},"isVePool":true},{"created":true,"chainId":5,"name":"Pegging Enthusiast","symbol":"AMES-BUSD","assetManager":"0x0000000000000000000000000000000000000000","type":"Weighted","txHash":"0xe8c6e9fa2cced710c0142fa43dad5bd55aeb93d94557dd3be2c7568d25d84069","poolId":"0x47761dc0a5836d6746310b5999e2a45557237774000200000000000000000003","poolAddress":"0x47761dc0a5836D6746310B5999E2a45557237774","date":"1/3/2023, 12:09:39 PM","initialBalances":["10000","20000"],"tokenInfo":[{"address":"0x7faA8158FaA037CC7516eF1f6864af44d75654AE","weight":"0.5","initialBalance":"10000","symbol":"BUSD"},{"address":"0xd71114b3AD1Ec657B4194E0B3b7C9fC71C7bdbEF","weight":"0.5","initialBalance":"20000","symbol":"AMES"}],"deploymentArgs":{"name":"Pegging Enthusiast","symbol":"AMES-BUSD","owner":"0x891eFc56f5CD6580b2fEA416adC960F2A6156494","tokens":["0x7faA8158FaA037CC7516eF1f6864af44d75654AE","0xd71114b3AD1Ec657B4194E0B3b7C9fC71C7bdbEF"],"swapFeePercentage":"0.01","weights":["0.5","0.5"],"assetManagers":["0x0000000000000000000000000000000000000000","0x0000000000000000000000000000000000000000"]},"gauge":{"address":"0xd348e36E33cbb94748942a131f9aAdaeA8850cf4","startingWeight":"0","added":true,"txHash":"0xcb28424cb4e6ef965b8e2637beba1e8e4f563f3b919ce59ae4c852e196da1c09","controllerTxHash":"0xd761ede6ea60ab6855efa48f4cf69a9c8d56e1bd1296a59eb054d88bbaada4f5"},"isVePool":false}]
+[
+  {
+    "created": true,
+    "chainId": 5,
+    "name": "That Main Pool Thing",
+    "symbol": "VRTK-BNB",
+    "assetManager": "0x0000000000000000000000000000000000000000",
+    "type": "Weighted",
+    "txHash": "0xda9b04e25f1789cd28644f471a2f5ee5a5564ae5a74e51d796bedd87cc1b85c3",
+    "poolId": "0x3e9f7b85e8ee2107aeca28677b6b416fa60b6200000200000000000000000002",
+    "poolAddress": "0x3e9f7B85E8Ee2107aeca28677b6B416fA60b6200",
+    "date": "1/3/2023, 12:07:50 PM",
+    "initialBalances": ["10800", "100"],
+    "tokenInfo": [
+      {
+        "address": "0xaFbf7fB9Fa206089041218dF93c8B3A1Bb9F4497",
+        "weight": "0.8",
+        "initialBalance": "10800",
+        "symbol": "VRTK"
+      },
+      {
+        "address": "0xe4E96Cf369D4d604Bedc4d7962F94D53E4B5e3C6",
+        "weight": "0.2",
+        "initialBalance": "100"
+      }
+    ],
+    "deploymentArgs": {
+      "name": "That Main Pool Thing",
+      "symbol": "VRTK-BNB",
+      "owner": "0x891eFc56f5CD6580b2fEA416adC960F2A6156494",
+      "tokens": [
+        "0xaFbf7fB9Fa206089041218dF93c8B3A1Bb9F4497",
+        "0xe4E96Cf369D4d604Bedc4d7962F94D53E4B5e3C6"
+      ],
+      "swapFeePercentage": "0.01",
+      "weights": ["0.8", "0.2"],
+      "assetManagers": [
+        "0x0000000000000000000000000000000000000000",
+        "0x0000000000000000000000000000000000000000"
+      ]
+    },
+    "gauge": {
+      "address": "0xf090783eEE18089916133781c781AbcAD26c73Db",
+      "startingWeight": "0.7",
+      "added": true,
+      "controllerTxHash": "0x90d69c24ccb70581557df51fd04661165071cb7188fd69bdf6a708e95ea3e42b",
+      "txHash": "0x418bece4452c591f11732104a22d15135a9cdd09248b057e3732bfd6df3cf557"
+    },
+    "isVePool": true
+  },
+  {
+    "created": true,
+    "chainId": 5,
+    "name": "Pegging Enthusiast",
+    "symbol": "AMES-BUSD",
+    "assetManager": "0x0000000000000000000000000000000000000000",
+    "type": "Weighted",
+    "txHash": "0xe8c6e9fa2cced710c0142fa43dad5bd55aeb93d94557dd3be2c7568d25d84069",
+    "poolId": "0x47761dc0a5836d6746310b5999e2a45557237774000200000000000000000003",
+    "poolAddress": "0x47761dc0a5836D6746310B5999E2a45557237774",
+    "date": "1/3/2023, 12:09:39 PM",
+    "initialBalances": ["10000", "20000"],
+    "tokenInfo": [
+      {
+        "address": "0x7faA8158FaA037CC7516eF1f6864af44d75654AE",
+        "weight": "0.5",
+        "initialBalance": "10000",
+        "symbol": "BUSD"
+      },
+      {
+        "address": "0xd71114b3AD1Ec657B4194E0B3b7C9fC71C7bdbEF",
+        "weight": "0.5",
+        "initialBalance": "20000",
+        "symbol": "AMES"
+      }
+    ],
+    "deploymentArgs": {
+      "name": "Pegging Enthusiast",
+      "symbol": "AMES-BUSD",
+      "owner": "0x891eFc56f5CD6580b2fEA416adC960F2A6156494",
+      "tokens": [
+        "0x7faA8158FaA037CC7516eF1f6864af44d75654AE",
+        "0xd71114b3AD1Ec657B4194E0B3b7C9fC71C7bdbEF"
+      ],
+      "swapFeePercentage": "0.01",
+      "weights": ["0.5", "0.5"],
+      "assetManagers": [
+        "0x0000000000000000000000000000000000000000",
+        "0x0000000000000000000000000000000000000000"
+      ]
+    },
+    "gauge": {
+      "address": "0xd348e36E33cbb94748942a131f9aAdaeA8850cf4",
+      "startingWeight": "0",
+      "added": true,
+      "txHash": "0xcb28424cb4e6ef965b8e2637beba1e8e4f563f3b919ce59ae4c852e196da1c09",
+      "controllerTxHash": "0xd761ede6ea60ab6855efa48f4cf69a9c8d56e1bd1296a59eb054d88bbaada4f5"
+    },
+    "isVePool": false
+  }
+]

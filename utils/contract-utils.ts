@@ -34,7 +34,8 @@ type GaugeContracts =
   | "VotingEscrowDelegationProxy"
   | "SingleRecipientGaugeFactory"
   | "BALTokenHolder"
-  | "FeeDistributor";
+  | "FeeDistributor"
+  | "GaugeControllerQuerier";
 export type DeployedContract =
   | FactoryContracts
   | VaulContracts

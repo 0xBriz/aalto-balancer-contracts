@@ -37,6 +37,7 @@ import {
   // addPoolGaugesToController,
   addGaugeTypes,
   addMainPoolGaugeSetup,
+  addVeBalHelpers,
   createPoolGaugesAndAddToController,
   deployLiquidityGaugeFactorySetup,
   deployMinter,
@@ -105,6 +106,7 @@ async function main() {
     // await doVeDeposit();
     // await addFeeDistributor();
     // await addGaugeController();
+    await addVeBalHelpers();
     // await addGaugeTypes();
     // await deployMinter();
     // await giveMinterPermissions();

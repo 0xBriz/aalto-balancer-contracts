@@ -24,62 +24,6 @@ import { logger } from "../logger";
 import { saveDeplomentData } from "../save-deploy-data";
 import { getSigner } from "../signers";
 
-export async function setupGaugeSystem(
-  doSave: boolean,
-  authEntryAdapterAddress: string,
-  votingEscrowAddress: string,
-  timelockAuth: string,
-  govToken: string,
-  vault: string
-) {
-  // const authEntryAdapterAddress = await getDeployedContractAddress("AuthorizerAdaptorEntrypoint");
-  // const votingEscrowAddress = await getDeployedContractAddress("VotingEscrow");
-  // const gaugeController = await deployContractUtil("GaugeController", {
-  //   votingEscrow: votingEscrowAddress,
-  //   authEntryAdapterAddress,
-  //   stakingAdmin: await getChainAdmin(),
-  // });
-  // // TODO: Add gauge types
-  // // Added a "staking admin" to the GaugeController previously for simplicity
-  // const { balMinter } = await deployMinterAndSetPermissions(
-  //   gaugeController.contract.address,
-  //   timelockAuth,
-  //   vault
-  // );
-  // const {
-  //   tokenHolder,
-  //   singleGaugeFactory,
-  //   singleRecipientGaugeAddress,
-  //   receipt: singleGaugeReceipt,
-  // } = await addMainPoolGauge(balMinter.contract.address, govToken, vault);
-  // const { veBoost, gaugeTemplate, gaugeFactory } = await deployLiquidityGaugeFactorySetup(
-  //   votingEscrowAddress,
-  //   balMinter.contract.address,
-  //   authEntryAdapterAddress
-  // );
-  // // add pool gauges
-  // logger.info(`Adding liqudity gauges for pools..`);
-  // await addPoolGauges(singleRecipientGaugeAddress, singleGaugeReceipt.transactionHash);
-  // if (doSave) {
-  //   await saveDeplomentData(gaugeController.deployment);
-  //   await saveDeplomentData(balMinter.deployment);
-  //   await saveDeplomentData(veBoost.deployment);
-  //   await saveDeplomentData(gaugeTemplate.deployment);
-  //   await saveDeplomentData(gaugeFactory.deployment);
-  //   await saveDeplomentData(tokenHolder.deployment);
-  //   await saveDeplomentData(singleGaugeFactory.deployment);
-  // }
-  // return {
-  //   gaugeController,
-  //   balMinter,
-  //   veBoost,
-  //   gaugeTemplate,
-  //   gaugeFactory,
-  //   tokenHolder,
-  //   singleGaugeFactory,
-  // };
-}
-
 export async function addGaugeController() {
   const gaugeController = await deployContractUtil("GaugeController", {
     votingEscrow: await getDeployedContractAddress("VotingEscrow"),
@@ -281,4 +225,11 @@ export async function addGaugeToController(pool: PoolCreationConfig) {
   await updatePoolConfig(pool);
 
   logger.success(`addGaugeToController: gauge added to controller`);
+}
+
+export async function addVeBalHelpers() {
+  const veHelper = await deployContractUtil("GaugeControllerQuerier", {
+    gaugeController: await getDeployedContractAddress("GaugeController"),
+  });
+  await saveDeplomentData(veHelper.deployment);
 }
