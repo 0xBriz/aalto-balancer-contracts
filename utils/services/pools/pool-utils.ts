@@ -13,6 +13,7 @@ import { getDeployedContractAddress } from "../../contract-utils";
 import { Contract } from "ethers";
 import { getSigner } from "../../deployers/signers";
 import * as LGF from "../../../artifacts/contracts/liquidity-mining/gauges/LiquidityGaugeFactory.sol/LiquidityGaugeFactory.json";
+import { logger } from "../../deployers/logger";
 
 /**
  * Sorts the tokens for a pool according to address as required by the vault.
@@ -97,8 +98,11 @@ export async function getPoolFactories(): Promise<PoolFactoryInfo[]> {
 }
 
 export async function updatePoolConfig(pool: PoolCreationConfig) {
+  logger.info(`updatePoolConfig: updating ${pool.name}`);
   let poolConfigs = await getAllPoolConfigs();
   poolConfigs = poolConfigs.filter((p) => p.name !== pool.name);
   poolConfigs.push(pool);
   await savePoolsData(poolConfigs);
+
+  logger.success(`updatePoolConfig: pool update complete`);
 }

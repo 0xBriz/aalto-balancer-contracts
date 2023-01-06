@@ -1,6 +1,7 @@
 [
   {
     "created": true,
+    "initJoinComplete": true,
     "chainId": 5,
     "name": "That Main Pool Thing",
     "symbol": "VRTK-BNB",
@@ -50,6 +51,7 @@
   },
   {
     "created": true,
+    "initJoinComplete": true,
     "chainId": 5,
     "name": "Pegging Enthusiast",
     "symbol": "AMES-BUSD",
@@ -95,6 +97,57 @@
       "added": true,
       "txHash": "0xcb28424cb4e6ef965b8e2637beba1e8e4f563f3b919ce59ae4c852e196da1c09",
       "controllerTxHash": "0xd761ede6ea60ab6855efa48f4cf69a9c8d56e1bd1296a59eb054d88bbaada4f5"
+    },
+    "isVePool": false
+  },
+  {
+    "created": true,
+    "initJoinComplete": true,
+    "chainId": 5,
+    "name": "Bear Market Breather",
+    "symbol": "ETH-BUSD",
+    "assetManager": "0x0000000000000000000000000000000000000000",
+    "type": "Weighted",
+    "txHash": "0xa09fb917ae61e5fffd80af74ca4f4aae82bf4ee89647fc14594a2c6645866c81",
+    "poolId": "0xe741a3fa0d0e3222c82fb6d0c7c7384723e83d97000200000000000000000004",
+    "poolAddress": "0xe741a3fA0d0E3222c82fb6d0C7C7384723E83d97",
+    "date": "1/5/2023, 5:32:46 PM",
+    "initialBalances": ["20", "25000"],
+    "tokenInfo": [
+      {
+        "address": "0x7c85523739053769278a1E5b1F39389b0e5CF539",
+        "weight": "0.5",
+        "initialBalance": "20",
+        "symbol": "WETH"
+      },
+      {
+        "address": "0x7faA8158FaA037CC7516eF1f6864af44d75654AE",
+        "weight": "0.5",
+        "initialBalance": "25000",
+        "symbol": "BUSD"
+      }
+    ],
+    "deploymentArgs": {
+      "name": "Bear Market Breather",
+      "symbol": "ETH-BUSD",
+      "owner": "0x891eFc56f5CD6580b2fEA416adC960F2A6156494",
+      "tokens": [
+        "0x7c85523739053769278a1E5b1F39389b0e5CF539",
+        "0x7faA8158FaA037CC7516eF1f6864af44d75654AE"
+      ],
+      "swapFeePercentage": "0.005",
+      "weights": ["0.5", "0.5"],
+      "assetManagers": [
+        "0x0000000000000000000000000000000000000000",
+        "0x0000000000000000000000000000000000000000"
+      ]
+    },
+    "gauge": {
+      "address": "0x01c13541F5110D207F1d1BCA383337D63b2B5444",
+      "startingWeight": "0",
+      "added": true,
+      "txHash": "0xd84ad7c7156f4b23468bd87a8aba29a30dd6fc897f7646afb2ab2785acda7d99",
+      "controllerTxHash": "0x6c7d6c5fbfae34b87c1890c716e3dafcd95ec9588f9a54394a095c5e39545187"
     },
     "isVePool": false
   }

@@ -20,6 +20,7 @@ import {
   getAllPoolConfigs,
   getPoolFactories,
   savePoolsData,
+  updatePoolConfig,
 } from "../utils/services/pools/pool-utils";
 import { PoolCreationService } from "../utils/services/pools/pool-creation.service";
 import { ZERO_ADDRESS } from "./utils/constants";
@@ -94,26 +95,32 @@ async function main() {
 
     // const pools = await getAllPoolConfigs();
     // for (const pool of pools) {
+    //   if (pool.initJoinComplete) {
+    //     continue;
+    //   }
     //   await initWeightedJoin(
     //     pool.poolId,
     //     pool.deploymentArgs.tokens,
     //     pool.initialBalances,
     //     await getChainAdmin()
     //   );
+
+    //   pool.initJoinComplete = true;
+    //   await updatePoolConfig(pool);
     // }
 
     // await setupVotingEscrow(saving);
     // await doVeDeposit();
     // await addFeeDistributor();
     // await addGaugeController();
-    await addVeBalHelpers();
+    // await addVeBalHelpers();
     // await addGaugeTypes();
     // await deployMinter();
     // await giveMinterPermissions();
     // await setupBoostProxy();
     // await deployLiquidityGaugeFactorySetup();
     // await addMainPoolGaugeSetup();
-    // await createPoolGaugesAndAddToController();
+    //  await createPoolGaugesAndAddToController();
   } catch (error) {
     console.error(error);
     process.exitCode = 1;
