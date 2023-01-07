@@ -6,6 +6,7 @@ import {
   getBalTokenAdmin,
   getDeployedContractAddress,
   getGaugeController,
+  getLiquidityGauge,
   getTimelockAuth,
 } from "../../contract-utils";
 import { getChainAdmin } from "../../data/addresses";
@@ -202,6 +203,17 @@ export async function createPoolGaugesAndAddToController() {
       logger.error(`Error adding pool gauge`);
       console.error(error);
     }
+  }
+}
+
+export async function giveGaugeRewardsPermissions() {
+  logger.info(`giveGaugeRewardsPermissions:`);
+
+  const poolConfigs = await getCreatedPoolConfigs();
+  for (const pool of poolConfigs) {
+    if (!pool.gauge.added) continue;
+
+    const gauge = await getLiquidityGauge(pool.gauge.address);
   }
 }
 

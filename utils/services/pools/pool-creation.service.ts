@@ -99,6 +99,7 @@ export class PoolCreationService {
 
     const data: PoolCreationConfig = {
       created: true,
+      initJoinComplete: false,
       chainId: await getChainId(),
       name,
       symbol,

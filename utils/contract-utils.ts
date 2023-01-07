@@ -6,9 +6,10 @@ import * as Timelock from "../artifacts/contracts/authorizer/TimelockAuthorizer.
 import * as TokenAdmin from "../artifacts/contracts/liquidity-mining/BalancerTokenAdmin.sol/BalancerTokenAdmin.json";
 import * as GovenToken from "../artifacts/contracts/liquidity-mining/governance/GovernanceToken.sol/GovernanceToken.json";
 import * as AuthEntry from "../artifacts/contracts/liquidity-mining/admin/AuthorizerAdapterEntrypoint.sol/AuthorizerAdaptorEntrypoint.json";
-import * as GC from "../artifacts/contracts/liquidity-mininG/GaugeController.vy/GaugeController.json";
+import * as GC from "../artifacts/contracts/liquidity-mining/GaugeController.vy/GaugeController.json";
 import * as VE from "../artifacts/contracts/liquidity-mining/VotingEscrow.vy/VotingEscrow.json";
 import * as AM from "./abi/DexTokenManager.json";
+import * as LG from "../artifacts/contracts/liquidity-mining/gauges/LiquidityGaugeV5.vy/LiquidityGaugeV5.json";
 import { Contract } from "ethers";
 import { ERC20_ABI } from "./abi/ERC20ABI";
 import { getSigner } from "./deployers/signers";
@@ -73,6 +74,10 @@ export async function getVotingEscrow() {
 
 export async function getBalancerPoolToken(address: string) {
   return getCacheOrNew(address, BPT.abi);
+}
+
+export async function getLiquidityGauge(address: string) {
+  return getCacheOrNew(address, LG.abi);
 }
 
 export async function getAutEntryAdapter() {
