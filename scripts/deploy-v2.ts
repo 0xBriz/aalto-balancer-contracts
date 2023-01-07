@@ -120,7 +120,7 @@ async function main() {
     // await setupBoostProxy();
     // await deployLiquidityGaugeFactorySetup();
     // await addMainPoolGaugeSetup();
-    await createPoolGaugesAndAddToController();
+    // await createPoolGaugesAndAddToController();
   } catch (error) {
     console.error(error);
     process.exitCode = 1;
