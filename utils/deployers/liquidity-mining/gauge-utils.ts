@@ -1,8 +1,20 @@
-import { BigNumber } from "ethers";
-import { getAutEntryAdapter, getLiquidityGauge } from "../../contract-utils";
+import { BigNumber, Contract } from "ethers";
+import {
+  defaultAbiCoder,
+  formatBytes32String,
+  hexZeroPad,
+  parseBytes32String,
+  toUtf8Bytes,
+} from "ethers/lib/utils";
+import {
+  getAutEntryAdapter,
+  getDeployedContractAddress,
+  getLiquidityGauge,
+} from "../../contract-utils";
 import { getChainAdmin } from "../../data/addresses";
 import {
-  canPerformAction,
+  getActionIdWithParams,
+  getFunctionSelectorBytes,
   getTimelockActionId,
   grantAuthEntryPermission,
   grantPerformActionIfNeeded,
@@ -11,6 +23,8 @@ import {
 import { approveTokensIfNeeded } from "../../token";
 import { awaitTransactionComplete } from "../../tx-utils";
 import { logger } from "../logger";
+import { getSigner } from "../signers";
+import { getTimelockAuth } from "../../contract-utils";
 
 export async function addGaugeReward(
   gaugeAddress: string,
@@ -40,8 +54,20 @@ export async function setGaugeRewardDistributor(
 
   const gauge = await getLiquidityGauge(gaugeAddress);
   const functionName = "add_reward";
-  const actionId = await getTimelockActionId(gauge, functionName);
-  //  await grantAuthEntryPermission(gauge.address, actionId);
-  await grantPerformActionIfNeeded(gauge.address, actionId, await getChainAdmin());
-  // await performAdapterAction(gauge, functionName, [token, distributor]);
+  // const actionId = await getTimelockActionId(gauge, functionName);
+  const params = [token, distributor];
+
+  const adapter = await getAutEntryAdapter();
+
+  // const actionId = await adapter.getActionId(getFunctionSelectorBytes(gauge, functionName));
+  // const authorizer = await getTimelockAuth(await getDeployedContractAddress("TimelockAuthorizer"));
+  // await awaitTransactionComplete(
+  //   await authorizer.grantPermissions([actionId], adapter.address, [gauge.address]),
+  //   10
+  // );
+
+  const callData = gauge.interface.encodeFunctionData(functionName, params);
+  await awaitTransactionComplete(await adapter.performAction(gauge.address, callData));
+  // const actionId2 = await authorizer.getActionId(actionId, hexZeroPad(toUtf8Bytes(callData), 32));
+  // console.log(actionId2);
 }

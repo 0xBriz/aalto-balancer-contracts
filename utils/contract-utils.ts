@@ -89,11 +89,10 @@ export async function getLiquidityGauge(address: string) {
 }
 
 export async function getAutEntryAdapter() {
-  return await getCacheOrNew(await getDeployedContractAddress("AuthorizerAdaptorEntrypoint"), [
-    "function getActionId(bytes4) external view returns(bytes32)",
-    "function performAction(address, bytes) external returns (bytes)",
-    "function canPerform(bytes32, address, address) public view returns (bool)",
-  ]);
+  return await getCacheOrNew(
+    await getDeployedContractAddress("AuthorizerAdaptorEntrypoint"),
+    AuthEntry.abi
+  );
 }
 
 export async function getGaugeController() {

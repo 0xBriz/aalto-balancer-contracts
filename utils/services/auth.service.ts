@@ -159,15 +159,15 @@ export async function grantPerformActionIfNeeded(
     contractPerformingOn
   );
 
-  if (!canDo) {
-    logger.info("Granting permision for action id: " + actionId);
-    await awaitTransactionComplete(
-      await authorizer.grantPermissions([actionId], forWho, [contractPerformingOn]),
-      10
-    );
-  } else {
-    logger.info("Already approved for action id");
-  }
+  //  if (!canDo) {
+  logger.info("Granting permision for action id: " + actionId);
+  await awaitTransactionComplete(
+    await authorizer.grantPermissions([actionId], forWho, [contractPerformingOn]),
+    10
+  );
+  //   } else {
+  //     logger.info("Already approved for action id");
+  //   }
 }
 
 export async function grantAuthEntryPermission(contractPerformingOn: string, actionId: string) {
@@ -230,14 +230,20 @@ export async function getTimelockActionIdWithParams(
   return authorizer.getActionId(getFunctionSelectorBytes(contractPerformingOn, functionName));
 }
 
-export async function canPerformAction(actionId: string, who: string, where: string) {
-  const authorizer = new Contract(
-    await getDeployedContractAddress("TimelockAuthorizer"),
-    [
-      "function hasPermission(bytes32 actionId, address account, address where) public view returns (bool) ",
-    ],
-    await getSigner()
-  );
-
-  return authorizer.hasPermission(actionId, who, where);
+export async function getActionIdWithParams(
+  actionId: string,
+  contractPerformingOn: Contract,
+  functionName: string,
+  paramValuesToEncode: any[]
+) {
+  // const authorizer = new Contract(
+  //   await getDeployedContractAddress("TimelockAuthorizer"),
+  //   ["function getActionId(bytes32 actionId, bytes32 how) public pure returns (bytes32) "],
+  //   await getSigner()
+  // );
+  // const callData = contractPerformingOn.interface.encodeFunctionData(
+  //   functionName,
+  //   paramValuesToEncode
+  // );
+  // return authorizer.getActionId(actionId, hexZeroPad(callData.toHexString(), 32) );
 }
