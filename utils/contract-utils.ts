@@ -56,8 +56,16 @@ export async function getVault() {
   return getCacheOrNew(await getDeployedContractAddress("Vault"), Vault.abi);
 }
 
-export async function getTimelockAuth(address: string): Promise<TimelockAuthorizer> {
-  return getCacheOrNew(address, Timelock.abi) as unknown as TimelockAuthorizer;
+export async function getTimelockAuth(address: string) {
+  return getCacheOrNew(address, Timelock.abi);
+}
+
+export async function getVaultAuthorizer() {
+  return getCacheOrNew(await getDeployedContractAddress("TimelockAuthorizer"), [
+    "function getPermissionId(bytes32 actionId,address account,address where) public pure returns (bytes32)",
+    "function getActionId(bytes4 selector) public view returns (bytes32)",
+    "function getActionId(bytes4 selector, bytes32 how) public pure returns (bytes32)",
+  ]);
 }
 
 export async function getBalTokenAdmin() {
@@ -81,10 +89,11 @@ export async function getLiquidityGauge(address: string) {
 }
 
 export async function getAutEntryAdapter() {
-  return await getCacheOrNew(
-    await getDeployedContractAddress("AuthorizerAdaptorEntrypoint"),
-    AuthEntry.abi
-  );
+  return await getCacheOrNew(await getDeployedContractAddress("AuthorizerAdaptorEntrypoint"), [
+    "function getActionId(bytes4) external view returns(bytes32)",
+    "function performAction(address, bytes) external returns (bytes)",
+    "function canPerform(bytes32, address, address) public view returns (bool)",
+  ]);
 }
 
 export async function getGaugeController() {

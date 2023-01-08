@@ -1,5 +1,11 @@
 import { Contract } from "ethers";
-import { getAutEntryAdapter, getDeployedContractAddress, getTimelockAuth } from "../contract-utils";
+import { boolean } from "hardhat/internal/core/params/argumentTypes";
+import {
+  getAutEntryAdapter,
+  getDeployedContractAddress,
+  getTimelockAuth,
+  getVaultAuthorizer,
+} from "../contract-utils";
 import { getChainAdmin } from "../data/addresses";
 import { logger } from "../deployers/logger";
 import { getSigner } from "../deployers/signers";
@@ -61,9 +67,10 @@ export class AuthService {
       ],
       await getSigner()
     );
+
     const funcHash = contractPerformingOn.interface.getSighash(functionName);
     logger.info("Getting action id..");
-    const actionId: string = await adapter.getActionId(funcHash);
+    const actionId: string = await contractPerformingOn.getActionId(funcHash);
     logger.success("action id: " + actionId);
 
     const authorizer = await getTimelockAuth(this.timelockAuthAddress);
@@ -98,4 +105,139 @@ export class AuthService {
 
     logger.success("Successfully performed adapter action");
   }
+}
+
+/**
+ * Authorization for the caller should have taken place beforehand
+ * @param contractPerformingOn
+ * @param functionName
+ * @param paramValuesToEncode
+ */
+export async function performAdapterAction(
+  contractPerformingOn: Contract,
+  functionName: string,
+  paramValuesToEncode: any[]
+) {
+  try {
+    logger.info(`Performing ${functionName} action through adapter..`);
+
+    const adapter = await getAutEntryAdapter();
+
+    const callData = contractPerformingOn.interface.encodeFunctionData(
+      functionName,
+      paramValuesToEncode
+    );
+
+    await awaitTransactionComplete(
+      await adapter.performAction(contractPerformingOn.address, callData),
+      10
+    );
+
+    logger.success("Successfully performed adapter action");
+  } catch (error) {
+    console.error(error);
+    logger.error("performAdapterAction failed");
+  }
+}
+
+/**
+ *
+ * @param contractPerformingOn Contract that is hooked into the auth adapter setup
+ * @param actionId Action id that was return from the contracts adpater reference
+ * @param forWho Who is being allowed to perform the action
+ */
+export async function grantPerformActionIfNeeded(
+  contractPerformingOn: string,
+  actionId: string,
+  forWho: string
+) {
+  const authorizer = await getTimelockAuth(await getDeployedContractAddress("TimelockAuthorizer"));
+  // Skip a tx if already approved
+  const canDo = await authorizer.hasPermission(
+    actionId,
+    await getChainAdmin(),
+    contractPerformingOn
+  );
+
+  if (!canDo) {
+    logger.info("Granting permision for action id: " + actionId);
+    await awaitTransactionComplete(
+      await authorizer.grantPermissions([actionId], forWho, [contractPerformingOn]),
+      10
+    );
+  } else {
+    logger.info("Already approved for action id");
+  }
+}
+
+export async function grantAuthEntryPermission(contractPerformingOn: string, actionId: string) {
+  const authorizer = await getTimelockAuth(await getDeployedContractAddress("TimelockAuthorizer"));
+  return await awaitTransactionComplete(
+    await authorizer.grantPermissions(
+      [actionId],
+      await getDeployedContractAddress("AuthorizerAdaptorEntrypoint"),
+      [contractPerformingOn]
+    ),
+    10
+  );
+}
+
+/**
+ * Get the action id from a contract that inherits from SingleAuthentication
+ * @param contractPerformingOn
+ * @param functionName
+ */
+export async function getSingletonAuthActionId(
+  contractPerformingOn: Contract,
+  selectorBytes: string
+): Promise<string> {
+  logger.info("Getting action id..");
+  const actionId = await contractPerformingOn.getActionId(selectorBytes);
+  logger.success("action id: " + actionId);
+
+  return actionId;
+}
+
+export function getFunctionSelectorBytes(contract: Contract, functionName: string) {
+  return contract.interface.getSighash(functionName);
+}
+
+export async function getTimelockActionId(contractPerformingOn: Contract, functionName: string) {
+  const authorizer = new Contract(
+    await getDeployedContractAddress("TimelockAuthorizer"),
+    ["function getActionId(bytes4 selector) public pure returns (bytes32)"],
+    await getSigner()
+  );
+  return authorizer.getActionId(getFunctionSelectorBytes(contractPerformingOn, functionName));
+}
+
+export async function getTimelockActionIdWithParams(
+  contractPerformingOn: Contract,
+  functionName: string,
+  paramValuesToEncode: any[]
+) {
+  const authorizer = new Contract(
+    await getDeployedContractAddress("TimelockAuthorizer"),
+    ["function getActionId(bytes4 selector) public pure returns (bytes32)"],
+    await getSigner()
+  );
+
+  const callData = contractPerformingOn.interface.encodeFunctionData(
+    functionName,
+    paramValuesToEncode
+  );
+
+  return authorizer.getActionId(getFunctionSelectorBytes(contractPerformingOn, functionName));
+}
+
+export async function canPerformAction(actionId: string, who: string, where: string) {
+  const authorizer = new Contract(
+    await getDeployedContractAddress("TimelockAuthorizer"),
+    [
+      "function hasPermission(bytes32 actionId, address account, address where) public view returns (bool) ",
+    ],
+    await getSigner()
+  );
+
+  return authorizer.hasPermission(actionId, who, where);
 }

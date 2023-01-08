@@ -1,5 +1,4 @@
 import { logger } from "../logger";
-import { setupGaugeSystem } from "./setup-gauges";
 import { setupVotingEscrow } from "./setup-voting-escrow";
 
 export async function deployLiquidityMining(doSave: boolean) {

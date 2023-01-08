@@ -1,20 +1,8 @@
 import { parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import { deployERC4626Factory } from "../utils/deployers/pools/factories/deploy-erc4626-factory";
-import { deployMulticall, deployMulticallV1 } from "../utils/deployers/general/deploy-multicall";
 import { setupGovernance } from "../utils/deployers/liquidity-mining/governance/setup-governance";
-import { deployTestERC20 } from "../utils/deployers/general/deploy-test-erc20";
-import { deployBootstrapPoolFactory } from "../utils/deployers/pools/factories/lbp-factory";
-import { deployStablePoolFactory } from "../utils/deployers/pools/factories/stable-factory";
-import { deployWeightedFactory } from "../utils/deployers/pools/factories/weighted-factory";
-import { deployWeightedNoAssetManagersFactory } from "../utils/deployers/pools/factories/weighted-nomanagers";
+import { deployTestERC20 } from "../utils/deployers/deploy-test-erc20";
 import { deployAuthAdapter } from "../utils/deployers/liquidity-mining/deploy-auth-adapter";
-import { deployGaugeController } from "../utils/deployers/liquidity-mining/gauges/deploy-gauge-controller";
-import {
-  deployLiquidityGaugeFactory,
-  deployLiquidityGaugeFactoryNoAdmin,
-} from "../utils/deployers/liquidity-mining/factories/deploy-liquidity-gauge-factory";
-import { deployRewardOnlyGaugeFactory } from "../utils/deployers/liquidity-mining/factories/deploy-reward-gauge-factory";
 import { deployBalTokenHolder } from "../utils/deployers/liquidity-mining/voting-escrow/deploy-token-holder";
 import { deployVeBalHelper } from "../utils/deployers/liquidity-mining/voting-escrow/deploy-ve-bal-helper";
 import { deployVeBoost } from "../utils/deployers/liquidity-mining/voting-escrow/deploy-ve-boost";

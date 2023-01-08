@@ -12,11 +12,14 @@ export async function doTransaction(txResponse: ContractTransaction) {
 export async function awaitTransactionComplete(txResponse: ContractTransaction, confirmations = 5) {
   try {
     logger.info(`- Starting transaction: ${txResponse.hash}`);
-    logger.info(`- Awaiting transaction receipt... - ` + new Date().toLocaleString());
+    logger.info(
+      `- Awaiting transaction receipt with (${confirmations}) confirmations... - ` +
+        new Date().toLocaleString()
+    );
     const txReceipt = await txResponse.wait(confirmations);
     logger.info("- TransactionReceipt received - " + new Date().toLocaleString());
+    // success
     if (txReceipt.status === 1) {
-      // success
       logger.success(`Transaction successful`);
     }
     return txReceipt;

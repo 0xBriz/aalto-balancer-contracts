@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { deployPoolFactories } from "../utils/deployers/pools/deploy-factories";
+import { deployPoolFactories } from "../utils/deployers/deploy-factories";
 import { deployVault } from "../utils/deployers/vault/deploy-vault";
 import { deployLiquidityMining } from "../utils/deployers/liquidity-mining/setup-liquidity-mining";
 import {
@@ -45,6 +45,7 @@ import {
   giveMinterPermissions,
   setupBoostProxy,
 } from "../utils/deployers/liquidity-mining/setup-gauges";
+import { setGaugeRewardDistributor } from "../utils/deployers/liquidity-mining/gauge-utils";
 
 // For testing/dev env
 export async function resetAllPoolConfigs() {
@@ -121,6 +122,13 @@ async function main() {
     // await deployLiquidityGaugeFactorySetup();
     // await addMainPoolGaugeSetup();
     // await createPoolGaugesAndAddToController();
+    //
+
+    await setGaugeRewardDistributor(
+      "0xcfD9570A037AAD79B2d1B64652eC9a20495dE42b",
+      "0x7c85523739053769278a1E5b1F39389b0e5CF539",
+      await getChainAdmin()
+    );
   } catch (error) {
     console.error(error);
     process.exitCode = 1;

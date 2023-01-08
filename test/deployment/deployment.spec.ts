@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { resetAllPoolConfigs } from "../../scripts/deploy-v2";
 import { ZERO_ADDRESS } from "../../utils/big-numbers/ethers-big-number";
 import { setupGovernance } from "../../utils/deployers/liquidity-mining/governance/setup-governance";
-import { deployPoolFactories } from "../../utils/deployers/pools/deploy-factories";
+import { deployPoolFactories } from "../../utils/deployers/deploy-factories";
 import { deployVault } from "../../utils/deployers/vault/deploy-vault";
 import { PoolCreationService } from "../../utils/services/pools/pool-creation.service";
 import { PoolFactoryInfo } from "../../utils/types";
