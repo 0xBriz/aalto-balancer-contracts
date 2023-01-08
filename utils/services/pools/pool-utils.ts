@@ -1,10 +1,12 @@
 import * as fs from "fs-extra";
 import { getAddress } from "ethers/lib/utils";
 import {
+  BasePoolArgs,
   CreateWeightedPoolArgs,
   PoolCreationConfig,
   PoolFactoryInfo,
   PoolTokenInfo,
+  StablePoolCreationArgs,
 } from "../../types";
 import { join } from "path";
 import { CHAIN_KEYS } from "../../data/chains";
@@ -52,6 +54,20 @@ export function getWeightedPoolCreationArgs(
   };
 }
 
+export function getStablePoolCreationArgs(pool: PoolCreationConfig): StablePoolCreationArgs {
+  const sortedInfo = sortTokensWithInfo(pool.tokenInfo);
+
+  return {
+    name: pool.deploymentArgs.name,
+    symbol: pool.deploymentArgs.symbol,
+    tokens: sortedInfo.map((info) => info.address),
+    swapFeePercentage: pool.deploymentArgs.swapFeePercentage,
+    owner: pool.deploymentArgs.owner,
+    amplificationParameter: pool.amp,
+    initialBalances: sortedInfo.map((info) => info.initialBalance),
+  };
+}
+
 export async function getPoolConfigPath() {
   return join(process.cwd(), "utils", "data", `${CHAIN_KEYS[await getChainId()]}-pools.json`);
 }
@@ -83,9 +99,9 @@ export async function getLiquidityGaugeFactory() {
 }
 
 export async function getPoolFactories(): Promise<PoolFactoryInfo[]> {
-  const [weightedAddress] = await Promise.all([
+  const [weightedAddress, stableAddress] = await Promise.all([
     getDeployedContractAddress("WeightedPoolFactory"),
-    // getDeployedContractAddress('WeightedPoolFactory'),
+    getDeployedContractAddress("StablePoolFactory"),
     // getDeployedContractAddress('WeightedPoolFactory')
   ]);
 
@@ -93,6 +109,10 @@ export async function getPoolFactories(): Promise<PoolFactoryInfo[]> {
     {
       type: "WeightedPoolFactory",
       address: weightedAddress,
+    },
+    {
+      type: "StablePoolFactory",
+      address: stableAddress,
     },
   ];
 }

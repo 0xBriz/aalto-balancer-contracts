@@ -5,6 +5,7 @@ import { logger } from "../../deployers/logger";
 import { _require } from "../../deployers/utils";
 import * as Weighted from "../../../artifacts/contracts/pool-weighted/WeightedPoolFactory.sol/WeightedPoolFactory.json";
 import * as LBP from "../../../artifacts/contracts/pool-weighted/smart/LiquidityBootstrappingPool.sol/LiquidityBootstrappingPool.json";
+import * as Stable from "../../../artifacts/contracts/pool-stable/StablePoolFactory.sol/StablePoolFactory.json";
 import {
   PoolTokenInfo,
   CreateWeightedPoolArgs,
@@ -13,12 +14,19 @@ import {
   PoolCreationBaseData,
   PoolFactoryInfo,
   FactoryType,
+  StablePoolCreationArgs,
 } from "../../types";
 import { initWeightedJoin } from "../../vault";
-import { getAllPoolConfigs, getWeightedPoolCreationArgs, savePoolsData } from "./pool-utils";
+import {
+  getAllPoolConfigs,
+  getStablePoolCreationArgs,
+  getWeightedPoolCreationArgs,
+  savePoolsData,
+  updatePoolConfig,
+} from "./pool-utils";
 import { Contract, ContractReceipt } from "ethers";
 import { getWeightedPoolInstance } from "../../contract-utils";
-import { awaitTransactionComplete, doTransaction } from "../../tx-utils";
+import { awaitTransactionComplete } from "../../tx-utils";
 import { getSigner } from "../../deployers/signers";
 import { getChainId } from "../../deployers/network";
 
@@ -37,6 +45,12 @@ export class PoolCreationService {
         return new Contract(
           this.factories.find((f) => f.type === "WeightedPoolFactory").address,
           Weighted.abi,
+          signer
+        );
+      case PoolType.Stable:
+        return new Contract(
+          this.factories.find((f) => f.type === "StablePoolFactory").address,
+          Stable.abi,
           signer
         );
       case PoolType.LiquidityBootstrappingPool:
@@ -264,6 +278,10 @@ export class PoolCreationService {
       _require(!!info.initialBalance?.length, "!token info init balance");
     });
 
+    if (pool.type === PoolType.Stable) {
+      _require(!!pool.amp, "!Amp not provided");
+    }
+
     _require(!!pool.deploymentArgs.swapFeePercentage, `!swapFeePercentage`);
     _require(!!pool.deploymentArgs.name, `!name`);
     _require(!!pool.deploymentArgs.symbol, `!symbol`);
@@ -275,7 +293,7 @@ export class PoolCreationService {
     logger.success(`validatePoolConfig: Validation all good`);
   }
 
-  async handlePoolByType(pool: PoolCreationConfig) {
+  private async handlePoolByType(pool: PoolCreationConfig) {
     switch (pool.type) {
       case PoolType.Weighted:
         return await this.createManagedWeightedPool(
@@ -286,8 +304,71 @@ export class PoolCreationService {
           pool.tokenInfo
         );
 
+      case PoolType.Stable:
+        return await this.createStablePool(pool);
       default:
         throw new Error(`Uknown PoolType: ${pool.type}`);
     }
+  }
+
+  private async doStablePoolCreation(args: StablePoolCreationArgs) {
+    const factory = await this.getFactory(PoolType.Stable);
+    return await awaitTransactionComplete(
+      await factory.create(
+        args.name,
+        args.symbol,
+        args.tokens,
+        args.amplificationParameter,
+        parseUnits(args.swapFeePercentage),
+        args.owner
+      ),
+      5
+    );
+  }
+
+  async createStablePool(pool: PoolCreationConfig) {
+    logger.info("PoolCreationConfig: starting pool creation");
+
+    const args = getStablePoolCreationArgs(pool);
+    const receipt = await this.doStablePoolCreation(args);
+    const poolInfo = await this.getPoolCreationData(receipt);
+
+    logger.success(`createStablePool: pool "${pool.deploymentArgs.name}" creation complete`);
+
+    const data: PoolCreationConfig = {
+      created: true,
+      initJoinComplete: false,
+      chainId: await getChainId(),
+      name: pool.deploymentArgs.name,
+      symbol: pool.deploymentArgs.symbol,
+      assetManager: this.assetManager,
+      type: PoolType.Stable,
+      txHash: poolInfo.txHash,
+      poolId: poolInfo.poolId,
+      poolAddress: poolInfo.poolAddress,
+      date: poolInfo.date,
+      initialBalances: args.initialBalances,
+      tokenInfo: pool.tokenInfo,
+      deploymentArgs: {
+        name: pool.deploymentArgs.name,
+        symbol: pool.deploymentArgs.symbol,
+        owner: args.owner,
+        tokens: args.tokens,
+        swapFeePercentage: args.swapFeePercentage,
+        assetManagers: args.tokens.map((t) => this.assetManager),
+        amp: pool.amp,
+      },
+      gauge: {
+        // These are set later
+        address: "",
+        startingWeight: "",
+        added: false,
+        txHash: "",
+      },
+    };
+
+    console.log(data);
+
+    return data;
   }
 }

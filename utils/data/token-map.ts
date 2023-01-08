@@ -10,7 +10,7 @@ export const TOKENS = {
     [56]: "0x0dDef12012eD645f12AEb1B845Cb5ad61C7423F5",
   },
   VRTK: {
-    [5]: "0xb269A278E427478712e2AF0eBa728021157A2114",
+    [5]: "0xaFbf7fB9Fa206089041218dF93c8B3A1Bb9F4497",
     [56]: "",
   },
   AMES: {

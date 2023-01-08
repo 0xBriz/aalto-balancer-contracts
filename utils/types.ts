@@ -73,12 +73,12 @@ export interface BasePoolArgs {
   swapFeePercentage: string;
   owner: string;
   assetManagers?: string[];
+  initialBalances?: string[];
   // tokenInfo: TokenWithManagerInfo[];
 }
 
 export interface CreateWeightedPoolArgs extends BasePoolArgs {
   weights: string[];
-  initialBalances?: string[];
 }
 
 export interface CreateBootstrapPoolArgs extends CreateWeightedPoolArgs {
@@ -112,8 +112,8 @@ export interface RewardPoolArgs {
 
 export interface PoolTokenInfo {
   address: string;
-  weight: string;
   initialBalance: string;
+  weight?: string;
   symbol?: string;
 }
 
@@ -146,7 +146,7 @@ export interface PoolCreationConfig {
   assetManager: string;
   tokenInfo: PoolTokenInfo[];
   weights?: string[];
-  amp?: string;
+  amp?: number;
   deploymentArgs: {
     name: string;
     symbol: string;
@@ -155,7 +155,7 @@ export interface PoolCreationConfig {
     swapFeePercentage: string;
     assetManagers: string[];
     weights?: string[];
-    amp?: string;
+    amp?: number;
     // other things
   };
   gauge: {

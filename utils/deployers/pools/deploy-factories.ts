@@ -7,7 +7,7 @@ import { saveDeplomentData } from "../save-deploy-data";
 const FACTORY_TYPES: DeployedContract[] = [
   // "ERC4626LinearPoolFactory",
   // "LiquidityBootstrappingPoolFactory",
-  // "StablePoolFactory",
+  "StablePoolFactory",
   "WeightedPoolFactory",
 ];
 

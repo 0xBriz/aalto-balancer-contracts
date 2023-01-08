@@ -89,7 +89,7 @@ async function main() {
     // const admin = await getBalTokenAdmin();
     // await activateTokenAdmin(admin, await getDeployedContractAddress("TimelockAuthorizer"));
 
-    // await deployPoolFactories(saving, await getDeployedContractAddress("Vault"));
+    //await deployPoolFactories(saving, await getDeployedContractAddress("Vault"));
     // const poolCreator = new PoolCreationService(ZERO_ADDRESS, await getPoolFactories());
     // poolCreator.createPools(saving);
 
