@@ -1,5 +1,5 @@
 import { getChainAdmin } from "../../../utils/data/addresses";
-import { doPoolJoin } from "../../../utils/pool/pool-utils";
+import { doPoolJoin } from "../../../utils/services/pools/pool-utils";
 import { JoinPoolRequest } from "../../../utils/types";
 
 /**

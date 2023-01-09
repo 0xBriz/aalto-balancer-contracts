@@ -170,6 +170,7 @@ export interface PoolCreationConfig {
 export interface PoolFactoryInfo {
   type: FactoryType | DeployedContract;
   address: string;
+  contract?: Contract;
 }
 
 export type FactoryType =

@@ -17,7 +17,7 @@ import { CHAIN_KEYS } from "./data/chains";
 import { getChainId } from "./deployers/network";
 import { join } from "path";
 
-type FactoryContracts =
+export type FactoryContracts =
   | "WeightedPoolFactory"
   | "LiquidityBootstrappingPoolFactory"
   | "ERC4626LinearPoolFactory"

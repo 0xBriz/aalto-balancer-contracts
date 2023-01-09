@@ -55,7 +55,7 @@ const config: HardhatUserConfig = {
       //   url: process.env.BSC_ARCHIVE_NODE || "",
       //   blockNumber: 23108471,
       // },
-      // loggingEnabled: true,
+      loggingEnabled: true,
       // mining: {
       //   auto: false,
       //   interval: 100,

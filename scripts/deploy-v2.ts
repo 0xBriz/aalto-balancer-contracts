@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { deployPoolFactories } from "../utils/deployers/deploy-factories";
+import { deployPoolFactories } from "../utils/deployers/pools/deploy-factories";
 import { setupVault } from "../utils/deployers/vault/deploy-vault";
 import { deployLiquidityMining } from "../utils/deployers/liquidity-mining/setup-liquidity-mining";
 import {
@@ -12,6 +12,7 @@ import {
 import {
   createGovernanceToken,
   createTokenAdmin,
+  setupGovernance,
 } from "../utils/deployers/liquidity-mining/governance/contract-deployment";
 import {
   getAllPoolConfigs,
@@ -26,7 +27,6 @@ import {
   doVeDeposit,
   setupVotingEscrow,
 } from "../utils/deployers/liquidity-mining/setup-voting-escrow";
-import { initWeightedJoin } from "../utils/pool/pool-utils";
 import { getChainAdmin } from "../utils/data/addresses";
 import { formatEther } from "ethers/lib/utils";
 import { saveDeploymentData } from "../utils/deployers/save-deploy-data";
@@ -43,6 +43,7 @@ import {
   setupBoostProxy,
 } from "../utils/deployers/liquidity-mining/gauges/setup-gauges";
 import { setGaugeRewardDistributor } from "../utils/deployers/liquidity-mining/gauges/gauge-utils";
+import { doPoolsCreation } from "../utils/deployers/pools/pool-creation";
 
 // For testing/dev env
 export async function resetAllPoolConfigs() {
@@ -60,7 +61,17 @@ async function main() {
   try {
     await ethers.provider.ready;
 
-    const saving = true;
+    const vaultData = await setupVault();
+    const govData = await setupGovernance({
+      timelockAuth: vaultData.timelockAuth.address,
+      vault: vaultData.vault.address,
+      adminAccount: await getChainAdmin(),
+    });
+
+    const poolsData = await doPoolsCreation(vaultData.vault.address, [
+      "ERC4626LinearPoolFactory",
+      "LiquidityBootstrappingPoolFactory",
+    ]);
 
     // await resetAllPoolConfigs();
 
@@ -83,25 +94,11 @@ async function main() {
     // const admin = await getBalTokenAdmin();
     // await activateTokenAdmin(admin, await getDeployedContractAddress("TimelockAuthorizer"));
 
-    //await deployPoolFactories(saving, await getDeployedContractAddress("Vault"));
+    // await deployPoolFactories(saving, await getDeployedContractAddress("Vault"));
     // const poolCreator = new PoolCreationService(ZERO_ADDRESS, await getPoolFactories());
-    // poolCreator.createPools(saving);
+    // await poolCreator.createPools(saving);
 
-    // const pools = await getAllPoolConfigs();
-    // for (const pool of pools) {
-    //   if (pool.initJoinComplete) {
-    //     continue;
-    //   }
-    //   await initWeightedJoin(
-    //     pool.poolId,
-    //     pool.deploymentArgs.tokens,
-    //     pool.initialBalances,
-    //     await getChainAdmin()
-    //   );
-
-    //   pool.initJoinComplete = true;
-    //   await updatePoolConfig(pool);
-    // }
+    // await doPoolInitJoins();
 
     // await setupVotingEscrow();
     // await doVeDeposit();
@@ -115,13 +112,6 @@ async function main() {
     // await deployLiquidityGaugeFactorySetup();
     // await addMainPoolGaugeSetup();
     // await createPoolGaugesAndAddToController();
-    //
-
-    await setGaugeRewardDistributor(
-      "0xcfD9570A037AAD79B2d1B64652eC9a20495dE42b",
-      "0x7c85523739053769278a1E5b1F39389b0e5CF539",
-      await getChainAdmin()
-    );
   } catch (error) {
     console.error(error);
     process.exitCode = 1;

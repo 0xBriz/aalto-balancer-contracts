@@ -169,7 +169,7 @@ export class PoolCreationService {
     }
   }
 
-  async createPools(doSave: boolean): Promise<{
+  async createPools(): Promise<{
     poolInfo: PoolCreationConfig[];
   }> {
     try {
@@ -208,15 +208,13 @@ export class PoolCreationService {
           poolInfo.push(createdPool);
         } catch (error) {
           logger.error(`Pool creation failed for pool "${pool.name}"`);
-          console.error(error);
+          throw error;
         }
       }
 
       logger.success("createPools: Pool creation complete");
 
-      if (doSave === true) {
-        await savePoolsData(poolInfo);
-      }
+      await savePoolsData(poolInfo);
 
       return {
         poolInfo,
