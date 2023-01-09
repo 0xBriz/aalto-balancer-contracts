@@ -56,8 +56,8 @@ export async function getVault() {
   return getCacheOrNew(await getDeployedContractAddress("Vault"), Vault.abi);
 }
 
-export async function getTimelockAuth(address: string) {
-  return getCacheOrNew(address, Timelock.abi);
+export async function getTimelockAuth() {
+  return getCacheOrNew(await getDeployedContractAddress("TimelockAuthorizer"), Timelock.abi);
 }
 
 export async function getVaultAuthorizer() {

@@ -9,19 +9,25 @@ import { saveDeplomentData } from "../../save-deploy-data";
 import { getMainPoolConfig, updatePoolConfig } from "../../../services/pools/pool-utils";
 import { getSigner } from "../../signers";
 import { Contract } from "ethers";
+import {
+  getBalTokenAdmin,
+  getDeployedContractAddress,
+  getGovernanceToken,
+} from "../../../contract-utils";
 
-export async function setupGovernance(doSave: boolean, vault: string, timelockAuth: string) {
+export async function setupGovernance(doSave: boolean) {
   try {
     logger.info("setupGovernance: initializing governance items");
 
     const { govTokenData } = await createGovernanceToken();
 
-    const { tokenAdminData } = await createTokenAdmin(vault, govTokenData.contract.address);
-
-    await activateTokenAdmin(tokenAdminData.contract, timelockAuth);
+    const { tokenAdminData } = await createTokenAdmin();
 
     // BalAdmin will take over all roles for the token
-    await giveTokenAdminControl(govTokenData.contract, tokenAdminData.contract.address);
+    // Must happen before calling `active` on the token admin or it will always revert
+    await giveTokenAdminControl();
+
+    await activateTokenAdmin();
 
     if (doSave === true) {
       await saveDeplomentData(govTokenData.deployment);
@@ -48,6 +54,15 @@ export async function createGovernanceToken() {
     symbol: "VRTK",
   });
 
+  await saveDeplomentData(govTokenData.deployment);
+
+  logger.success("setupGovernance: governance token created");
+
+  return { govTokenData };
+}
+
+export async function updateMainPoolConfigForGovToken() {
+  const govTokenAddress = await getDeployedContractAddress("GovernanceToken");
   // Set the new token address for use in pool creation and such later
   const vePool = await getMainPoolConfig();
   let hadSymbol = false;
@@ -56,7 +71,7 @@ export async function createGovernanceToken() {
       hadSymbol = true;
       return {
         ...ti,
-        address: govTokenData.contract.address,
+        address: govTokenAddress,
       };
     }
 
@@ -68,46 +83,51 @@ export async function createGovernanceToken() {
   }
 
   await updatePoolConfig(vePool);
-
-  logger.success("setupGovernance: governance token created");
-
-  return { govTokenData };
 }
 
-export async function createTokenAdmin(vault: string, govToken: string) {
+export async function createTokenAdmin() {
   const tokenAdminData = await deployContractUtil("BalancerTokenAdmin", {
-    vault,
-    balancerToken: govToken,
+    vault: await getDeployedContractAddress("Vault"),
+    balancerToken: await getDeployedContractAddress("GovernanceToken"),
     initialMintAllowance: parseEther("1250000"),
   });
+
+  await saveDeplomentData(tokenAdminData.deployment);
 
   return {
     tokenAdminData,
   };
 }
 
-export async function activateTokenAdmin(tokenAdmin: Contract, timelockAuth: string) {
+// Give token admin default admin role with `giveTokenAdminControl` before trying to activate
+export async function activateTokenAdmin() {
+  const tokenAdmin = await getBalTokenAdmin();
   const address = (await getSigner()).address;
-  // const authService = new AuthService(timelockAuth);
-  // await authService.giveVaultAuthorization(
-  //   tokenAdmin,
-  //   "activate",
-  //   (
-  //     await getSigner()
-  //   ).address,
-  //   false
-  // );
+  const authService = new AuthService();
+  await authService.giveVaultAuthorization(
+    tokenAdmin,
+    "activate",
+    (
+      await getSigner()
+    ).address,
+    false
+  );
   // Has to happen before activate
-  //  await giveTokenAdminControl()
+  await giveTokenAdminControl();
   logger.info("setupGovernance: activating token admin");
   await awaitTransactionComplete(await tokenAdmin.activate(address), 10);
   logger.success("setupGovernance: token admin activated");
 }
 
-export async function giveTokenAdminControl(govToken: Contract, tokenAdminAddress: string) {
+// Must happen before calling `active` on the token admin or it will always revert
+export async function giveTokenAdminControl() {
   logger.info("setupGovernance: giving token admin default admin role");
+  const govToken = await getGovernanceToken();
   await awaitTransactionComplete(
-    await govToken.grantRole(await govToken.DEFAULT_ADMIN_ROLE(), tokenAdminAddress)
+    await govToken.grantRole(
+      await govToken.DEFAULT_ADMIN_ROLE(),
+      await getDeployedContractAddress("BalancerTokenAdmin")
+    )
   );
   logger.success("setupGovernance: role granted");
 }

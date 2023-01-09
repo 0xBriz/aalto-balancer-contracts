@@ -58,7 +58,7 @@ const config: HardhatUserConfig = {
       // loggingEnabled: true,
       mining: {
         auto: false,
-        interval: 1000,
+        interval: 100,
       },
     },
     bsc: {
@@ -76,6 +76,9 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,
+  },
+  mocha: {
+    timeout: 60000,
   },
 };
 

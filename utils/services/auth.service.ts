@@ -12,7 +12,7 @@ import { getSigner } from "../deployers/signers";
 import { awaitTransactionComplete } from "../tx-utils";
 
 export class AuthService {
-  constructor(public readonly timelockAuthAddress: string) {}
+  constructor() {}
 
   async giveVaultAuthorization(
     contractGrantingOn: Contract,
@@ -20,7 +20,7 @@ export class AuthService {
     permissionFor: string,
     doCheckAfter = true
   ) {
-    const authorizer = await getTimelockAuth(this.timelockAuthAddress);
+    const authorizer = await getTimelockAuth();
     const contractAddressBeingGranted = contractGrantingOn.address;
 
     logger.info(
@@ -28,12 +28,12 @@ export class AuthService {
     );
 
     const selector = contractGrantingOn.interface.getSighash(functionName);
-    // Will throw if busted contract reference is given
+    // Will throw if busted contract reference is given (Not a SingletonAuth instance)
     const actionId = await contractGrantingOn.getActionId(selector);
 
     awaitTransactionComplete(
       await authorizer.grantPermissions([actionId], permissionFor, [contractAddressBeingGranted]),
-      10
+      5
     );
 
     if (doCheckAfter) {
@@ -73,7 +73,7 @@ export class AuthService {
     const actionId: string = await contractPerformingOn.getActionId(funcHash);
     logger.success("action id: " + actionId);
 
-    const authorizer = await getTimelockAuth(this.timelockAuthAddress);
+    const authorizer = await getTimelockAuth();
     // Skip a tx if already approved
     const canDo = await authorizer.hasPermission(
       actionId,
@@ -151,7 +151,7 @@ export async function grantPerformActionIfNeeded(
   actionId: string,
   forWho: string
 ) {
-  const authorizer = await getTimelockAuth(await getDeployedContractAddress("TimelockAuthorizer"));
+  const authorizer = await getTimelockAuth();
   // Skip a tx if already approved
   const canDo = await authorizer.hasPermission(
     actionId,
@@ -171,7 +171,7 @@ export async function grantPerformActionIfNeeded(
 }
 
 export async function grantAuthEntryPermission(contractPerformingOn: string, actionId: string) {
-  const authorizer = await getTimelockAuth(await getDeployedContractAddress("TimelockAuthorizer"));
+  const authorizer = await getTimelockAuth();
   return await awaitTransactionComplete(
     await authorizer.grantPermissions(
       [actionId],

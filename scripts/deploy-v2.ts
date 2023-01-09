@@ -68,12 +68,8 @@ async function main() {
     // await resetAllPoolConfigs();
 
     // const { vaultData, authorizerData } = await deployVault(saving);
-    // const {} = await setupGovernance(
-    //   saving,
-    //   await getDeployedContractAddress("Vault"),
-    //   await getDeployedContractAddress("TimelockAuthorizer")
-    // );
     // const { govTokenData } = await createGovernanceToken();
+    // await updateMainPoolConfigForGovToken()
     // await saveDeplomentData(govTokenData.deployment);
     // const { tokenAdminData } = await createTokenAdmin(
     //   await getDeployedContractAddress("Vault"),
