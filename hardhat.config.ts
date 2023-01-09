@@ -56,10 +56,10 @@ const config: HardhatUserConfig = {
       //   blockNumber: 23108471,
       // },
       // loggingEnabled: true,
-      mining: {
-        auto: false,
-        interval: 100,
-      },
+      // mining: {
+      //   auto: false,
+      //   interval: 100,
+      // },
     },
     bsc: {
       url: process.env.BSC_MAINNET_URL || "",

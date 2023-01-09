@@ -1,6 +1,5 @@
 import { ethers } from "hardhat";
 import { DAY, ONE_MONTH_SECONDS } from "../../../scripts/utils/time";
-import { TOKENS } from "../../data/token-map";
 import { logger } from "../logger";
 import { saveDeploymentData } from "../save-deploy-data";
 import { deployContractUtil } from "../deploy-util";
@@ -20,10 +19,7 @@ export async function setupVault() {
 
     // Will deploy a dummy authorizer to start
     const { vault, basicAuthorizer } = await deployVault(await getChainWETH());
-    const authAdapterData = await deployAuthAdapter(vault.address);
-    const { authEntryPoint } = await deployAuthEntryPointAdapter(
-      authAdapterData.authAdapter.address
-    );
+    const { authEntryPoint, authAdapter } = await deployAdaptersSetup(vault.address);
     const { timelockAuth } = await deployTimelockAuth(admin.address, authEntryPoint.address);
 
     // Then, with the entrypoint correctly deployed, we create the actual authorizer to be used and set it in the vault.
@@ -32,7 +28,7 @@ export async function setupVault() {
     return {
       vault,
       timelockAuth,
-      authAdapterData,
+      authAdapter,
       authEntryPoint,
       basicAuthorizer,
     };
@@ -60,33 +56,29 @@ export async function setProperAuthorizerForVault(timelockAuth: string) {
     await basicAuthorizer.grantRolesToMany([setAuthorizerActionId], [admin.address])
   );
 
-  await vault.connect(admin).setAuthorizer(timelockAuth);
+  await awaitTransactionComplete(await vault.connect(admin).setAuthorizer(timelockAuth));
 }
 
 export async function deployVault(weth: string) {
-  logger.info("Deploying MockBasicAuthorizer..");
-
-  const authDeployment = await deployContractUtil("MockBasicAuthorizer", {});
+  const basicAuthDeployment = await deployContractUtil("MockBasicAuthorizer", {});
 
   // Set to max values
   const pauseWindowDuration = ONE_MONTH_SECONDS * 6;
   const bufferPeriodDuration = DAY * 90;
 
   const vaultDeployment = await deployContractUtil("Vault", {
-    authorizer: authDeployment.contract.address, //  use original value for verification
+    authorizer: basicAuthDeployment.contract.address, //  use original value for verification
     WETH: weth,
     pauseWindowDuration,
     bufferPeriodDuration,
   });
 
-  await Promise.all([
-    saveDeploymentData(vaultDeployment.deployment),
-    saveDeploymentData(authDeployment.deployment),
-  ]);
+  await saveDeploymentData(vaultDeployment.deployment);
+  await saveDeploymentData(basicAuthDeployment.deployment);
 
   return {
     vault: vaultDeployment.contract,
-    basicAuthorizer: authDeployment.contract,
+    basicAuthorizer: basicAuthDeployment.contract,
   };
 }
 
@@ -103,6 +95,13 @@ export async function deployTimelockAuth(admin: string, entryAdapter: string) {
   return {
     timelockAuth: authDeployment.contract,
   };
+}
+
+export async function deployAdaptersSetup(vault: string) {
+  const { authAdapter } = await deployAuthAdapter(vault);
+  const { authEntryPoint } = await deployAuthEntryPointAdapter(authAdapter.address);
+
+  return { authAdapter, authEntryPoint };
 }
 
 export async function deployAuthEntryPointAdapter(authAdapter: string) {
