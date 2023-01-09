@@ -6,29 +6,34 @@ import { getDeployedContractAddress } from "../../../contract-utils";
 import { activateTokenAdmin, giveTokenAdminControl } from "./authorization";
 import { BigNumber } from "ethers";
 
-export async function setupGovernance() {
+export async function setupGovernance(addresses: {
+  timelockAuth: string;
+  adminAccount: string;
+  vault: string;
+}) {
   try {
     logger.info("setupGovernance: initializing governance items");
 
-    // const { govTokenData } = await createGovernanceToken();
+    const govToken = await createGovernanceToken();
 
-    // const { tokenAdminData } = await createTokenAdmin();
+    const tokenAdmin = await createTokenAdmin(
+      addresses.vault,
+      govToken.address,
+      parseEther("1250000")
+    );
 
-    // // BalAdmin will take over all roles for the token
-    // // Must happen before calling `active` on the token admin or it will always revert
-    // await giveTokenAdminControl();
+    // BalAdmin will take over all roles for the token
+    // Must happen before calling `active` on the token admin or it will always revert
+    await giveTokenAdminControl(govToken.address, tokenAdmin.address);
 
-    // await activateTokenAdmin();
-
-    // await saveDeploymentData(govTokenData.deployment);
-    // await saveDeploymentData(tokenAdminData.deployment);
+    await activateTokenAdmin(tokenAdmin.address, addresses.timelockAuth, addresses.adminAccount);
 
     logger.success("setupGovernance: governance setup complete");
 
-    // return {
-    //   govTokenData,
-    //   tokenAdminData,
-    // };
+    return {
+      govToken,
+      tokenAdmin,
+    };
   } catch (error) {
     throw error;
   }
@@ -49,21 +54,7 @@ export async function createGovernanceToken() {
   return govTokenData.contract;
 }
 
-export async function createTokenAdmin() {
-  const tokenAdminData = await deployContractUtil("BalancerTokenAdmin", {
-    vault: await getDeployedContractAddress("Vault"),
-    balancerToken: await getDeployedContractAddress("GovernanceToken"),
-    initialMintAllowance: parseEther("1250000"),
-  });
-
-  await saveDeploymentData(tokenAdminData.deployment);
-
-  return {
-    tokenAdminData,
-  };
-}
-
-export async function createTokenAdminWithParams(
+export async function createTokenAdmin(
   vault: string,
   balancerToken: string,
   initialMintAllowance: BigNumber

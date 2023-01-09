@@ -12,7 +12,6 @@ import {
 import {
   createGovernanceToken,
   createTokenAdmin,
-  setupGovernance,
 } from "../utils/deployers/liquidity-mining/governance/contract-deployment";
 import {
   getAllPoolConfigs,

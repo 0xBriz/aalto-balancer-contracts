@@ -14,19 +14,7 @@ import { logger } from "../../logger";
 import { getSigner } from "../../signers";
 
 // Must happen before calling `activate` on the token admin or it will always revert
-export async function giveTokenAdminControl() {
-  logger.info("setupGovernance: giving token admin default admin role");
-  const govToken = await getGovernanceToken();
-  await awaitTransactionComplete(
-    await govToken.grantRole(
-      await govToken.DEFAULT_ADMIN_ROLE(),
-      await getDeployedContractAddress("BalancerTokenAdmin")
-    )
-  );
-  logger.success("setupGovernance: role granted");
-}
-
-export async function giveTokenAdminControlWithParams(govTokenAddress: string, tokenAdmin: string) {
+export async function giveTokenAdminControl(govTokenAddress: string, tokenAdmin: string) {
   logger.info("setupGovernance: giving token admin default admin role");
   const govToken = await getGovernanceTokenByAddress(govTokenAddress);
   await awaitTransactionComplete(
@@ -44,18 +32,6 @@ export async function activateTokenAdmin(
   logger.info("setupGovernance: activating token admin");
 
   const tokenAdmin = await getBalTokenAdminByAddress(tokenAdminAddress);
-  // const address = (await getSigner()).address;
-  // const authService = new AuthService();
-  // await authService.giveVaultAuthorization(
-  //   tokenAdmin,
-  //   "activate",
-  //   (
-  //     await getSigner()
-  //   ).address,
-  //   false
-  // );
-  // await awaitTransactionComplete(await tokenAdmin.activate(address));
-
   const timelockAuth = await getTimelockAuthByAddress(authorizer);
   // grant admin permission to activate the token admin
   const actionId = await tokenAdmin.getActionId(tokenAdmin.interface.getSighash("activate"));

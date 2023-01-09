@@ -1,6 +1,5 @@
 import { parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import { setupGovernance } from "../utils/deployers/liquidity-mining/governance/contract-deployment";
 import { deployTestERC20 } from "../utils/deployers/deploy-test-erc20";
 import { ONE_DAY_SECONDS, ONE_WEEK_SECONDS } from "./utils/time";
 import {
