@@ -180,7 +180,7 @@ export type FactoryType =
   | "ComposableStablePoolFactory";
 
 export interface DeploymentData {
-  name: string;
+  name: DeployedContract;
   contract: Contract;
   args: {};
 }

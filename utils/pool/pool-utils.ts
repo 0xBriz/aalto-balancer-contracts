@@ -6,7 +6,8 @@ import { awaitTransactionComplete } from "../tx-utils";
 import { JoinPoolRequest } from "../types";
 
 /**
- * Utility to perform the INIT_JOIN operation on a weight pool
+ * Utility to perform the INIT_JOIN operation on a weight pool.
+ * Will approve the vault for each token as needed.
  * @param poolId
  * @param tokens
  * @param initialBalances
@@ -45,12 +46,9 @@ export async function initWeightedJoin(
     // Vault needs approval to pull the tokens in
     await approveTokensIfNeeded(tokens, recipient, vault.address);
 
-    // Joins are done on the Vault instead of pools
-    const tx = await vault.joinPool(poolId, recipient, recipient, joinPoolRequest);
-
-    const confirmations = 10;
-    logger.info(`Awaiting pool join tx with (${confirmations}) confirmations..`);
-    const rx = await tx.wait(5);
+    const rx = await awaitTransactionComplete(
+      await vault.joinPool(poolId, recipient, recipient, joinPoolRequest)
+    );
 
     logger.success("INIT_JOIN complete");
 

@@ -65,7 +65,7 @@ async function main() {
 
     // await resetAllPoolConfigs();
 
-    // const { vaultData, authorizerData } = await deployVault(saving);
+    // const { vaultData, authorizerData } = await setupVault();
     // const { govTokenData } = await createGovernanceToken();
     // await updateMainPoolConfigForGovToken()
     // await saveDeplomentData(govTokenData.deployment);

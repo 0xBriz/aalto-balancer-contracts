@@ -1,7 +1,6 @@
 import { parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { deployTestERC20 } from "../utils/deployers/deploy-test-erc20";
-import { deployAuthAdapter } from "../utils/deployers/liquidity-mining/deploy-auth-adapter";
 import { ONE_WEEK_SECONDS } from "./utils/time";
 
 // MAINNET

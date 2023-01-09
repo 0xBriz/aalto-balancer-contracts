@@ -13,7 +13,6 @@ import * as LG from "../artifacts/contracts/liquidity-mining/gauges/LiquidityGau
 import { Contract } from "ethers";
 import { ERC20_ABI } from "./abis/ERC20ABI";
 import { getSigner } from "./deployers/signers";
-import { TimelockAuthorizer } from "../typechain";
 import { CHAIN_KEYS } from "./data/chains";
 import { getChainId } from "./deployers/network";
 import { join } from "path";
@@ -24,8 +23,15 @@ type FactoryContracts =
   | "ERC4626LinearPoolFactory"
   | "StablePoolFactory";
 
-type VaulContracts = "Vault" | "TimelockAuthorizer" | "AuthorizerAdaptorEntrypoint";
+type VaulContracts =
+  | "Vault"
+  | "TimelockAuthorizer"
+  | "AuthorizerAdaptor"
+  | "AuthorizerAdaptorEntrypoint"
+  | "MockBasicAuthorizer";
+
 type GovernanceContracts = "GovernanceToken" | "BalancerTokenAdmin" | "BalancerMinter";
+
 type GaugeContracts =
   | "VotingEscrow"
   | "GaugeController"
@@ -37,6 +43,7 @@ type GaugeContracts =
   | "BALTokenHolder"
   | "FeeDistributor"
   | "GaugeControllerQuerier";
+
 export type DeployedContract =
   | FactoryContracts
   | VaulContracts

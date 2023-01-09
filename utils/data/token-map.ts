@@ -1,8 +1,8 @@
 export const TOKENS = {
   NATIVE_TOKEN: {
-    // same as WBNB for now, but in the event we do other things
     [5]: "0xe4E96Cf369D4d604Bedc4d7962F94D53E4B5e3C6",
     [56]: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+    // Not test things that swaps with native/weth so just using a dummy copy
     [31337]: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
   },
   AEQ: {
