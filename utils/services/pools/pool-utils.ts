@@ -1,7 +1,6 @@
 import * as fs from "fs-extra";
 import { defaultAbiCoder, getAddress, parseUnits } from "ethers/lib/utils";
 import {
-  BasePoolArgs,
   CreateWeightedPoolArgs,
   JoinPoolRequest,
   PoolCreationConfig,
@@ -221,4 +220,30 @@ export async function doPoolInitJoins() {
       logger.error(`Unsupported init join for pool type: ${pool.type}`);
     }
   }
+}
+
+/**
+ *  Set the new token address for use in pool creation and such later
+ * @param govTokenAddress
+ */
+export async function updateMainPoolConfigForGovToken(govTokenAddress: string) {
+  const vePool = await getMainPoolConfig();
+  let hadSymbol = false;
+  vePool.tokenInfo = vePool.tokenInfo.map((ti) => {
+    if (ti.symbol === "VRTK") {
+      hadSymbol = true;
+      return {
+        ...ti,
+        address: govTokenAddress,
+      };
+    }
+
+    return ti;
+  });
+
+  if (!hadSymbol) {
+    throw new Error("Missing VRTK symbol for ve pool");
+  }
+
+  await updatePoolConfig(vePool);
 }

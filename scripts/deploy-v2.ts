@@ -44,6 +44,8 @@ import {
 } from "../utils/deployers/liquidity-mining/gauges/setup-gauges";
 import { setGaugeRewardDistributor } from "../utils/deployers/liquidity-mining/gauges/gauge-utils";
 import { doPoolsCreation } from "../utils/deployers/pools/pool-creation";
+import { Logger } from "../utils/deployers/logger";
+import { PoolFactoryInfo } from "../utils/types";
 
 // For testing/dev env
 export async function resetAllPoolConfigs() {
@@ -61,6 +63,8 @@ async function main() {
   try {
     await ethers.provider.ready;
 
+    Logger.setDefaults(false, false);
+
     const vaultData = await setupVault();
     const govData = await setupGovernance({
       timelockAuth: vaultData.timelockAuth.address,
@@ -68,10 +72,23 @@ async function main() {
       adminAccount: await getChainAdmin(),
     });
 
-    const poolsData = await doPoolsCreation(vaultData.vault.address, [
+    // const vault = "0x00c0402bde9e2c2962ca7586a5dabb38fad515a8";
+
+    const factories = await deployPoolFactories(vaultData.vault.address, [
       "ERC4626LinearPoolFactory",
       "LiquidityBootstrappingPoolFactory",
+      "StablePoolFactory",
     ]);
+
+    const poolCreator = new PoolCreationService(ZERO_ADDRESS, factories);
+    await poolCreator.createPools();
+
+    // const poolsData = await doPoolsCreation(vault, [
+    //   "ERC4626LinearPoolFactory",
+    //   "LiquidityBootstrappingPoolFactory",
+    // ]);
+
+    // await doPoolInitJoins();
 
     // await resetAllPoolConfigs();
 

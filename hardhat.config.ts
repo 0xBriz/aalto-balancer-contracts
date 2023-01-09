@@ -24,6 +24,15 @@ const config: HardhatUserConfig = {
         },
       },
       {
+        version: "0.8.4",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+      },
+      {
         version: "0.6.8",
         settings: {
           optimizer: {
@@ -43,6 +52,15 @@ const config: HardhatUserConfig = {
           },
         },
       },
+      "contracts/pool-weighted/smart/LiquidityBootstrappingPoolFactory.sol": {
+        version: "0.7.1",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+      },
     },
   },
   vyper: {
@@ -53,9 +71,11 @@ const config: HardhatUserConfig = {
       allowUnlimitedContractSize: true,
       // forking: {
       //   url: process.env.BSC_ARCHIVE_NODE || "",
-      //   blockNumber: 23108471,
+      //   blockNumber: 24643800,
       // },
       loggingEnabled: true,
+      // gas: 2100000,
+      // gasPrice: 8000000000,
       // mining: {
       //   auto: false,
       //   interval: 100,

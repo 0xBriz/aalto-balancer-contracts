@@ -5,6 +5,7 @@ import { saveDeploymentData } from "../../save-deploy-data";
 import { getDeployedContractAddress } from "../../../contract-utils";
 import { activateTokenAdmin, giveTokenAdminControl } from "./authorization";
 import { BigNumber } from "ethers";
+import { updateMainPoolConfigForGovToken } from "../../../services/pools/pool-utils";
 
 export async function setupGovernance(addresses: {
   timelockAuth: string;
@@ -23,7 +24,7 @@ export async function setupGovernance(addresses: {
     );
 
     // BalAdmin will take over all roles for the token
-    // Must happen before calling `active` on the token admin or it will always revert
+    // Must happen before calling `activate` on the token admin or it will always revert
     await giveTokenAdminControl(govToken.address, tokenAdmin.address);
 
     await activateTokenAdmin(tokenAdmin.address, addresses.timelockAuth, addresses.adminAccount);
@@ -48,6 +49,7 @@ export async function createGovernanceToken() {
   });
 
   await saveDeploymentData(govTokenData.deployment);
+  await updateMainPoolConfigForGovToken(govTokenData.contract.address);
 
   logger.success("setupGovernance: governance token created");
 
