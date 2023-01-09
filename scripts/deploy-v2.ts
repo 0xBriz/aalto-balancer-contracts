@@ -104,7 +104,7 @@ async function main() {
     //   await updatePoolConfig(pool);
     // }
 
-    // await setupVotingEscrow(saving);
+    // await setupVotingEscrow();
     // await doVeDeposit();
     // await addFeeDistributor();
     // await addGaugeController();

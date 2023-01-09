@@ -4,35 +4,33 @@ import { logger } from "../../logger";
 import { saveDeploymentData } from "../../save-deploy-data";
 import { getDeployedContractAddress } from "../../../contract-utils";
 import { activateTokenAdmin, giveTokenAdminControl } from "./authorization";
+import { BigNumber } from "ethers";
 
-export async function setupGovernance(doSave: boolean) {
+export async function setupGovernance() {
   try {
     logger.info("setupGovernance: initializing governance items");
 
-    const { govTokenData } = await createGovernanceToken();
+    // const { govTokenData } = await createGovernanceToken();
 
-    const { tokenAdminData } = await createTokenAdmin();
+    // const { tokenAdminData } = await createTokenAdmin();
 
-    // BalAdmin will take over all roles for the token
-    // Must happen before calling `active` on the token admin or it will always revert
-    await giveTokenAdminControl();
+    // // BalAdmin will take over all roles for the token
+    // // Must happen before calling `active` on the token admin or it will always revert
+    // await giveTokenAdminControl();
 
-    await activateTokenAdmin();
+    // await activateTokenAdmin();
 
-    if (doSave === true) {
-      await saveDeploymentData(govTokenData.deployment);
-      await saveDeploymentData(tokenAdminData.deployment);
-    }
+    // await saveDeploymentData(govTokenData.deployment);
+    // await saveDeploymentData(tokenAdminData.deployment);
 
     logger.success("setupGovernance: governance setup complete");
 
-    return {
-      govTokenData,
-      tokenAdminData,
-    };
+    // return {
+    //   govTokenData,
+    //   tokenAdminData,
+    // };
   } catch (error) {
-    console.log(error);
-    process.exit(1);
+    throw error;
   }
 }
 
@@ -48,7 +46,7 @@ export async function createGovernanceToken() {
 
   logger.success("setupGovernance: governance token created");
 
-  return { govTokenData };
+  return govTokenData.contract;
 }
 
 export async function createTokenAdmin() {
@@ -63,4 +61,20 @@ export async function createTokenAdmin() {
   return {
     tokenAdminData,
   };
+}
+
+export async function createTokenAdminWithParams(
+  vault: string,
+  balancerToken: string,
+  initialMintAllowance: BigNumber
+) {
+  const tokenAdminData = await deployContractUtil("BalancerTokenAdmin", {
+    vault,
+    balancerToken,
+    initialMintAllowance,
+  });
+
+  await saveDeploymentData(tokenAdminData.deployment);
+
+  return tokenAdminData.contract;
 }

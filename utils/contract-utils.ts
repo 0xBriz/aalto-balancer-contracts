@@ -67,6 +67,10 @@ export async function getTimelockAuth() {
   return getCacheOrNew(await getDeployedContractAddress("TimelockAuthorizer"), Timelock.abi);
 }
 
+export async function getTimelockAuthByAddress(address: string) {
+  return getCacheOrNew(address, Timelock.abi);
+}
+
 export async function getVaultAuthorizer() {
   return getCacheOrNew(await getDeployedContractAddress("TimelockAuthorizer"), [
     "function getPermissionId(bytes32 actionId,address account,address where) public pure returns (bytes32)",
@@ -79,8 +83,16 @@ export async function getBalTokenAdmin() {
   return getCacheOrNew(await getDeployedContractAddress("BalancerTokenAdmin"), TokenAdmin.abi);
 }
 
+export async function getBalTokenAdminByAddress(address: string) {
+  return getCacheOrNew(address, TokenAdmin.abi);
+}
+
 export async function getGovernanceToken() {
   return getCacheOrNew(await getDeployedContractAddress("GovernanceToken"), GovenToken.abi);
+}
+
+export async function getGovernanceTokenByAddress(address: string) {
+  return getCacheOrNew(address, GovenToken.abi);
 }
 
 export async function getVotingEscrow() {

@@ -74,7 +74,7 @@ contract BalancerTokenAdmin is IBalancerTokenAdmin, SingletonAuthentication, Ree
      * @notice Initiate BAL token inflation schedule
      * @dev Reverts if contract does not have sole minting powers over BAL (and no other minters can be added).
      */
-    function activate(address initialMintReceiver) external override nonReentrant {
+    function activate(address initialMintReceiver) external override authenticate nonReentrant {
         require(_startEpochTime == type(uint256).max, "Already activated");
         require(initialMintReceiver != address(0), "initialMintReceiver not set");
 
