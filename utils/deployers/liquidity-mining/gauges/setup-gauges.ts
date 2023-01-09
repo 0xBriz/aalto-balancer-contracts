@@ -1,6 +1,6 @@
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
-import { ZERO_ADDRESS } from "../../big-numbers/ethers-big-number";
+import { ZERO_ADDRESS } from "../../../big-numbers/ethers-big-number";
 import {
   getAutEntryAdapter,
   getBalTokenAdmin,
@@ -8,22 +8,22 @@ import {
   getGaugeController,
   getLiquidityGauge,
   getTimelockAuth,
-} from "../../contract-utils";
-import { getChainAdmin } from "../../data/addresses";
-import { AuthService } from "../../services/auth.service";
+} from "../../../contract-utils";
+import { getChainAdmin } from "../../../data/addresses";
+import { AuthService } from "../../../services/auth.service";
 import {
   getCreatedPoolConfigs,
   getLiquidityGaugeFactory,
   getMainPoolConfig,
   savePoolsData,
   updatePoolConfig,
-} from "../../services/pools/pool-utils";
-import { awaitTransactionComplete, doTransaction } from "../../tx-utils";
-import { GaugeType, PoolCreationConfig } from "../../types";
-import { deployContractUtil } from "../deploy-util";
-import { logger } from "../logger";
-import { saveDeplomentData } from "../save-deploy-data";
-import { getSigner } from "../signers";
+} from "../../../services/pools/pool-utils";
+import { awaitTransactionComplete, doTransaction } from "../../../tx-utils";
+import { GaugeType, PoolCreationConfig } from "../../../types";
+import { deployContractUtil } from "../../deploy-util";
+import { logger } from "../../logger";
+import { saveDeploymentData } from "../../save-deploy-data";
+import { getSigner } from "../../signers";
 
 export async function addGaugeController() {
   const gaugeController = await deployContractUtil("GaugeController", {
@@ -31,7 +31,7 @@ export async function addGaugeController() {
     authEntryAdapterAddress: await getDeployedContractAddress("AuthorizerAdaptorEntrypoint"),
     stakingAdmin: await getChainAdmin(),
   });
-  await saveDeplomentData(gaugeController.deployment);
+  await saveDeploymentData(gaugeController.deployment);
 }
 
 export async function addGaugeTypes() {
@@ -49,16 +49,14 @@ export async function deployMinter() {
     tokenAdmin: await getDeployedContractAddress("BalancerTokenAdmin"),
     gaugeController: await getDeployedContractAddress("GaugeController"),
   });
-  await saveDeplomentData(balMinter.deployment);
+  await saveDeploymentData(balMinter.deployment);
 }
 
 export async function giveMinterPermissions() {
   logger.info("setupGaugeSystem: giving BalMinter mint permission..");
   const tokenAdminAddress = await getDeployedContractAddress("BalancerTokenAdmin");
   const minterAddress = await getDeployedContractAddress("BalancerMinter");
-  const timelockAuth = await getTimelockAuth(
-    await getDeployedContractAddress("TimelockAuthorizer")
-  );
+  const timelockAuth = await getTimelockAuth();
   const tokenAdmin = await getBalTokenAdmin();
   const actionId = await tokenAdmin.getActionId(tokenAdmin.interface.getSighash("mint"));
   await awaitTransactionComplete(
@@ -81,7 +79,7 @@ export async function setupBoostProxy() {
     adapter: await getDeployedContractAddress("VotingEscrow"),
   });
 
-  await saveDeplomentData(veBoost.deployment);
+  await saveDeploymentData(veBoost.deployment);
 
   const boostProxy = await deployContractUtil("VotingEscrowDelegationProxy", {
     vault: await getDeployedContractAddress("Vault"),
@@ -89,7 +87,7 @@ export async function setupBoostProxy() {
     delegationImpl: veBoost.contract.address,
   });
 
-  await saveDeplomentData(boostProxy.deployment);
+  await saveDeploymentData(boostProxy.deployment);
 }
 
 export async function deployLiquidityGaugeFactorySetup() {
@@ -101,13 +99,13 @@ export async function deployLiquidityGaugeFactorySetup() {
     adapter: await getDeployedContractAddress("AuthorizerAdaptorEntrypoint"),
   });
 
-  await saveDeplomentData(gaugeTemplate.deployment);
+  await saveDeploymentData(gaugeTemplate.deployment);
 
   const gaugeFactory = await deployContractUtil("LiquidityGaugeFactory", {
     template: gaugeTemplate.contract.address,
   });
 
-  await saveDeplomentData(gaugeFactory.deployment);
+  await saveDeploymentData(gaugeFactory.deployment);
 
   logger.success("deployLiquidityGaugeFactorySetup: Complete");
 
@@ -127,13 +125,13 @@ export async function addMainPoolGaugeSetup() {
     name: "BalTokenHolder",
   });
 
-  await saveDeplomentData(tokenHolder.deployment);
+  await saveDeploymentData(tokenHolder.deployment);
 
   const singleGaugeFactory = await deployContractUtil("SingleRecipientGaugeFactory", {
     minter: await getDeployedContractAddress("BalancerMinter"),
   });
 
-  await saveDeplomentData(singleGaugeFactory.deployment);
+  await saveDeploymentData(singleGaugeFactory.deployment);
 
   const receipt = await doTransaction(
     singleGaugeFactory.contract.create(tokenHolder.contract.address)
@@ -243,5 +241,5 @@ export async function addVeBalHelpers() {
   const veHelper = await deployContractUtil("GaugeControllerQuerier", {
     gaugeController: await getDeployedContractAddress("GaugeController"),
   });
-  await saveDeplomentData(veHelper.deployment);
+  await saveDeploymentData(veHelper.deployment);
 }

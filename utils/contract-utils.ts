@@ -8,10 +8,10 @@ import * as GovenToken from "../artifacts/contracts/liquidity-mining/governance/
 import * as AuthEntry from "../artifacts/contracts/liquidity-mining/admin/AuthorizerAdapterEntrypoint.sol/AuthorizerAdaptorEntrypoint.json";
 import * as GC from "../artifacts/contracts/liquidity-mining/GaugeController.vy/GaugeController.json";
 import * as VE from "../artifacts/contracts/liquidity-mining/VotingEscrow.vy/VotingEscrow.json";
-import * as AM from "./abi/DexTokenManager.json";
+import * as AM from "./abis/DexTokenManager.json";
 import * as LG from "../artifacts/contracts/liquidity-mining/gauges/LiquidityGaugeV5.vy/LiquidityGaugeV5.json";
 import { Contract } from "ethers";
-import { ERC20_ABI } from "./abi/ERC20ABI";
+import { ERC20_ABI } from "./abis/ERC20ABI";
 import { getSigner } from "./deployers/signers";
 import { TimelockAuthorizer } from "../typechain";
 import { CHAIN_KEYS } from "./data/chains";

@@ -3,9 +3,9 @@ import { deployAuthAdapter } from "../liquidity-mining/deploy-auth-adapter";
 import { DAY, ONE_MONTH_SECONDS } from "../../../scripts/utils/time";
 import { TOKENS } from "../../data/token-map";
 import { logger } from "../logger";
-import { saveDeplomentData } from "../save-deploy-data";
+import { saveDeploymentData } from "../save-deploy-data";
 
-export async function deployVault(doSave: boolean) {
+export async function setupVault(doSave: boolean) {
   try {
     await ethers.provider.ready;
     const admin = (await ethers.getSigners())[0];
@@ -14,7 +14,7 @@ export async function deployVault(doSave: boolean) {
     // This sequence breaks the circular dependency between authorizer, vault, adaptor and entrypoint.
     // First we deploy the vault, adaptor and entrypoint with a basic authorizer.
 
-    const vaultData = await doVault(TOKENS.NATIVE_TOKEN[chainId]); // Will deploy a dummy authorizer to start
+    const vaultData = await deployVault(TOKENS.NATIVE_TOKEN[chainId]); // Will deploy a dummy authorizer to start
     const authAdapterData = await deployAuthAdapter(vaultData.vault.address);
     const entryAdapterData = await deployAuthEntry(authAdapterData.authAdapter.address);
 
@@ -32,10 +32,10 @@ export async function deployVault(doSave: boolean) {
     await vaultData.vault.connect(admin).setAuthorizer(authorizerData.authorizer.address);
 
     if (doSave === true) {
-      await saveDeplomentData(vaultData.deployment);
-      await saveDeplomentData(authorizerData.deployment);
-      await saveDeplomentData(authAdapterData.deployment);
-      await saveDeplomentData(entryAdapterData.deployment);
+      await saveDeploymentData(vaultData.deployment);
+      await saveDeploymentData(authorizerData.deployment);
+      await saveDeploymentData(authAdapterData.deployment);
+      await saveDeploymentData(entryAdapterData.deployment);
     }
 
     return {
@@ -50,7 +50,7 @@ export async function deployVault(doSave: boolean) {
   }
 }
 
-async function doVault(weth: string) {
+export async function deployVault(weth: string) {
   logger.info("Deploying MockBasicAuthorizer..");
 
   const MockBasicAuthorizer = await ethers.getContractFactory("MockBasicAuthorizer");

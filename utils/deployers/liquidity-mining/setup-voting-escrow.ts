@@ -8,12 +8,12 @@ import {
 import { getChainAdmin } from "../../data/addresses";
 import { getMainPoolConfig } from "../../services/pools/pool-utils";
 import { ONE_WEEK_SECONDS, ONE_YEAR_SECONDS } from "../../time";
-import { approveTokensIfNeeded } from "../../token";
+import { approveTokensIfNeeded } from "../../token/token-utils";
 import { awaitTransactionComplete } from "../../tx-utils";
 import { deployContractUtil } from "../deploy-util";
 import { logger } from "../logger";
 import { getCurrentBlockTimestamp } from "../network";
-import { saveDeplomentData } from "../save-deploy-data";
+import { saveDeploymentData } from "../save-deploy-data";
 
 export async function setupVotingEscrow(doSave: boolean) {
   logger.info("setupVotingEscrow: initializing gauge items");
@@ -32,7 +32,7 @@ export async function setupVotingEscrow(doSave: boolean) {
   });
 
   if (doSave) {
-    await saveDeplomentData(votingEscrow.deployment);
+    await saveDeploymentData(votingEscrow.deployment);
   }
 
   // Then we can deploy fee distributor
@@ -44,7 +44,7 @@ export async function setupVotingEscrow(doSave: boolean) {
   logger.success("setupVotingEscrow: complete");
 
   if (doSave) {
-    await saveDeplomentData(feeDistributor.deployment);
+    await saveDeploymentData(feeDistributor.deployment);
   }
 
   return {
@@ -76,5 +76,5 @@ export async function addFeeDistributor() {
     startTime: (await getCurrentBlockTimestamp()) + ONE_WEEK_SECONDS,
   });
 
-  await saveDeplomentData(feeDistributor.deployment);
+  await saveDeploymentData(feeDistributor.deployment);
 }

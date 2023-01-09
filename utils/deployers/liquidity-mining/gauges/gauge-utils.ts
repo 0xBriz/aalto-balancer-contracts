@@ -10,8 +10,8 @@ import {
   getAutEntryAdapter,
   getDeployedContractAddress,
   getLiquidityGauge,
-} from "../../contract-utils";
-import { getChainAdmin } from "../../data/addresses";
+} from "../../../contract-utils";
+import { getChainAdmin } from "../../../data/addresses";
 import {
   getActionIdWithParams,
   getFunctionSelectorBytes,
@@ -19,12 +19,12 @@ import {
   grantAuthEntryPermission,
   grantPerformActionIfNeeded,
   performAdapterAction,
-} from "../../services/auth.service";
-import { approveTokensIfNeeded } from "../../token";
-import { awaitTransactionComplete } from "../../tx-utils";
-import { logger } from "../logger";
-import { getSigner } from "../signers";
-import { getTimelockAuth } from "../../contract-utils";
+} from "../../../services/auth.service";
+import { approveTokensIfNeeded } from "../../../token/token-utils";
+import { awaitTransactionComplete } from "../../../tx-utils";
+import { logger } from "../../logger";
+import { getSigner } from "../../signers";
+import { getTimelockAuth } from "../../../contract-utils";
 
 export async function addGaugeReward(
   gaugeAddress: string,

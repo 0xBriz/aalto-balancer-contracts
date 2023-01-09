@@ -1,17 +1,14 @@
-import { ethers } from "hardhat";
 import * as fs from "fs-extra";
 import { join } from "path";
 import { CHAIN_KEYS } from "../data/chains";
 import { logger } from "./logger";
 import { DeploymentData } from "../types";
+import { getChainId } from "./network";
 
-export async function saveDeplomentData(deployment: DeploymentData) {
+export async function saveDeploymentData(deployment: DeploymentData) {
   try {
-    const basePath = join(
-      process.cwd(),
-      "deployments",
-      CHAIN_KEYS[ethers.provider.network.chainId]
-    );
+    const chainId = await getChainId();
+    const basePath = join(process.cwd(), "deployments", CHAIN_KEYS[chainId]);
 
     logger.info(`saveDeplomentData: Saving deployment data for ${deployment.name}`);
 
@@ -28,7 +25,11 @@ export async function saveDeplomentData(deployment: DeploymentData) {
       txData,
     };
 
-    await fs.writeJSON(join(basePath, `${deployment.name}-${Date.now()}.json`), data);
+    // Hardhat test env
+    if (chainId !== 31337) {
+      await fs.writeJSON(join(basePath, `${deployment.name}-${Date.now()}.json`), data);
+    }
+
     const addressPath = join(basePath, "addresses.json");
     const addresses = await fs.readJSON(addressPath);
     addresses[deployment.name] = receipt.contractAddress;

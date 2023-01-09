@@ -2,10 +2,6 @@ import { parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { deployTestERC20 } from "../utils/deployers/deploy-test-erc20";
 import { deployAuthAdapter } from "../utils/deployers/liquidity-mining/deploy-auth-adapter";
-import { deployBalTokenHolder } from "../utils/deployers/liquidity-mining/voting-escrow/deploy-token-holder";
-import { deployVeBalHelper } from "../utils/deployers/liquidity-mining/voting-escrow/deploy-ve-bal-helper";
-import { deployVeBoost } from "../utils/deployers/liquidity-mining/voting-escrow/deploy-ve-boost";
-import { deployVotingEscrow } from "../utils/deployers/liquidity-mining/voting-escrow/deploy-voting-escrow";
 import { ONE_WEEK_SECONDS } from "./utils/time";
 
 // MAINNET

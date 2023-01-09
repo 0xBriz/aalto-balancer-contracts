@@ -32,8 +32,7 @@ export class AuthService {
     const actionId = await contractGrantingOn.getActionId(selector);
 
     awaitTransactionComplete(
-      await authorizer.grantPermissions([actionId], permissionFor, [contractAddressBeingGranted]),
-      5
+      await authorizer.grantPermissions([actionId], permissionFor, [contractAddressBeingGranted])
     );
 
     if (doCheckAfter) {
@@ -84,8 +83,7 @@ export class AuthService {
       await awaitTransactionComplete(
         await authorizer.grantPermissions([actionId], await getChainAdmin(), [
           contractPerformingOn.address,
-        ]),
-        10
+        ])
       );
     } else {
       logger.info("Alreaday approved for action id");
@@ -99,8 +97,7 @@ export class AuthService {
     );
 
     await awaitTransactionComplete(
-      await adapter.performAction(contractPerformingOn.address, callData),
-      10
+      await adapter.performAction(contractPerformingOn.address, callData)
     );
 
     logger.success("Successfully performed adapter action");
@@ -129,8 +126,7 @@ export async function performAdapterAction(
     );
 
     await awaitTransactionComplete(
-      await adapter.performAction(contractPerformingOn.address, callData),
-      10
+      await adapter.performAction(contractPerformingOn.address, callData)
     );
 
     logger.success("Successfully performed adapter action");
@@ -159,15 +155,14 @@ export async function grantPerformActionIfNeeded(
     contractPerformingOn
   );
 
-  //  if (!canDo) {
-  logger.info("Granting permision for action id: " + actionId);
-  await awaitTransactionComplete(
-    await authorizer.grantPermissions([actionId], forWho, [contractPerformingOn]),
-    10
-  );
-  //   } else {
-  //     logger.info("Already approved for action id");
-  //   }
+  if (!canDo) {
+    logger.info("Granting permision for action id: " + actionId);
+    await awaitTransactionComplete(
+      await authorizer.grantPermissions([actionId], forWho, [contractPerformingOn])
+    );
+  } else {
+    logger.info("Already approved for action id");
+  }
 }
 
 export async function grantAuthEntryPermission(contractPerformingOn: string, actionId: string) {
@@ -177,8 +172,7 @@ export async function grantAuthEntryPermission(contractPerformingOn: string, act
       [actionId],
       await getDeployedContractAddress("AuthorizerAdaptorEntrypoint"),
       [contractPerformingOn]
-    ),
-    10
+    )
   );
 }
 

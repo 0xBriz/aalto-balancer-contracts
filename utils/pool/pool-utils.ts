@@ -1,9 +1,9 @@
 import { defaultAbiCoder, parseUnits } from "ethers/lib/utils";
-import { getVault } from "./contract-utils";
-import { logger } from "./deployers/logger";
-import { approveTokensIfNeeded } from "./token";
-import { awaitTransactionComplete } from "./tx-utils";
-import { JoinPoolRequest } from "./types";
+import { getVault } from "../contract-utils";
+import { logger } from "../deployers/logger";
+import { approveTokensIfNeeded } from "../token/token-utils";
+import { awaitTransactionComplete } from "../tx-utils";
+import { JoinPoolRequest } from "../types";
 
 /**
  * Utility to perform the INIT_JOIN operation on a weight pool

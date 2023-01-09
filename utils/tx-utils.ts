@@ -1,4 +1,5 @@
 import { ContractTransaction } from "ethers";
+import { getDefaultConfirmationsForChain } from "./data/chains";
 import { logger } from "./deployers/logger";
 
 export async function doTransaction(txResponse: ContractTransaction) {
@@ -9,13 +10,18 @@ export async function doTransaction(txResponse: ContractTransaction) {
   }
 }
 
-export async function awaitTransactionComplete(txResponse: ContractTransaction, confirmations = 5) {
+export async function awaitTransactionComplete(
+  txResponse: ContractTransaction,
+  confirmations?: number
+) {
   try {
     logger.info(`- Starting transaction: ${txResponse.hash}`);
     logger.info(
       `- Awaiting transaction receipt with (${confirmations}) confirmations... - ` +
         new Date().toLocaleString()
     );
+
+    confirmations = confirmations || (await getDefaultConfirmationsForChain());
     const txReceipt = await txResponse.wait(confirmations);
     logger.info("- TransactionReceipt received - " + new Date().toLocaleString());
     // success

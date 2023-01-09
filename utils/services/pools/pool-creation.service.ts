@@ -13,27 +13,19 @@ import {
   PoolType,
   PoolCreationBaseData,
   PoolFactoryInfo,
-  FactoryType,
   StablePoolCreationArgs,
 } from "../../types";
-import { initWeightedJoin } from "../../vault";
 import {
   getAllPoolConfigs,
   getStablePoolCreationArgs,
   getWeightedPoolCreationArgs,
   savePoolsData,
-  updatePoolConfig,
 } from "./pool-utils";
 import { Contract, ContractReceipt } from "ethers";
 import { getWeightedPoolInstance } from "../../contract-utils";
 import { awaitTransactionComplete } from "../../tx-utils";
 import { getSigner } from "../../deployers/signers";
 import { getChainId } from "../../deployers/network";
-
-const POOL_ADMIN = {
-  5: OPERATOR,
-  56: OPERATOR,
-};
 
 export class PoolCreationService {
   constructor(public readonly assetManager: string, public readonly factories: PoolFactoryInfo[]) {}
@@ -170,8 +162,7 @@ export class PoolCreationService {
           assetManagers,
           parseUnits(args.swapFeePercentage),
           args.owner
-        ),
-        5
+        )
       );
     } catch (error) {
       throw error;
@@ -321,8 +312,7 @@ export class PoolCreationService {
         args.amplificationParameter,
         parseUnits(args.swapFeePercentage),
         args.owner
-      ),
-      5
+      )
     );
   }
 

@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 import { deployPoolFactories } from "../utils/deployers/deploy-factories";
-import { deployVault } from "../utils/deployers/vault/deploy-vault";
+import { setupVault } from "../utils/deployers/vault/deploy-vault";
 import { deployLiquidityMining } from "../utils/deployers/liquidity-mining/setup-liquidity-mining";
 import {
   getBalTokenAdmin,
@@ -10,12 +10,10 @@ import {
   getVault,
 } from "../utils/contract-utils";
 import {
-  activateTokenAdmin,
   createGovernanceToken,
   createTokenAdmin,
-  giveTokenAdminControl,
   setupGovernance,
-} from "../utils/deployers/liquidity-mining/governance/setup-governance";
+} from "../utils/deployers/liquidity-mining/governance/contract-deployment";
 import {
   getAllPoolConfigs,
   getPoolFactories,
@@ -29,10 +27,10 @@ import {
   doVeDeposit,
   setupVotingEscrow,
 } from "../utils/deployers/liquidity-mining/setup-voting-escrow";
-import { initWeightedJoin } from "../utils/vault";
+import { initWeightedJoin } from "../utils/pool/pool-utils";
 import { getChainAdmin } from "../utils/data/addresses";
 import { formatEther } from "ethers/lib/utils";
-import { saveDeplomentData } from "../utils/deployers/save-deploy-data";
+import { saveDeploymentData } from "../utils/deployers/save-deploy-data";
 import {
   addGaugeController,
   // addPoolGaugesToController,
@@ -44,8 +42,8 @@ import {
   deployMinter,
   giveMinterPermissions,
   setupBoostProxy,
-} from "../utils/deployers/liquidity-mining/setup-gauges";
-import { setGaugeRewardDistributor } from "../utils/deployers/liquidity-mining/gauge-utils";
+} from "../utils/deployers/liquidity-mining/gauges/setup-gauges";
+import { setGaugeRewardDistributor } from "../utils/deployers/liquidity-mining/gauges/gauge-utils";
 
 // For testing/dev env
 export async function resetAllPoolConfigs() {

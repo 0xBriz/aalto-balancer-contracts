@@ -1,5 +1,5 @@
 import { BigNumber, Contract, ContractTransaction, ethers } from "ethers";
-import { defaultAbiCoder, Interface } from "ethers/lib/utils";
+import { defaultAbiCoder } from "ethers/lib/utils";
 import { sub } from "date-fns";
 import { MAX_UINT256 } from "../scripts/utils/constants";
 import { ERC20_ABI } from "./abis/ERC20ABI";

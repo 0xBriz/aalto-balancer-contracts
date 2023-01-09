@@ -1,18 +1,10 @@
 import { parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import { setupGovernance } from "../utils/deployers/liquidity-mining/governance/setup-governance";
+import { setupGovernance } from "../utils/deployers/liquidity-mining/governance/contract-deployment";
 import { deployTestERC20 } from "../utils/deployers/deploy-test-erc20";
 import { deployAuthAdapter } from "../utils/deployers/liquidity-mining/deploy-auth-adapter";
-import { deployBalTokenHolder } from "../utils/deployers/liquidity-mining/voting-escrow/deploy-token-holder";
-import { deployVeBalHelper } from "../utils/deployers/liquidity-mining/voting-escrow/deploy-ve-bal-helper";
-import { deployVeBoost } from "../utils/deployers/liquidity-mining/voting-escrow/deploy-ve-boost";
-import { deployVotingEscrow } from "../utils/deployers/liquidity-mining/voting-escrow/deploy-voting-escrow";
 import { ONE_DAY_SECONDS, ONE_WEEK_SECONDS } from "./utils/time";
-import {
-  deployAuthEntry,
-  deployTimelock,
-  deployVault,
-} from "../utils/deployers/vault/deploy-vault";
+import { deployAuthEntry, deployTimelock, setupVault } from "../utils/deployers/vault/deploy-vault";
 
 const VAULT = "0x84259CbD70aA17EB282Cb40666d2687Cd8E100AA";
 const TIME_AUTH = "0xe775Ce316d91c8A40487338Bc14c745Ba52D8C7a";
