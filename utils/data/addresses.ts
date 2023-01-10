@@ -9,6 +9,15 @@ export const ADMIN = {
   31337: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
 };
 
+export const VERTEK_ADDRESS = {
+  56: {
+    MULTISIG: "0xA8AAe7bEB83d62eb908F8F1F833A83407e0E04a6",
+  },
+  5: {
+    MULTISIG: OPERATOR,
+  },
+};
+
 export async function getChainAdmin() {
   return getAddress(ADMIN[await getChainId()]);
 }
