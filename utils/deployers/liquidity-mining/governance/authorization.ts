@@ -38,7 +38,7 @@ export async function activateTokenAdmin(
   await awaitTransactionComplete(
     await timelockAuth.grantPermissions([actionId], adminMintReceiver, [tokenAdmin.address])
   );
-  await awaitTransactionComplete(await tokenAdmin.activate(adminMintReceiver));
+  await awaitTransactionComplete(await tokenAdmin.activate());
 
   logger.success("setupGovernance: token admin activated");
 }

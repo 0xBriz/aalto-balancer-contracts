@@ -73,7 +73,7 @@ const config: HardhatUserConfig = {
       //   url: process.env.BSC_ARCHIVE_NODE || "",
       //   blockNumber: 24643800,
       // },
-      loggingEnabled: true,
+      // loggingEnabled: true,
       // gas: 2100000,
       // gasPrice: 8000000000,
       // mining: {

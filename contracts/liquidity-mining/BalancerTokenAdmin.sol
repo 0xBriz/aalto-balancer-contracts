@@ -74,9 +74,8 @@ contract BalancerTokenAdmin is IBalancerTokenAdmin, SingletonAuthentication, Ree
      * @notice Initiate BAL token inflation schedule
      * @dev Reverts if contract does not have sole minting powers over BAL (and no other minters can be added).
      */
-    function activate(address initialMintReceiver) external override authenticate nonReentrant {
+    function activate() external override authenticate nonReentrant {
         require(_startEpochTime == type(uint256).max, "Already activated");
-        require(initialMintReceiver != address(0), "initialMintReceiver not set");
 
         // We need to check that this contract can't be bypassed to mint more BAL in the future.
         // If other addresses had minting rights over the BAL token then this inflation schedule
@@ -154,7 +153,7 @@ contract BalancerTokenAdmin is IBalancerTokenAdmin, SingletonAuthentication, Ree
             "Multiple snapshotters exist"
         );
 
-        _balancerToken.mint(initialMintReceiver, _initialMintAllowance);
+        _balancerToken.mint(msg.sender, _initialMintAllowance);
 
         // As BAL inflation is now enforced by this contract we can initialise the relevant variables.
         _startEpochSupply = _balancerToken.totalSupply().sub(_initialMintAllowance);

@@ -1,5 +1,10 @@
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { expect } from "chai";
+import { ANY_ADDRESS, ZERO_BYTES32 } from "../../scripts/utils/constants";
+import { actionId } from "../../utils/actionid";
 import { getChainAdmin } from "../../utils/data/addresses";
+import { getSigner } from "../../utils/deployers/signers";
 import {
   deployAdaptersSetup,
   deployTimelockAuth,
@@ -7,9 +12,17 @@ import {
   setProperAuthorizerForVault,
 } from "../../utils/deployers/vault/deploy-vault";
 import { getChainWETH } from "../../utils/token/token-utils";
+import { governanceSetupFixture } from "../fixtures/goverance-setup.fixture";
+import { vaultSetupFixture } from "../fixtures/vault-setup.fixture";
 import { cleanUpTestDeploymentData } from "../test-utils/general-utils";
 
 describe("Vault Authorization", () => {
+  let owner: SignerWithAddress;
+
+  before(async () => {
+    owner = await getSigner();
+  });
+
   after(async () => {
     await cleanUpTestDeploymentData();
   });
@@ -40,5 +53,11 @@ describe("Vault Authorization", () => {
     expect(vaultAuthorizer).to.equal(timelockAuth.address);
   });
 
-  it("should authorize things", async () => {});
+  it("should authorize things", async () => {
+    const { timelockAuth, tokenAdmin, govToken } = await loadFixture(governanceSetupFixture);
+    // await govToken.grantRole(ZERO_BYTES32, tokenAdmin.address);
+    // const id = actionId(tokenAdmin, "activate");
+    // await timelockAuth.grantPermissions([id], owner.address, [ANY_ADDRESS]);
+    // await tokenAdmin.activate();
+  });
 });
