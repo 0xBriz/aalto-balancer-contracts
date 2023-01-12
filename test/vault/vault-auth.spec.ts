@@ -39,4 +39,6 @@ describe("Vault Authorization", () => {
     vaultAuthorizer = await vault.getAuthorizer();
     expect(vaultAuthorizer).to.equal(timelockAuth.address);
   });
+
+  it("should authorize things", async () => {});
 });
