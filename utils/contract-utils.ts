@@ -49,7 +49,8 @@ export type DeployedContract =
   | VaulContracts
   | GovernanceContracts
   | GaugeContracts
-  | "AssetManager";
+  | "AssetManager"
+  | "Multicall";
 
 // Doing actual file reads every time here.
 // Maybe save some milliseconds per, but with a long job using the same contracts, saving some total seconds iz good

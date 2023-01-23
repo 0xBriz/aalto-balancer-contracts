@@ -72,9 +72,9 @@ export interface BasePoolArgs {
   tokens: string[];
   swapFeePercentage: string;
   owner: string;
+  rateProviders?: string[];
   assetManagers?: string[];
   initialBalances?: string[];
-  // tokenInfo: TokenWithManagerInfo[];
 }
 
 export interface CreateWeightedPoolArgs extends BasePoolArgs {
@@ -153,9 +153,11 @@ export interface PoolCreationConfig {
     tokens: string[];
     owner: string;
     swapFeePercentage: string;
-    assetManagers: string[];
+    assetManagers?: string[];
     weights?: string[];
+    rateProviders?: string[];
     amp?: number;
+    initialBalances?: string[];
     // other things
   };
   gauge: {

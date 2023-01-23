@@ -9,3 +9,7 @@ export const actionId = (
   const selector = (contractInterface ?? instance.interface).getSighash(method);
   return instance.getActionId(selector);
 };
+
+export function getCalldata(instance: Contract, method: string, args: any[]) {
+  return instance.interface.encodeFunctionData(method, args);
+}

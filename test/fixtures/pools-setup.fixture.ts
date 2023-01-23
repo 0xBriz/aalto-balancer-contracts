@@ -1,6 +1,6 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { ZERO_ADDRESS } from "../../utils/big-numbers/ethers-big-number";
-import { deployPoolFactories } from "../../utils/deployers/pools/deploy-factories";
+import { deployPoolFactories } from "../../utils/deployers/pools/factories";
 import { PoolCreationService } from "../../utils/services/pools/pool-creation.service";
 import { doPoolInitJoins, getAllPoolConfigs } from "../../utils/services/pools/pool-utils";
 import { resetTestPoolConfigs } from "../test-utils/general-utils";

@@ -2,7 +2,7 @@ import { ZERO_ADDRESS } from "../../big-numbers/ethers-big-number";
 import { FactoryContracts } from "../../contract-utils";
 import { PoolCreationService } from "../../services/pools/pool-creation.service";
 import { doPoolInitJoins, getAllPoolConfigs } from "../../services/pools/pool-utils";
-import { deployPoolFactories } from "./deploy-factories";
+import { deployPoolFactories } from "./factories";
 
 /**
  * Consolidates the steps in intial full deployment of the core pools

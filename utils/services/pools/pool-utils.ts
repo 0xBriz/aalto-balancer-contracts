@@ -13,7 +13,7 @@ import { join } from "path";
 import { CHAIN_KEYS } from "../../data/chains";
 import { getChainId } from "../../deployers/network";
 import { getDeployedContractAddress, getVault } from "../../contract-utils";
-import { Contract } from "ethers";
+import { Contract, ethers } from "ethers";
 import { getSigner } from "../../deployers/signers";
 import * as LGF from "../../../artifacts/contracts/liquidity-mining/gauges/LiquidityGaugeFactory.sol/LiquidityGaugeFactory.json";
 import { logger } from "../../deployers/logger";
@@ -54,6 +54,28 @@ export function getWeightedPoolCreationArgs(
     weights: sortedInfo.map((info) => info.weight),
     swapFeePercentage,
     owner,
+    initialBalances: sortedInfo.map((info) => info.initialBalance),
+  };
+}
+
+export function getWeightedPoolArgsFromConfig(
+  pool: PoolCreationConfig,
+  owner: string
+): CreateWeightedPoolArgs {
+  pool.deploymentArgs.rateProviders = pool.deploymentArgs.rateProviders?.length
+    ? pool.deploymentArgs.rateProviders
+    : pool.deploymentArgs.tokens.map((t) => ethers.constants.AddressZero);
+
+  const sortedInfo = sortTokensWithInfo(pool.tokenInfo);
+
+  return {
+    name: pool.deploymentArgs.name,
+    symbol: pool.deploymentArgs.symbol,
+    tokens: sortedInfo.map((info) => info.address),
+    swapFeePercentage: pool.deploymentArgs.swapFeePercentage,
+    owner,
+    rateProviders: pool.deploymentArgs.rateProviders,
+    weights: sortedInfo.map((info) => info.weight),
     initialBalances: sortedInfo.map((info) => info.initialBalance),
   };
 }
@@ -141,10 +163,12 @@ export async function updatePoolConfig(pool: PoolCreationConfig) {
  * @returns
  */
 export async function initWeightedJoin(
+  vaultAddress: string,
   poolId: string,
   tokens: string[],
   initialBalances: string[],
-  recipient: string
+  recipient: string,
+  signer
 ) {
   try {
     logger.info("Starting INIT_JOIN for pool id: " + poolId);
@@ -167,7 +191,13 @@ export async function initWeightedJoin(
       fromInternalBalance: false,
     };
 
-    const vault = await getVault();
+    const vault = new Contract(
+      vaultAddress,
+      [
+        "function joinPool(bytes32, address, address, tuple(address[], uint256[], bytes, bool)) external",
+      ],
+      signer
+    );
 
     // Vault needs approval to pull the tokens in
     await approveTokensIfNeeded(tokens, recipient, vault.address);
@@ -178,7 +208,7 @@ export async function initWeightedJoin(
 
     logger.success("INIT_JOIN complete");
 
-    return rx;
+    // return rx;
   } catch (error) {
     console.log(error);
     throw error;
@@ -201,24 +231,22 @@ export async function doPoolJoin(
 export async function doPoolInitJoins() {
   const pools = await getAllPoolConfigs();
   for (const pool of pools) {
-    if (pool.initJoinComplete) {
-      continue;
-    }
-
-    // TODO: Need to check init join params needed for other types
-    if (pool.type === PoolType.Weighted || pool.type === PoolType.Stable) {
-      await initWeightedJoin(
-        pool.poolId,
-        pool.deploymentArgs.tokens,
-        pool.initialBalances,
-        await getChainAdmin()
-      );
-
-      pool.initJoinComplete = true;
-      await updatePoolConfig(pool);
-    } else {
-      logger.error(`Unsupported init join for pool type: ${pool.type}`);
-    }
+    // if (pool.initJoinComplete) {
+    //   continue;
+    // }
+    // // TODO: Need to check init join params needed for other types
+    // if (pool.type === PoolType.Weighted || pool.type === PoolType.Stable) {
+    //   await initWeightedJoin(
+    //     pool.poolId,
+    //     pool.deploymentArgs.tokens,
+    //     pool.initialBalances,
+    //     await getChainAdmin()
+    //   );
+    //   pool.initJoinComplete = true;
+    //   await updatePoolConfig(pool);
+    // } else {
+    //   logger.error(`Unsupported init join for pool type: ${pool.type}`);
+    // }
   }
 }
 

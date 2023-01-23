@@ -1,5 +1,9 @@
 import { ethers } from "hardhat";
-import { deployPoolFactories } from "../utils/deployers/pools/deploy-factories";
+import {
+  createWeightedPool,
+  deployPoolFactories,
+  getPoolCreationData,
+} from "../utils/deployers/pools/factories";
 import { setupVault } from "../utils/deployers/vault/deploy-vault";
 import { deployLiquidityMining } from "../utils/deployers/liquidity-mining/setup-liquidity-mining";
 import {
@@ -16,12 +20,15 @@ import {
 } from "../utils/deployers/liquidity-mining/governance/contract-deployment";
 import {
   getAllPoolConfigs,
+  getMainPoolConfig,
   getPoolFactories,
+  getWeightedPoolArgsFromConfig,
+  initWeightedJoin,
   savePoolsData,
   updatePoolConfig,
 } from "../utils/services/pools/pool-utils";
 import { PoolCreationService } from "../utils/services/pools/pool-creation.service";
-import { ZERO_ADDRESS } from "./utils/constants";
+import { ANY_ADDRESS, ZERO_ADDRESS } from "./utils/constants";
 import {
   addFeeDistributor,
   doVeDeposit,
@@ -45,7 +52,15 @@ import {
 import { setGaugeRewardDistributor } from "../utils/deployers/liquidity-mining/gauges/gauge-utils";
 import { doPoolsCreation } from "../utils/deployers/pools/pool-creation";
 import { Logger } from "../utils/deployers/logger";
-import { PoolFactoryInfo } from "../utils/types";
+import { CreateWeightedPoolArgs, PoolFactoryInfo } from "../utils/types";
+import { deployContractUtil } from "../utils/deployers/deploy-util";
+import { AuthorizerAdaptor } from "../utils/models/AuthorizerAdapter";
+import { getSigner } from "../utils/deployers/signers";
+import { AuthorizerAdaptorEntrypoint } from "../utils/models/AuthorizerAdaptorEntrypoint";
+import { TimelockAuthorizer } from "../utils/models/TimelockAuthorizer";
+import { Contract } from "ethers";
+import { actionId, getCalldata } from "../utils/actionid";
+import { awaitTransactionComplete } from "../utils/tx-utils";
 
 // For testing/dev env
 export async function resetAllPoolConfigs() {
@@ -59,76 +74,79 @@ export async function resetAllPoolConfigs() {
   await savePoolsData(pools);
 }
 
+async function sleep(ms = 5000) {
+  console.log("Sleeping...");
+  return new Promise((res) => setTimeout(res, ms));
+}
+
 async function main() {
   try {
     await ethers.provider.ready;
 
-    Logger.setDefaults(false, false);
+    const weightedFactory = "0x8F1a6dD65E8d76de878dEb776A5D41b5919Feba7";
+    const vaultAddress = "0x1F56FDcB9E3a818E4BB2E6Fe2cb73F7385D3Aeac";
+    const signer = await getSigner();
 
-    const vaultData = await setupVault();
-    const govData = await setupGovernance({
-      timelockAuth: vaultData.timelockAuth.address,
-      vault: vaultData.vault.address,
-      adminAccount: await getChainAdmin(),
-    });
+    const pools = await getAllPoolConfigs();
+    const pool = pools[0];
+    const args = getWeightedPoolArgsFromConfig(pool, signer.address);
+    pool.deploymentArgs = {
+      ...pool.deploymentArgs,
+      ...args,
+    };
+    await updatePoolConfig(pool);
 
-    // const vault = "0x00c0402bde9e2c2962ca7586a5dabb38fad515a8";
+    // const receipt = await createWeightedPool(weightedFactory, args, signer);
 
-    const factories = await deployPoolFactories(vaultData.vault.address, [
-      "ERC4626LinearPoolFactory",
-      "LiquidityBootstrappingPoolFactory",
-      "StablePoolFactory",
-    ]);
+    // console.log(receipt);
+    const poolAddress = "0x39F84FE24135D3C160b5E1BCa36b0e66b6C11c4E";
+    // pool.created = true;
+    // pool.poolAddress = poolAddress;
+    // await updatePoolConfig(pool);
 
-    const poolCreator = new PoolCreationService(ZERO_ADDRESS, factories);
-    await poolCreator.createPools();
+    // const poolData = await getPoolCreationData(poolAddress, signer);
+    // await updatePoolConfig({
+    //   ...pool,
+    //   ...poolData,
+    // });
 
-    // const poolsData = await doPoolsCreation(vault, [
-    //   "ERC4626LinearPoolFactory",
-    //   "LiquidityBootstrappingPoolFactory",
-    // ]);
+    const rx = await initWeightedJoin(
+      vaultAddress,
+      pool.poolId,
+      pool.deploymentArgs.tokens,
+      pool.deploymentArgs.initialBalances,
+      signer.address,
+      signer
+    );
 
-    // await doPoolInitJoins();
+    const tokenAdmin = new Contract(
+      "0xb8e6D3700BCE2CC163BD4FfC52dA1F65CFeE8909",
+      [
+        "function getActionId(bytes4) public view returns (bytes32)",
+        "function activate() external",
+      ],
+      signer
+    );
 
-    // await resetAllPoolConfigs();
+    const actionId = await tokenAdmin.getActionId(tokenAdmin.interface.getSighash("activate"));
+    console.log(actionId);
 
-    // const { vaultData, authorizerData } = await setupVault();
-    // const { govTokenData } = await createGovernanceToken();
-    // await updateMainPoolConfigForGovToken()
-    // await saveDeplomentData(govTokenData.deployment);
-    // const { tokenAdminData } = await createTokenAdmin(
-    //   await getDeployedContractAddress("Vault"),
-    //   await getDeployedContractAddress("GovernanceToken")
-    // );
-    // await saveDeplomentData(tokenAdminData.deployment);
+    const authorizer = new Contract(
+      "0x3d838DF4F4Ac0b28693771B83E40DB07F9b1ADe9",
+      [
+        `function grantPermissions(
+          bytes32[] memory actionIds,
+          address account,
+          address[] memory where
+      ) external`,
+      ],
+      signer
+    );
 
-    // Has to happen before activate
-    // await giveTokenAdminControl(
-    //   await getGovernanceToken(),
-    //   await getDeployedContractAddress("BalancerTokenAdmin")
-    // );
+    const tx = await authorizer.grantPermissions([actionId], signer.address, [tokenAdmin.address]);
+    await tx.wait(2);
 
-    // const admin = await getBalTokenAdmin();
-    // await activateTokenAdmin(admin, await getDeployedContractAddress("TimelockAuthorizer"));
-
-    // await deployPoolFactories(saving, await getDeployedContractAddress("Vault"));
-    // const poolCreator = new PoolCreationService(ZERO_ADDRESS, await getPoolFactories());
-    // await poolCreator.createPools(saving);
-
-    // await doPoolInitJoins();
-
-    // await setupVotingEscrow();
-    // await doVeDeposit();
-    // await addFeeDistributor();
-    // await addGaugeController();
-    // await addVeBalHelpers();
-    // await addGaugeTypes();
-    // await deployMinter();
-    // await giveMinterPermissions();
-    // await setupBoostProxy();
-    // await deployLiquidityGaugeFactorySetup();
-    // await addMainPoolGaugeSetup();
-    // await createPoolGaugesAndAddToController();
+    awaitTransactionComplete;
   } catch (error) {
     console.error(error);
     process.exitCode = 1;
