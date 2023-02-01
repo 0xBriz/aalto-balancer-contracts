@@ -8,10 +8,7 @@
     "clean": "npx hardhat clean",
     "lint:sol": "solhint -f table contracts/**/*.sol",
     "format": "npx prettier --write 'contracts/**/*.sol'",
-    "deploy:local": "npx hardhat run --network hardhat ./scripts/deploy-v2.ts",
-    "deploy:goerli:v2": "npx hardhat run --network goerli ./scripts/deploy-v2.ts",
-    "deploy:bsc": "npx hardhat run ./scripts/deploy.ts",
-    "deploy:goerli": "npx hardhat --network goerli run ./scripts/deploy-v2.ts"
+    "deploy": "npx hardhat run ./scripts/deploy.ts"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-network-helpers": "^1.0.3",
