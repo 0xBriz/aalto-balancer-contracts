@@ -65,7 +65,7 @@ abstract contract BasePool is
 
     // 1e18 corresponds to 1.0, or a 100% fee
     uint256 private constant _MIN_SWAP_FEE_PERCENTAGE = 1e12; // 0.0001%
-    uint256 private constant _MAX_SWAP_FEE_PERCENTAGE = 1e17; // 10% - this fits in 64 bits
+    uint256 private constant _MAX_SWAP_FEE_PERCENTAGE = 25e16; // 25% - this fits in 64 bits
 
     // Storage slot that can be used to store unrelated pieces of information. In particular, by default is used
     // to store only the swap fee percentage of a pool. But it can be extended to store some more pieces of information.
