@@ -85,6 +85,10 @@ const config: HardhatUserConfig = {
       url: process.env.BSC_MAINNET_URL || "",
       accounts: process.env.DEV_KEY !== undefined ? [process.env.DEV_KEY] : [],
     },
+    arbitrum: {
+      url: process.env.ARBITRUM_RPC || "",
+      accounts: process.env.DEV_KEY !== undefined ? [process.env.DEV_KEY] : [],
+    },
     goerli: {
       url: process.env.GOERLI_RPC || "",
       accounts: process.env.DEV_KEY !== undefined ? [process.env.DEV_KEY] : [],
